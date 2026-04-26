@@ -136,36 +136,76 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({
         </div>
 
         {/* Play/Pause Button */}
-        <button
-          onClick={togglePlay}
-          className="w-12 h-12 rounded-full bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
-          aria-label={isPlaying ? 'Pavziraj' : 'Predvajaj'}
-          aria-pressed={isPlaying ? 'true' : 'false'}
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            {isPlaying ? (
-              <motion.div
-                key="pause"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Pause className="w-5 h-5" aria-hidden="true" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="play"
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-              >
-                <Play className="w-5 h-5 ml-0.5" aria-hidden="true" />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={togglePlay}
+            className="w-12 h-12 rounded-full bg-accent hover:bg-accent-hover text-white flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+            aria-label={isPlaying ? 'Pavziraj' : 'Predvajaj'}
+            aria-pressed={isPlaying ? 'true' : 'false'}
+          >
+            <AnimatePresence mode="wait" initial={false}>
+              {isPlaying ? (
+                <motion.div
+                  key="pause"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Pause className="w-5 h-5" aria-hidden="true" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="play"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.8, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <Play className="w-5 h-5 ml-0.5" aria-hidden="true" />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+        {/* Audio Visualizer */}
+        {isPlaying && !prefersReducedMotion && (
+          <div className="flex items-end gap-[2px] h-4 ml-2" aria-hidden="true">
+            {[...Array(4)].map((_, i) => (
+              <div
+                key={i}
+                className="w-1 bg-accent rounded-full animate-bounce"
+                style={{
+                  height: '100%',
+                  animationDuration: `${0.4 + i * 0.1}s`,
+                  animationDelay: `${i * 0.1}s`
+                }}
+              />
+            ))}
+          </div>
+        )}
+          </button>
+
+          {/* Audio Visualizer */}
+          {isPlaying && !prefersReducedMotion && (
+            <div className="flex items-end gap-[2px] h-4" aria-hidden="true">
+              {[...Array(4)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="w-1 bg-accent rounded-full"
+                  animate={{
+                    height: ['30%', '100%', '50%', '80%', '40%'][i % 5]
+                  }}
+                  transition={{
+                    duration: 0.4,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                    delay: i * 0.1
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Progress Bar */}

@@ -18,12 +18,12 @@ export const HeroSection: React.FC = () => {
         <img
           src="/hero.jpeg"
           alt="The Drinkers - Nova Zasedba"
-          className="w-full h-full object-cover object-[center_20%] brightness-110 contrast-110"
+          className="w-full h-full object-cover object-[center_20%] brightness-125 contrast-125 saturate-110"
           loading="eager"
           fetchPriority="high"
         />
-        {/* ✅ POPRAVEK: 'via-background/40' namesto 85. Sredina je zdaj bolj prosojna! */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background" />
+        {/* ✅ POPRAVEK: 'via-background/20' - še svetlejši gradient za boljšo vidnost obrazov */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/20 to-background" />
       </div>
 
       {/* Content */}

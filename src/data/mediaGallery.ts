@@ -7,7 +7,7 @@ export const MEDIA_GALLERY: MediaItem[] = [
     title: 'Deset majhnih jagrov',
     description: 'Uradni videospot (1997) – kultni hit The Drinkers',
     src: 'https://www.youtube.com/embed/VIDEO_ID', // Zamenjaj z dejanskim ID-jem
-    thumbnail: '/hero-band.jpg', // Placeholder - zamenjaj z dejanskim thumbnail
+    thumbnail: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
     alt: 'The Drinkers - Deset majhnih jagrov videospot',
     year: 1997
   },
@@ -17,7 +17,7 @@ export const MEDIA_GALLERY: MediaItem[] = [
     title: 'Žeja (Live Trbovlje 2003)',
     description: 'Legendarni nastop ob 10-letnici',
     src: 'https://www.youtube.com/embed/VIDEO_ID',
-    thumbnail: '/hero-band.jpg',
+    thumbnail: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
     alt: 'The Drinkers live v Trbovljah 2003',
     year: 2003
   },
@@ -26,8 +26,8 @@ export const MEDIA_GALLERY: MediaItem[] = [
     type: 'image',
     title: 'Sandi Kolenc-Koli',
     description: 'Legendarni frontman (1965–2017)',
-    src: '/hero-band.jpg',
-    thumbnail: '/hero-band.jpg',
+    src: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
+    thumbnail: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
     alt: 'Sandi Kolenc-Koli na odru',
     year: 2000
   },
@@ -36,8 +36,8 @@ export const MEDIA_GALLERY: MediaItem[] = [
     type: 'image',
     title: 'Nova generacija 2026',
     description: 'Domen Kolenc z originalnimi člani',
-    src: '/hero-band.jpg',
-    thumbnail: '/hero-band.jpg',
+    src: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
+    thumbnail: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
     alt: 'The Drinkers nova zasedba 2026',
     year: 2026
   }

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#1a1a1a"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#grad)" rx="64"/>
+  
+  <!-- Beer Mug -->
+  <g transform="translate(156, 136)">
+    <!-- Mug body -->
+    <path d="M40 0 L160 0 L160 180 C160 200 145 220 125 220 L75 220 C55 220 40 200 40 180 Z" fill="#c41e3a"/>
+    
+    <!-- Mug handle -->
+    <path d="M160 40 L200 40 C220 40 230 60 230 100 C230 140 220 160 200 160 L160 160" fill="none" stroke="#c41e3a" stroke-width="20" stroke-linecap="round"/>
+    
+    <!-- Beer foam -->
+    <ellipse cx="100" cy="20" rx="50" ry="15" fill="#f4d03f"/>
+    <ellipse cx="70" cy="10" rx="25" ry="10" fill="#f4d03f"/>
+    <ellipse cx="130" cy="10" rx="25" ry="10" fill="#f4d03f"/>
+    
+    <!-- Music note -->
+    <text x="85" y="160" font-family="Arial, sans-serif" font-size="60" fill="#0a0a0a" font-weight="bold">♪</text>
+  </g>
+  
+  <!-- TD initials -->
+  <text x="256" y="380" font-family="Arial, sans-serif" font-size="48" fill="#ffffff" text-anchor="middle" font-weight="bold">TD</text>
+</svg>

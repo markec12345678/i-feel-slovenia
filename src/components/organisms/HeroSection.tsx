@@ -16,7 +16,7 @@ export const HeroSection: React.FC = () => {
       {/* 🖼️ OZADJE: Svetlejši gradient za boljšo vidnost benda */}
       <div className="absolute inset-0 z-0">
         <img
-          src="/hero-band.jpg"
+          src="/hero-band-new.jpg"
           alt="The Drinkers - Nova Zasedba"
           className="w-full h-full object-cover object-[center_20%] brightness-110 contrast-110"
           loading="eager"

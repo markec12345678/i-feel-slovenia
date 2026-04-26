@@ -7,7 +7,7 @@ export const MEDIA_GALLERY: MediaItem[] = [
     title: 'Deset majhnih jagrov',
     description: 'Uradni videospot (1997) – kultni hit The Drinkers',
     src: 'https://www.youtube.com/embed/VIDEO_ID', // Zamenjaj z dejanskim ID-jem
-    thumbnail: '/_b5ac7716-0ea1-42cf-8e1e-437a20b9faf7.jpeg',
+    thumbnail: '/_ac366ef5-d5ec-4427-8bdf-14a354656cf1.jpeg',
     alt: 'The Drinkers - Deset majhnih jagrov videospot',
     year: 1997
   },

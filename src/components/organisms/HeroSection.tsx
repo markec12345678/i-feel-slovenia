@@ -13,18 +13,17 @@ export const HeroSection: React.FC = () => {
       className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 pt-20 pb-12" 
       aria-label="The Drinkers – Drink'n'Roll Legacy"
     >
-      {/* 🖼️ NOVO OZADJE: Slika benda + Temen preliv za berljivost */}
+      {/* 🖼️ OZADJE: Svetlejši gradient za boljšo vidnost benda */}
       <div className="absolute inset-0 z-0">
-        {/* Slika: object-[center_20%] zagotovi, da so obrazi vidni tudi na mobilnih */}
-        <img 
-          src="/hero-band.jpg" 
+        <img
+          src="/hero-band.jpg"
           alt="The Drinkers - Nova Zasedba"
-          className="w-full h-full object-cover object-[center_20%]"
-          loading="eager" // Nujno za LCP optimizacijo
-          fetchPriority="high" // Pove brskalniku, da je to najpomembnejša slika
+          className="w-full h-full object-cover object-[center_20%] brightness-110 contrast-110"
+          loading="eager"
+          fetchPriority="high"
         />
-        {/* Temen gradient, da tekst ostane berljiv (od zgoraj navzdol) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/85 to-background" />
+        {/* ✅ POPRAVEK: 'via-background/40' namesto 85. Sredina je zdaj bolj prosojna! */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/40 to-background" />
       </div>
 
       {/* Content */}

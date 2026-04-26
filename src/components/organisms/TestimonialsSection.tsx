@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useRef, useCallback, useTransition } from 'react';
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { TestimonialCard } from '@/components/atoms/TestimonialCard';
 import { TESTIMONIALS } from '@/data/testimonials';
@@ -8,49 +8,107 @@ import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 export const TestimonialsSection: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [isPending, startTransition] = useTransition();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const shouldAnimate = !prefersReducedMotion;
 
-  // Auto-rotate testimonials (pauses on hover/focus)
+  // Use CSS transition direction state
+  const [direction, setDirection] = useState<'left' | 'right' | null>(null);
+
+  // Cleanup timer on unmount
   useEffect(() => {
-    if (!isAutoPlaying || prefersReducedMotion) return;
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
+
+  // Auto-rotate testimonials with RAF scheduling
+  useEffect(() => {
+    if (!isAutoPlaying || prefersReducedMotion) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
     
     timerRef.current = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+      startTransition(() => {
+        setDirection('left');
+        setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+      });
     }, 6000);
     
-    return () => clearInterval(timerRef.current);
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, [isAutoPlaying, prefersReducedMotion]);
 
+  // Optimized navigation with useTransition
   const goToNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
-    setIsAutoPlaying(false);
+    startTransition(() => {
+      setDirection('left');
+      setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
+      setIsAutoPlaying(false);
+    });
   }, []);
 
   const goToPrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
-    setIsAutoPlaying(false);
+    startTransition(() => {
+      setDirection('right');
+      setCurrentIndex((prev) => (prev - 1 + TESTIMONIALS.length) % TESTIMONIALS.length);
+      setIsAutoPlaying(false);
+    });
   }, []);
 
   const goToIndex = useCallback((index: number) => {
-    setCurrentIndex(index);
+    startTransition(() => {
+      setDirection(index > currentIndex ? 'left' : 'right');
+      setCurrentIndex(index);
+      setIsAutoPlaying(false);
+    });
+  }, [currentIndex]);
+
+  // Debounced hover/focus handlers
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
+  const handleInteractionStart = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
     setIsAutoPlaying(false);
   }, []);
+  
+  const handleInteractionEnd = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+    }
+    hoverTimeoutRef.current = setTimeout(() => {
+      if (!prefersReducedMotion) {
+        setIsAutoPlaying(true);
+      }
+    }, 300);
+  }, [prefersReducedMotion]);
 
-  // Pause on hover/focus for accessibility
-  const handleInteractionStart = () => setIsAutoPlaying(false);
-  const handleInteractionEnd = () => {
-    if (!prefersReducedMotion) setIsAutoPlaying(true);
-  };
-
-  // Keyboard navigation
+  // Keyboard navigation with RAF
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') goToNext();
-      if (e.key === 'ArrowLeft') goToPrev();
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        requestAnimationFrame(goToNext);
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        requestAnimationFrame(goToPrev);
+      }
     };
+    
     const carousel = carouselRef.current;
     if (carousel) {
       carousel.addEventListener('keydown', handleKey);
@@ -78,7 +136,7 @@ export const TestimonialsSection: React.FC = () => {
           Spomini, čustva in besede ljudi, ki so doživeli The Drinkers v živo.
         </p>
 
-        {/* Carousel Container */}
+        {/* Carousel Container - Optimized with CSS transitions */}
         <div
           ref={carouselRef}
           className="relative"
@@ -91,54 +149,55 @@ export const TestimonialsSection: React.FC = () => {
           aria-label="Citati fanov"
           aria-roledescription="carousel"
         >
-          {/* Testimonial Cards */}
-          <div className="overflow-hidden">
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={currentIndex}
-                className="px-2"
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -50 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
-                role="group"
-                aria-roledescription="slide"
-                aria-label={`Cit ${currentIndex + 1} od ${TESTIMONIALS.length}`}
-              >
-                <TestimonialCard 
-                  testimonial={TESTIMONIALS[currentIndex]} 
-                  isActive={true} 
-                />
-              </motion.div>
-            </AnimatePresence>
+          {/* Testimonial Cards - CSS transition instead of Framer Motion AnimatePresence */}
+          <div className="overflow-hidden will-change-transform">
+            <div
+              className={`px-2 transition-all duration-300 ease-out ${
+                isPending ? 'opacity-50' : 'opacity-100'
+              } ${direction === 'left' ? 'translate-x-0' : direction === 'right' ? 'translate-x-0' : ''}`}
+              style={{ 
+                willChange: 'opacity, transform',
+                transform: 'translateZ(0)' // Force GPU acceleration
+              }}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`Cit ${currentIndex + 1} od ${TESTIMONIALS.length}`}
+            >
+              <TestimonialCard 
+                testimonial={TESTIMONIALS[currentIndex]} 
+                isActive={true} 
+              />
+            </div>
           </div>
 
-          {/* Navigation Buttons */}
+          {/* Navigation Buttons - with RAF scheduling */}
           <button
-            onClick={goToPrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 p-3 rounded-full bg-surface/80 border border-white/10 hover:border-accent/50 text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            onClick={() => requestAnimationFrame(goToPrev)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-12 p-3 rounded-full bg-surface/80 border border-white/10 hover:border-accent/50 text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
             aria-label="Prejšnji citat"
+            style={{ willChange: 'transform' }}
           >
             <ChevronLeft className="w-6 h-6" aria-hidden="true" />
           </button>
           <button
-            onClick={goToNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 p-3 rounded-full bg-surface/80 border border-white/10 hover:border-accent/50 text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            onClick={() => requestAnimationFrame(goToNext)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-12 p-3 rounded-full bg-surface/80 border border-white/10 hover:border-accent/50 text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent active:scale-95"
             aria-label="Naslednji citat"
+            style={{ willChange: 'transform' }}
           >
             <ChevronRight className="w-6 h-6" aria-hidden="true" />
           </button>
 
-          {/* Dots Indicator */}
+          {/* Dots Indicator - Memoized */}
           <div className="flex justify-center gap-2 mt-8" role="tablist" aria-label="Navigacija po citatih">
             {TESTIMONIALS.map((_, index) => (
               <button
                 key={index}
-                onClick={() => goToIndex(index)}
-                className={`w-3 h-3 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                onClick={() => requestAnimationFrame(() => goToIndex(index))}
+                className={`h-3 rounded-full transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                   index === currentIndex 
                     ? 'bg-accent w-8' 
-                    : 'bg-white/20 hover:bg-white/40'
+                    : 'w-3 bg-white/20 hover:bg-white/40'
                 }`}
                 role="tab"
                 aria-selected={index === currentIndex ? 'true' : 'false'}
@@ -147,10 +206,13 @@ export const TestimonialsSection: React.FC = () => {
             ))}
           </div>
 
-          {/* Auto-play indicator (decorative) */}
+          {/* Auto-play indicator */}
           {!prefersReducedMotion && (
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 mb-12 flex items-center gap-2 text-secondary/60 text-xs">
-              <div className={`w-2 h-2 rounded-full ${isAutoPlaying ? 'bg-accent animate-pulse' : 'bg-white/20'}`} aria-hidden="true" />
+              <div 
+                className={`w-2 h-2 rounded-full transition-colors duration-200 ${isAutoPlaying ? 'bg-accent' : 'bg-white/20'}`} 
+                aria-hidden="true" 
+              />
               <span>{isAutoPlaying ? 'Avtomatsko vrtenje' : 'Pavzirano'}</span>
             </div>
           )}

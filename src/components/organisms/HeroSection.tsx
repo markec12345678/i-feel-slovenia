@@ -13,23 +13,19 @@ export const HeroSection: React.FC = () => {
       className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 pt-20 pb-12" 
       aria-label="The Drinkers – Drink'n'Roll Legacy"
     >
-      {/* Background – Dark gradient + subtle beer pattern */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-surface to-background z-0" />
-      
-      {/* Subtle grain texture (SVG inline – <1KB, lazy loaded) */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] z-0 pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` 
-        }}
-        aria-hidden="true"
-      />
-      
-      {/* Decorative beer glass pattern (low-opacity, decorative only) */}
-      <div 
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(196,30,58,0.08),transparent_70%)] z-0 pointer-events-none"
-        aria-hidden="true"
-      />
+      {/* 🖼️ NOVO OZADJE: Slika benda + Temen preliv za berljivost */}
+      <div className="absolute inset-0 z-0">
+        {/* Slika: object-[center_20%] zagotovi, da so obrazi vidni tudi na mobilnih */}
+        <img 
+          src="/hero-band.jpg" 
+          alt="The Drinkers - Nova Zasedba"
+          className="w-full h-full object-cover object-[center_20%]"
+          loading="eager" // Nujno za LCP optimizacijo
+          fetchPriority="high" // Pove brskalniku, da je to najpomembnejša slika
+        />
+        {/* Temen gradient, da tekst ostane berljiv (od zgoraj navzdol) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-background/85 to-background" />
+      </div>
 
       {/* Content */}
       <motion.div
@@ -39,7 +35,7 @@ export const HeroSection: React.FC = () => {
       >
         {/* Badge */}
         <motion.div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface/80 border border-accent/30 mb-6"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface/80 border border-accent/30 mb-6 backdrop-blur-sm"
           initial={shouldAnimate ? { opacity: 0, y: -10 } : { opacity: 1, y: 0 }}
           animate={shouldAnimate ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
         >
@@ -49,7 +45,7 @@ export const HeroSection: React.FC = () => {
 
         {/* Headline – Bebas Neue */}
         <motion.h1
-          className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-primary leading-[1.05] mb-6 tracking-tight"
+          className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-primary leading-[1.05] mb-6 tracking-tight drop-shadow-lg"
           initial={shouldAnimate ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
           animate={shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } : { opacity: 1, y: 0 }}
         >
@@ -59,7 +55,7 @@ export const HeroSection: React.FC = () => {
 
         {/* Subheadline – Inter */}
         <motion.p
-          className="font-body text-lg md:text-xl text-secondary mb-8 max-w-2xl mx-auto leading-relaxed"
+          className="font-body text-lg md:text-xl text-secondary mb-8 max-w-2xl mx-auto leading-relaxed drop-shadow-md"
           initial={shouldAnimate ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
           animate={shouldAnimate ? { opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.4 } } : { opacity: 1, y: 0 }}
         >
@@ -76,17 +72,17 @@ export const HeroSection: React.FC = () => {
         >
           <WaitlistForm 
             placeholder="tvoj@email.com" 
-            buttonText="Pridruži se" 
-            successMessage="Na zdravje! 🍺 Prejel boš novice o koncertih."
+            buttonText="Pridruži se Pivoluciji" 
+            successMessage="Na zdravje! 🍺 Prejel boš novice o tribute dogodkih."
           />
         </motion.div>
 
-        {/* Social Proof */}
+        {/* Pivolucija Social Proof */}
         <motion.div 
-          className="flex flex-wrap items-center justify-center gap-6 text-secondary/80"
+          className="flex flex-wrap items-center justify-center gap-6 text-secondary/90 bg-surface/40 p-4 rounded-xl backdrop-blur-sm border border-white/5"
           initial={shouldAnimate ? { opacity: 0 } : { opacity: 1 }}
           animate={shouldAnimate ? { opacity: 1, transition: { delay: 0.45 } } : { opacity: 1 }}
-          aria-label="The Drinkers statistika"
+          aria-label="The Drinkers zapuščina v številkah"
         >
           <div className="flex items-center gap-2">
             <Disc className="w-5 h-5 text-accent" aria-hidden="true" />

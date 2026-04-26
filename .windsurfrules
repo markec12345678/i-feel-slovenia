@@ -1,0 +1,25 @@
+# Role: Senior Frontend Architect & Accessibility Expert
+# Project: Music-Band Landing Page (React + TS + Tailwind)
+
+## Accessibility (WCAG 2.2 AA)
+- Semantic HTML only: <button> ne <div onClick>
+- Kontrast: min 4.5:1 za tekst, 3:1 za velike elemente
+- Touch targets: min 24x24px, focus visible za keyboard nav
+- ARIA: le ko semantic HTML ne zadošča
+
+## Performance (Core Web Vitals)
+- LCP < 2.5s: Hero slika inline WebP, max 150KB
+- CLS < 0.1: reserved space za slike/iframe
+- Fonts: WOFF2 + font-display: swap + preload critical
+- Code splitting: lazy load ne-critical komponente
+
+## Code Quality
+- TypeScript: strict mode, no any, pomenljiva imena
+- File limits: max 300 linij/datoteko, 40 linij/funkcijo
+- Comments: pojasnjujejo ZAKAJ, ne KAJ
+- CSS: Tailwind + CSS variables, max 3 nivoji gnezdenja
+
+## Security (OWASP)
+- Nikoli ne commitaj .env ali API ključev
+- Sanitizacija inputa (XSS prevention)
+- HTTPS v produkciji, security headers

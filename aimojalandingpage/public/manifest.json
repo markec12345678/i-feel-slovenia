@@ -1,0 +1,18 @@
+{
+  "name": "I Feel Slovenia - Turizem",
+  "short_name": "Slovenija",
+  "description": "Odkrijte Slovenijo - deželo čudovitih jezer, alpskih vrhov in skritih jam.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#009B3A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

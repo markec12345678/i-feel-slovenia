@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="ljubljana-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="50%" style="stop-color:#764ba2"/>
+      <stop offset="100%" style="stop-color:#f093fb"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#ljubljana-grad)"/>
+  <path d="M 0 500 Q 400 450 800 500" stroke="#009B3A" stroke-width="20" fill="none" opacity="0.4"/>
+  <path d="M 0 520 Q 400 470 800 520" stroke="#00B4D8" stroke-width="15" fill="none" opacity="0.3"/>
+  <rect x="280" y="120" width="240" height="200" fill="#4a5568" rx="8"/>
+  <polygon points="280,120 400,50 520,120" fill="#2d3748"/>
+  <rect x="385" y="200" width="30" height="120" fill="#009B3A"/>
+  <rect x="360" y="320" width="80" height="25" fill="#718096"/>
+  <circle cx="400" cy="180" r="6" fill="#ffd700">
+    <animate attributeName="cy" values="180;175;180" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="400" y="570" text-anchor="middle" font-family="Inter,sans-serif" font-size="40" font-weight="bold" fill="white" opacity="0.95">Ljubljana</text>
+</svg>

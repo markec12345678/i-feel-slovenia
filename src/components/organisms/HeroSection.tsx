@@ -94,7 +94,7 @@ export const HeroSection: React.FC = () => {
             alt="The Drinkers - Nova Zasedba"
             className="w-full max-w-[500px] lg:max-w-[600px] rounded-2xl shadow-2xl shadow-black/50 border border-white/5 object-cover rotate-2"
             loading="eager"
-            fetchPriority="high"
+            fetchpriority="high"
           />
 
           {/* Floating Badge na sliki */}

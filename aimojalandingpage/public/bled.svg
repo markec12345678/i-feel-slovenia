@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="bled-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB"/>
+      <stop offset="50%" style="stop-color:#4A90A4"/>
+      <stop offset="100%" style="stop-color:#2E86AB"/>
+    </linearGradient>
+    <linearGradient id="mountain-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#8B7355"/>
+      <stop offset="100%" style="stop-color:#6B5344"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bled-grad)"/>
+  <polygon points="50,400 150,150 250,400" fill="url(#mountain-grad)" opacity="0.9"/>
+  <rect x="120" y="200" width="60" height="80" fill="#5D4E37" rx="5"/>
+  <ellipse cx="400" cy="500" rx="300" ry="60" fill="#009B3A" opacity="0.5"/>
+  <ellipse cx="400" cy="480" rx="280" ry="55" fill="#00B4D8" opacity="0.6"/>
+  <circle cx="400" cy="460" r="50" fill="#90EE90" opacity="0.7"/>
+  <rect x="390" y="440" width="20" height="25" fill="#8B7355"/>
+  <polygon points="400,440 410,425 420,440" fill="#A0522D"/>
+  <text x="400" y="570" text-anchor="middle" font-family="Inter,sans-serif" font-size="40" font-weight="bold" fill="white" opacity="0.95">Blejsko jezero</text>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="triglav-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e3c72"/>
+      <stop offset="50%" style="stop-color:#2a5298"/>
+      <stop offset="100%" style="stop-color:#ffffff"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#triglav-grad)"/>
+  <polygon points="50,500 250,150 450,500" fill="#4a5568" opacity="0.7"/>
+  <polygon points="200,500 400,100 600,500" fill="#2d3748" opacity="0.8"/>
+  <polygon points="350,500 400,200 450,500" fill="#1a202c" opacity="0.9"/>
+  <polygon points="380,500 400,280 420,500" fill="#ffffff" opacity="0.95"/>
+  <polygon points="400,280 410,260 420,280" fill="#ffffff" opacity="0.9"/>
+  <polygon points="395,280 400,265 405,280" fill="#ffffff" opacity="0.85"/>
+  <circle cx="400" cy="250" r="5" fill="#ffd700">
+    <animate attributeName="r" values="5;8;5" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="400" y="570" text-anchor="middle" font-family="Inter,sans-serif" font-size="40" font-weight="bold" fill="white" opacity="0.95">Triglav</text>
+</svg>

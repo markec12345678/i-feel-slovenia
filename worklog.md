@@ -208,3 +208,51 @@ Stage Summary:
 - ✅ AI načrtovalec deluje z deležnimi rezultati
 - ✅ Lint čist
 - Tehnika: image-search skill za pridobivanje realnih slik iz spleta (OSS-hosted, stabilni URL-ji)
+
+---
+Task ID: 5
+Agent: main (Z.ai Code)
+Task: Interaktivni Leaflet zemljevid z integracijo AI itinererja
+
+Work Log:
+- Nameščen leaflet@1.9.4 + @types/leaflet (uporabljen direktni Leaflet, ne react-leaflet — izognitev React 19 peer dep težavam)
+- Ustvarjen `src/components/sections/map-view.tsx` ("use client"):
+  - Leaflet zemljevid centriran na Slovenijo [46.15, 14.47], zoom 8
+  - OpenStreetMap tile layer
+  - 12 custom divIcon markerjev z emoji ikonami glede na tip destinacije (lake→🏞️, city→🏛️, mountain→⛰️, cave→🕳️, coast→🏖️, river→🌊, spa→💆, gorge→🏞️)
+  - Popup-i z: sliko destinacije, imenom, tagline, oceno (★), trajanjem, ceno, in CTA gumb "Več informacij" (event delegation preko data-dest-id)
+  - Polyline route layer: črtkana zelena črta + oštevilčeni oranžni markerji (1,2,3...) za vrstni red poti
+  - Kontrolni gumbi: "Vse destinacije" (fitBounds), "Ponastavi" (setView), "Skrij/Pokaži pot" toggle
+  - Info badge spodaj levo: število destinacij
+  - scrollWheelZoom: false (boljša UX na mobilnem)
+- Ustvarjen `src/components/sections/map-section.tsx`:
+  - Wrapper z next/dynamic (ssr:false) za client-only load Leaflet-a
+  - Loading state z MapIcon spinner
+  - Header z badge "Interaktivni zemljevid" + naslov "Odkrijte Slovenijo na zemljevidu"
+  - Lastni DestinationModal (deljen dizajn z DestinationsSection)
+  - Route badge ko je AI itinerer aktiven
+  - Legend spodaj (klikni marker / črtkana črta = pot / OSM podatki)
+- Ustvarjen `src/lib/store.ts` (zustand):
+  - `useAppStore` z itinerary in routeCoords
+  - `setItinerary` izpelje koordinate poti iz AI itinererja (loop čez days.locations, lookup v DESTINATIONS, deduplikacija)
+- Posodobljen `src/components/sections/itinerary-planner.tsx`:
+  - Import useAppStore + useEffect
+  - Sinhronizacija lokalnega itinerary state → globalni store (za MapSection)
+- Posodobljen `src/app/page.tsx`: dodan <MapSection /> med ItineraryPlanner in ExperiencesSection
+- Agent Browser self-verification:
+  1. Zemljevid se naloži pravilno — VLM: "interaktivni zemljevid Slovenije z zelenimi markerji"
+  2. Marker popup test (klik preko eval): "popup z Bled, tagline, ocena 4.8, 1-2 dni, €€, gumb Več informacij"
+  3. CTA "Več informacij" iz popupa odpre poln DestinationModal z affiliate gumbi (Booking, DiscoverCars, Viator, Skyscanner)
+  4. AI integracija: generiral itinerer → zemljevid prikazuje "Pot iz AI itinererja (5 postankov)" badge + črtkana polyline + oštevilčeni markerji 1-5 razporejeni po Sloveniji
+  5. Mobile test (390x844): zemljevid viden, gumbi dostopni
+  6. Console: 0 runtime errorjev (samo nekritičen Dialog accessibility warning)
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ Interaktivni Leaflet zemljevid polno funkcionalen
+- ✅ 12 destinacij kot custom markerji z emoji ikonami
+- ✅ Popup-i z sliko + info + CTA gumb
+- ✅ AI itinerer integracija: polyline + oštevilčeni markerji se samodejno prikažejo
+- ✅ Mobile responsive
+- ✅ Brez runtime errorjev, lint čist
+- Arhitektura: zustand store za deljenje itinerary state med ItineraryPlanner (writer) in MapSection (reader)

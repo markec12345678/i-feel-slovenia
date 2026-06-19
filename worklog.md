@@ -1829,3 +1829,90 @@ Stage Summary:
   - PWA za mobilno izkušnjo
   - Email avtomatizacija za engagement
   - Analytics za ROI dokaz
+
+---
+Task ID: 28-a/b
+Agent: full-stack-developer
+Task: Booking panel za AI itinerer — rešitev "ne vem kako rezervirati" problema
+
+Work Log:
+- Prebral worklog.md (kontekst projekta I Feel Slovenia, Task 1-27), itinerary-planner.tsx, affiliate.ts, slovenia-data.ts, prisma/schema.prisma, src/lib/db.ts, src/lib/types.ts in obstoječe API route (listings, products, experiences) za uskladitev vzorcev.
+- Ustvaril `src/app/api/itinerary/bookings/route.ts`:
+  - POST handler, ki sprejme `{ destinationIds: string[] }`.
+  - Sanitizira in deduplicira IDje, prazna množica vrne `{}`.
+  - Vzporedno (Promise.all) pridobi listings, experiences in products iz baze z `destinationId IN [...]`, sortirano `featured DESC, rating DESC`, omejeno na 3 na destinacijo.
+  - Razčleni JSON polja (images, specialties, languages) pred vračanjem.
+  - Če za destinacijo ni nič, vrne prazne arraye. Robustno handle-a napake (500).
+- Ustvaril `src/components/sections/booking-panel.tsx`:
+  - "use client" komponenta, definira lokalne tipe BookingListing/Experience/Product/Options/BookingData (da ne moti types.ts).
+  - Tabs (4): Nastanitev (🏨) | Aktivnosti (🎯) | Hrana (🍽️) | Transport (🚗). TabsList grid-cols-2 sm:grid-cols-4, triggerji prikazujejo count badge s številom opcij.
+  - **Nastanitev**: za vsako destinacijo → Booking.com affiliate kartica + naši listings kategorij hotel/spa/other.
+  - **Aktivnosti**: za vsako destinacijo → Viator affiliate kartica + naše experiences.
+  - **Hrana**: za vsako destinacijo → naši listings restavracija/bar + naši products (food/wine/honey/oil).
+  - **Transport**: DiscoverCars za prvo destinacijo + Skyscanner za let v Ljubljano.
+  - Sub-komponente: ListingCard, ExperienceCard, ProductCard (s sliko size-12, imenom, ceno, "Obišči" gumbem z website/mailto/tel fallback, featured/verified badge-i, rating z zvezdico). AffiliateCard (partner ikona + CTA gumb, target=_blank rel="sponsored"). EmptyState (prijazno sporočilo ko ni baze). DestinationHeading (MapPin + ime).
+  - Vse affiliate povezave: rel="noopener noreferrer sponsored", target="_blank".
+  - Mobile-first responsive (grid-cols-2 na mobilci, 4 na desktop). Ni indigo/modre.
+- Posodobil `src/components/sections/itinerary-planner.tsx`:
+  - Dodal `bookingData` state in useEffect, ki ob spremembi itinererja zbere vse `destination_id` iz vseh dni (deduplicirano), jih POSTa na `/api/itinerary/bookings` in shrani rezultat. Cleanup flag preprečuje race condition.
+  - Po `day.locations.map(...)` znotraj CardContent dodal `<BookingPanel dayPlan={day} bookingData={bookingData} />` — prikaže se znotraj dnevnega Card-a pod lokacijami.
+  - Odstranil stari "Rezerviraj" gumb znotraj posamezne lokacije (zdaj je v booking panelu) in s tem nepotrebne importe (`getAffiliateLinks`, `ExternalLink`).
+- Testiranje: curl POST na /api/itinerary/bookings z ["bled","ljubljana"] vrne pravilno strukturirane podatke z Blejskimi hoteli; prazna množica vrne `{}`; neznan ID vrne prazne arraye.
+- `bun run lint` čist — 0 errors, 0 warnings.
+
+Stage Summary:
+- Ustvarjene datoteke:
+  - `src/app/api/itinerary/bookings/route.ts` — POST API za booking opcije po destinacijah.
+  - `src/components/sections/booking-panel.tsx` — Tabs-baziran booking panel (4 kategorije) z lokalnimi ponudniki + affiliate povezavami.
+- Posodobljene datoteke:
+  - `src/components/sections/itinerary-planner.tsx` — integriran BookingPanel pod vsakim dnevom; odstranjen stari "Rezerviraj" gumb.
+- Rezultat: uporabnik, ki generira AI itinerer, sedaj dobi takoj pod vsakim dnem celovit "Rezerviraj ta dan" panel s 4 zavihki — poveže AI plan z našo bazo lokalov/izkušenj/izdelkov + zunanje affiliate partnerje (Booking, Viator, DiscoverCars, Skyscanner). Neposredna pot od navdiha do rezervacije.
+
+---
+Task ID: 28-29
+Agent: main (Z.ai Code)
+Task: Booking panel za AI itinerer — povezava med AI načrtom in rezervacijo
+
+Work Log:
+- PROBLEM: uporabnik generira AI itinerer ampak potem ne ve kako rezervirati
+- REŠITEV: celovit "Rezerviraj ta dan" booking panel po vsakem dnevu v itinererju
+
+- API /api/itinerary/bookings:
+  - POST { destinationIds: string[] } → { [destId]: { listings, experiences, products } }
+  - Vzporedno pridobi vse tri tipe iz baze (Promise.all)
+  - Sort: featured DESC, rating DESC, limit 3 na destinacijo
+  - Parsa JSON polja (images, specialties, languages)
+
+- BookingPanel komponenta (src/components/sections/booking-panel.tsx):
+  - 4 tabi: Nastanitev | Aktivnosti | Hrana | Transport
+  - Nastanitev: Booking.com affiliate + naši listings (kategorija hotel)
+  - Aktivnosti: naši experiences (iz baze) + Viator affiliate
+  - Hrana: naši listings (kategorija restaurant) + naši products (food/wine)
+  - Transport: DiscoverCars najem avta + Skyscanner leti
+  - Sub-komponente: ListingCard, ExperienceCard, ProductCard, AffiliateCard, EmptyState
+  - Vse povezave target=_blank rel="sponsored"
+
+- ItineraryPlanner integracija:
+  - Ko je itinerer generiran → fetch booking podatke za vse destination_ids
+  - <BookingPanel dayPlan={day} bookingData={bookingData} /> dodan pod vsakim dnevom
+  - Odstranjen stari "Rezerviraj" gumb (zdaj v booking panelu)
+
+- Agent Browser self-verification:
+  1. Generiral AI itinerer (3 dni, budget €500, summer, 2 osebi)
+  2. "Rezerviraj ta dan" panel viden pod Dan 1
+  3. 4 tabi prisotni: Nastanitev, Aktivnosti, Hrana, Transport
+  4. Nastanitev tab: Booking.com + Hotel Vila Bled prikazan
+  5. Aktivnosti tab: "Sprehod po Blejskem otoku s pletno vožnjo" (€28/osebo) iz baze + Viator
+  6. Transport tab: DiscoverCars "Najem avta v Bled" + Skyscanner "Leti do Ljubljane"
+  7. API test: POST /api/itinerary/bookings ["bled","ljubljana"] → bled: 3 listings/1 exp/1 prod, ljubljana: 3 listings/1 exp/0 prod
+  8. 0 kritičnih runtime errorjev
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ Celovit booking panel integriran v AI itinerer
+- ✅ 4 kategorije: Nastanitev, Aktivnosti, Hrana, Transport
+- ✅ Povezava med AI načrtom in naše baze (listings, experiences, products)
+- ✅ Affiliate partnerji (Booking, Viator, DiscoverCars, Skyscanner) integrirani
+- ✅ Uporabnik lahko zdaj od AI načrta → direktno do rezervacije
+- ✅ 0 runtime errorjev, lint čist
+- UX zanka zaprta: navdih (AI) → raziskovanje (destinacije/POI) → načrt (itinerer) → rezervacija (booking panel)

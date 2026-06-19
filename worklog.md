@@ -663,3 +663,182 @@ Stage Summary:
 - ✅ Plan limiti (free=1, premium=5, enterprise=∞) z ownership izolacijo
 - ✅ 0 runtime errorjev, lint čist
 - Platforma je zdaj POPOLN B2B izdelek: obiskovalci najdejo lokale, lastniki upravljajo, admin nadzoruje, monetizacija deluje
+
+---
+Task ID: 12-b/c/d/e
+Agent: full-stack-developer
+Task: Beta promo posodobitve (JoinUs, PitchDeck, Owner dashboard, Admin dashboard, API limiti)
+
+Work Log:
+- Prebral `worklog.md` za celoten kontekst platforme (Task 1-11). Razumel BETA model: platforma BREZPLAČNA za vse lokale dokler ne dosežemo 30 aktivnih lokalov (cold start problem rešitev).
+- Prebral vse ciljne datoteke: `src/lib/beta.ts` (getBetaStatus, BETA_INFO, BETA_THRESHOLD=30, isFeaturePaid), `src/lib/pricing.ts` (vsi paketi z betaFree=true, originalPrice za Premium/Enterprise), `src/components/sections/join-us.tsx`, `src/components/sections/pitch-deck.tsx`, `src/app/owner/dashboard/page.tsx`, `src/components/admin/admin-dashboard.tsx`, `src/app/api/owner/listings/route.ts`, `src/components/beta-banner.tsx`, `src/app/page.tsx`, `src/app/admin/page.tsx`.
+- Preveril shadcn/ui komponente na voljo (progress.tsx obstaja, vse drugo OK). Preveril dev log: 0 errorjev, /api/beta-status vrača 200.
+
+=== 1. JOIN-US (src/components/sections/join-us.tsx) — popoln prepis ===
+- Dodal velik beta badge v hero: "🚀 BETA: Vsi paketi BREZPLAČNI — omejen čas" z amber/zelena barvo (Rocket ikona, rounded-full, ring-2).
+- Dodajal "Beta ugodnosti" sekcijo pod hero z "Zakaj zdaj?" naslovom: 5 beta ugodnosti iz BETA_INFO.benefits v grid 1/2/5 kolon (Gift/Sparkles/TrendingUp/ShieldCheck/Clock ikone, amber obroba).
+- Cenovne kartice posodobljene:
+  - Originalna cena PREČRTANA za pakete z originalPrice (Premium €149/mes ~~prečrtano~~, Enterprise €499/mes ~~prečrtano~~)
+  - "Brezplačno med beta" badge pod prečrtano ceno (zelena text-primary)
+  - Premium badge spremenjen v "BETA: BREZPLAČNO" z Rocket ikono (bil "Najbolj priljubljen")
+  - CTA gumbi prikazujejo "Naroči brezplačno" za betaFree pakete
+- Submit gumb spremenjen iz "Pošlji prijavo" v "Naroči brezplačno" z Sparkles ikono.
+- "Začni zdaj" hero gumb spremenjen v "Začni brezplačno".
+- Select v formi: paketi označeni z " — brezplačno (beta)" za betaFree pakete.
+- Na dnu pricing sekcije dodan <BetaCounter> komponenta — client-side fetch iz /api/beta-status:
+  - Prikaže "Še X lokalov do vklopa monetizacije" + "Trenutno X od 30 lokalov"
+  - Progress bar (X/30) z amber barvo
+  - BETA AKTIVEN badge z Zap ikono
+  - Če ni več aktivna (>=30 lokalov): prikaže "Monetizacija aktivna" stanje
+  - Loading state z Loader2 spinner
+- Uvozil BETA_INFO iz "@/lib/beta" (client constant — brez getBetaStatus da ne potegne db v client bundle).
+
+=== 2. PITCH DECK (src/components/sections/pitch-deck.tsx) — server component ===
+- Dodan velik beta badge v hero: "Brezplačno med beta — brez obveznosti" z amber/zelena barvo (Rocket ikona, rounded-full, ring-2).
+- Final CTA card popolnoma prenovljen:
+  - Velik badge: "BETA · BREZPLAČNO · BREZ KREDITNE KARTICE"
+  - Nov naslov: "Pridruži se BREZPLAČNO med beta — brez kreditne kartice"
+  - 4 beta ugodnosti v grid 1/2:
+    1. "Brezplačni Premium paket (vrednost €149/mes)" — Gift ikona
+    2. "Brez kreditne kartice" — CreditCard ikona
+    3. "Lahko odidete kadar" — LogOut ikona
+    4. "30 dni garancija po prekinitvi beta-ja" — Clock ikona
+  - Glavni CTA: "Pridruži se brezplačno" z Gift ikono
+  - Info badge: "Brez obveznosti · 30 dni garancije · 30 lokalov do monetizacije"
+  - Footer info: "Brez kreditne kartice", "GDPR varni podatki", "24-urni odziv" z malimi ikonami
+- Pitch-deck je server component (brez "use client") — lahko neposredno uvozi BETA_INFO iz "@/lib/beta" (server-only OK).
+
+=== 3. OWNER DASHBOARD (src/app/owner/dashboard/page.tsx) — popoln prepis ===
+- Dodan <BetaBanner /> na vrh main (nad headerjem).
+- Dodan beta status fetch v useEffect (client-side fetch /api/beta-status).
+- Dva seta PLAN_LIMITS konstant:
+  - PLAN_LIMITS_NORMAL: free=1, premium=5, enterprise=∞ (izven beta)
+  - PLAN_LIMITS_BETA: free=3, premium=8, enterprise=∞ (v beta)
+- Dynamic planLimit = isBetaActive ? PLAN_LIMITS_BETA[plan] : PLAN_LIMITS_NORMAL[plan]
+- Listings tab:
+  - Dodana beta info badge za free/premium: "Beta: 3 lokalci brezplačno (običajno 1)" z Rocket ikono, amber obroba, podnapis z razlago
+  - Limit avtomatsko uporablja beta limite (3 namesto 1 za free)
+- Naročnina tab:
+  - Beta banner na vrhu (kartica z amber obrobo, Rocket ikona): "BETA: Vaš paket je BREZPLAČEN"
+  - BetaCounterInline komponenta: "Trenutno X / 30 lokalov na platformi" z Progress bar
+  - Trenutni paket kartica: dodan "Brezplačno med beta" badge, spremenjen opis da omenja beta limite (3/8/∞)
+  - "Nadgradi brezplačno" posebna kartica za free uporabnike v beta-ju
+  - Pricing cards: prikaz originalPrice prečrtano + "Brezplačno med beta" + "Nadgradi (zdaj BREZPLAČNO)" CTA
+  - SubscriptionCard.handleUpgrade zdaj dejansko kliče /api/stripe/checkout (demo mode direktno nadgradi) → reload page da se session osveži
+  - Loading state na gumbu (Loader2 spinner z "Nadgrajujem...")
+  - Toast obvestje ob uspehu
+- Statistika tab: nespremenjen (KPI + top lokal + top 5 po klikih + Alert o podrobni statistiki).
+
+=== 4. ADMIN DASHBOARD (src/components/admin/admin-dashboard.tsx) — surgical edits ===
+- Dodani ikone: Rocket, Gift, Zap (k lucide-react importom).
+- Dodan import: BetaBanner, Progress, BETA_INFO.
+- Dodan <BetaBanner /> na vrh AdminDashboard (nad headerjem).
+- Dodan <BetaStatusWidget /> v main, nad Tabs:
+  - Velika kartica z gradientom (from-amber-50 to-amber-100/50)
+  - "BETA AKTIVEN" naslov z Rocket ikono
+  - "Vsi paketi BREZPLAČNI" badge z Zap ikono
+  - Števec: "X / 30 lokalov do monetizacije" + "Še X lokalov"
+  - Progress bar (X/30) z amber barvo
+  - Sporočilo: "Ko dosežemo 30 lokalov, se monetizacija samodejno vklopi. Beta uporabniki obdržijo svoje ugodnosti 6 mesecev."
+  - Na lg+ zaslonih: stranski panel z "Beta konča {date}"
+  - Loading state z Loader2 spinner
+  - Ko beta končan: zeleno stanje "Monetizacija aktivna"
+- useBetaStatus hook (custom hook): fetch /api/beta-status, manages loading+status state, cleanup preko cancelled flag.
+- Dodan <BetaStatusCard /> v Statistika tab (nad KPI-ji):
+  - Kompaktna kartica z naslovom "Beta status platforme"
+  - "X / 30" števec + Progress bar + badge (BETA AKTIVEN ali MONETIZACIJA)
+  - Status message na dnu
+- PlanBadge in KpiCard nespremenjene.
+
+=== 5. API: listings/route.ts POST — beta-aware limiti ===
+- Uvozil getBetaStatus iz "@/lib/beta".
+-PLAN_LIMITS_NORMAL in PLAN_LIMITS_BETA konstanti.
+- V POST handlerju: klic getBetaStatus() → limits = betaStatus.isActive ? BETA : NORMAL → limit = limits[plan]
+- Error message se prilagodi: če beta aktiven, pove "med beta največ X lokalov", sicer originalno besedilo.
+
+=== 6. BETA BANNER V LAYOUTIH ===
+- src/app/page.tsx (homepage): dodan <BetaBanner /> med Navigation in main (pred Hero).
+- src/app/owner/dashboard/page.tsx: dodan <BetaBanner /> na vrh main (pred headerjem).
+- src/app/admin/page.tsx:
+  - LoginForm state: wrap v <div className="min-h-screen bg-muted/30 flex flex-col"> z <BetaBanner /> na vrhu + LoginForm spodaj (LoginForm sedaj uporablja flex-1 namesto min-h-screen).
+  - AdminDashboard state: BetaBanner je že dodan znotraj AdminDashboard komponente same.
+
+=== VERIFIKACIJA ===
+- `bun run lint`: 0 errorjev, 0 opozoril (exit 0).
+- Dev log: 0 runtime errorjev, vsi endpoint-i vračajo 200.
+- curl testi:
+  - `/` → 200
+  - `/admin` → 200
+  - `/owner/dashboard` → 200
+  - `/owner/prijava` → 200
+  - `/api/beta-status` → 200 z `{isActive:true, listingCount:11, remainingToMonetization:19, message:"Beta obdobje — vse brezplačno. Še 19 lokalov do vklopa monetizacije.", betaEndDate:"2025-12-31"}`
+- BETA_INFO uspešno uvožen v client komponente (join-us, owner dashboard, admin dashboard, pitch-deck) — brez db v client bundle (tree-shaking deluje ker BETA_INFO ne uporablja db).
+
+Stage Summary:
+Posodobljene datoteke (6):
+- `src/components/sections/join-us.tsx` — popoln prepis z beta badge, ugodnosti sekcija, prečrtane cene, BETA: BREZPLAČNO badge, BetaCounter
+- `src/components/sections/pitch-deck.tsx` — beta badge v hero, prenovljen Final CTA z 4 beta ugodnostmi
+- `src/app/owner/dashboard/page.tsx` — popoln prepis z BetaBanner, beta-aware limiti (3/8/∞), beta banner v naročnini, nadgradnja preko /api/stripe/checkout
+- `src/components/admin/admin-dashboard.tsx` — BetaBanner + BetaStatusWidget na vrhu, BetaStatusCard v Statistika, useBetaStatus hook
+- `src/app/api/owner/listings/route.ts` — getBetaStatus() check v POST, PLAN_LIMITS_BETA (3/8/∞) ko beta aktiven
+- `src/app/page.tsx` — dodan <BetaBanner /> pred Hero
+- `src/app/admin/page.tsx` — dodan <BetaBanner /> v LoginForm state (wrappano v flex-col)
+
+Funkcionalnost:
+- Vsi paketi BREZPLAČNI med beta (prikaz prečrtane originalne cene)
+- Beta števec na 3 mestih (JoinUs, Owner Naročnina, Admin Statistika + Widget)
+- Free owner ima 3 lokalce med beta (ne 1) — API + UI sinkronizirana
+- Nadgradnja preko /api/stripe/checkout direktno nadgradi v demo mode (že delalo, sedaj tudi UI uporablja)
+- BetaBanner prikazan na 3 straneh: homepage, owner dashboard, admin (login + dashboard)
+- Server-component (pitch-deck) lahko neposredno uvozi BETA_INFO; client komponente uporabljajo BETA_INFO constant + fetch /api/beta-status za real-time števec
+
+Tehnologije: shadcn/ui (Progress, Card, Badge, Button, Tabs, Alert, AlertDialog), lucide-react (Rocket, Gift, Zap, Check, Sparkles, Crown, Clock, CreditCard, LogOut, ShieldCheck, TrendingUp, Loader2, ArrowRight, Star, Building2, Building, MapPin, Pencil, Trash2, Eye, MousePointerClick, Plus, AlertCircle, CalendarClock), Next.js 16 App Router, Prisma+SQLite, slovenski UI v celoti.
+
+Barvna paleta: NO indigo/blue — primary (zelena) za akcije/monetizacijo, amber za beta poudarek (badge, banner, counter, kartice), accent (terakota) redko uporabljen. Skladno z obstoječo slovensko temo.
+
+Mobile-first responsive: grid 1/2/3/5 kolon (ugodnosti), 1/2 (beta CTA benefits), flex-col sm:flex-row za beta bannere, hidden lg:flex za stranski panel v admin widgetu, text-xs sm:text-sm za prilagodljive oznake.
+
+TypeScript strict: interface BetaStatus definiran lokalno v vsaki komponenti (da se izognemo importu db-vsebovajočega beta.ts v client), useBetaStatus hook z eksplicitnimi tipi, type guard pattern za API odgovore v SubscriptionCard.handleUpgrade.
+
+Lint čist (0 errorjev, 0 opozoril), vsi endpoint-i testirani z curl (200), dev server HTTP 200, 0 runtime errorjev v dev.log.
+
+---
+Task ID: 13
+Agent: main (Z.ai Code)
+Task: Beta model implementacija + self-verification
+
+Work Log:
+- Ustvarjen src/lib/beta.ts — centralni modul z getBetaStatus() (server, Prisma), BETA_INFO (client), BETA_THRESHOLD=30, isFeaturePaid()
+- Ustvarjen API /api/beta-status (GET) — vrne { isActive, listingCount, remainingToMonetization, message, betaEndDate }
+- Ustvarjena komponenta src/components/beta-banner.tsx — pasica na vrhu strani (client, fetch iz API, dismissable)
+- Posodobljen src/lib/pricing.ts — vsi paketi betaFree=true, Premium/Enterprise monthlyPrice=0 + originalPrice (149/499) za prečrtan prikaz, badge "BETA: BREZPLAČNO"
+- Subagent (12-b/c/d/e) posodobil:
+  - JoinUs sekcija: beta badge v hero, prečrtane cene, "BETA: BREZPLAČNO" badge, beta ugodnosti sekcija, števec na dnu
+  - Pitch deck: beta badge, prenovljen CTA z beta ugodnostmi
+  - Owner dashboard: BetaBanner, beta limiti (free=3, premium=8), Naročnina tab z brezplačno nadgradnjo
+  - Admin dashboard: BetaStatusWidget (11/30, progress bar, 6-mesečne ugodnosti)
+  - API /api/owner/listings: beta-aware plan limiti (PLAN_LIMITS_BETA vs PLAN_LIMITS_NORMAL)
+  - page.tsx, admin/page.tsx: dodan BetaBanner
+- Agent Browser self-verification:
+  1. Homepage beta banner: "Beta obdobje: Vsi paketi BREZPLAČNI za lokalce. Še 19 lokalov do vklopa monetizacije."
+  2. JoinUs pricing: prečrtane cene (~~€149~~), "Brezplačno med beta", "BETA: BREZPLAČNO" badge na Premium
+  3. Admin dashboard: "BETA AKTIVEN" widget, "11/30 lokalov do monetizacije", progress bar, "6 mesecev ugodnosti"
+  4. Owner registracija E2E: izpolnil → auto-login → /owner/dashboard z beta bannerjem
+  5. Owner Naročnina tab: "BETA: Vaš paket je BREZPLAČEN", "Nadgradi brezplačno", "Brez kreditne kartice"
+  6. Pitch deck: "Brezplačno med beta — brez obveznosti" badge
+  7. API /api/beta-status: { isActive: true, listingCount: 11, remainingToMonetization: 19, message: "Beta obdobje — vse brezplačno..." }
+  8. 0 runtime errorjev
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ Beta model popolnoma implementiran
+- ✅ Vsi paketi BREZPLAČNI med beta (dokler < 30 lokalov)
+- ✅ Beta banner na vseh ključnih straneh (home, admin, owner dashboard)
+- ✅ Prečrtane originalne cene + "BETA: BREZPLAČNO" badge
+- ✅ Admin beta widget z napredkom do monetizacije (11/30)
+- ✅ Owner beta limiti (free=3 namesto 1, premium=8 namesto 5)
+- ✅ Owner brezplačna nadgradnja preko Stripe demo (direktno nadgradi plan)
+- ✅ Pitch deck z beta poudarkom
+- ✅ 0 runtime errorjev, lint čist
+- Cold start problem rešen: noben lokal ne plača dokler platforma nima kritične mase
+- Ko dosežemo 30 lokalov: monetizacija se samodejno vklopi, beta uporabniki obdržijo ugodnosti 6 mesecev

@@ -2123,3 +2123,35 @@ Platforma je PRODUKCIJSKO PRIPRAVLJENA:
 - PWA (service worker, icons)
 - Email avtomatizacija (lead → email)
 - Pavšalni oglasni model (beta: brezplačno do 30 lokalov)
+
+---
+Task ID: 32
+Agent: main (Z.ai Code)
+Task: Odstranitev Alamy watermarka iz hero slike
+
+Work Log:
+- Uporabnik opozoril: Alamy watermark viden na hero sliki v ozadju
+- VLM potrdil: "alamy" watermark prisoten na več mestih (levo, desno, spodaj)
+- Trenutna slika: 65ea408c89ea.jpg (Bled z gradom — imela watermark)
+- Nov image search z query "Lake Bled Slovenia island church aerial view beautiful sunrise no watermark"
+- 5 kandidatov pridobljenih
+- VLM preveril 3 najboljše — vsi čisti (brez watermarka)
+- Izbran: 6e61d0d8dc53.jpg — "Lake Bled with Church and Castle at sunset"
+- VLM podroben opis: "izjemno primerna, vizualno zelo privlačna"
+  - Blejski otok s cerkvijo Marijinega vnebovzetja
+  - Blejski grad na pečini
+  - Julijske Alpe v ozadju
+  - Sončni zahod s toplimi barvami (zlati, oranžni, rdečkasti)
+  - Simetričen odsev v jezeru
+  - Dramatično nebo z meglo
+- Posodobljen hero.tsx: zamenjana slika + posodobljen alt text
+- Agent Browser verification: VLM potrdil "Na sliki ni viden 'alamy' watermark. Slika je privlačna."
+- Lint: 0 errorjev
+
+Stage Summary:
+- ✅ Alamy watermark odstranjen iz hero slike
+- ✅ Nova čista, profesionalna slika Blejskega jezera ob sončnem zahodu
+- ✅ VLM potrjuje: "izjemno primerna za hero ozadje slovenske turistične strani"
+- ✅ Vse komponente ostale nespremenjene (samo Image src zamenjan)
+- ✅ 0 runtime errorjev, lint čist
+- Hero slika zdaj odraža aplikacijo: naravna lepota Slovenije, zgodovinske znamenitosti, romantična atmosfera

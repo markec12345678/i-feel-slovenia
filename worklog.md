@@ -2155,3 +2155,37 @@ Stage Summary:
 - ✅ Vse komponente ostale nespremenjene (samo Image src zamenjan)
 - ✅ 0 runtime errorjev, lint čist
 - Hero slika zdaj odraža aplikacijo: naravna lepota Slovenije, zgodovinske znamenitosti, romantična atmosfera
+
+---
+Task ID: 33-34
+Agent: main (Z.ai Code)
+Task: Sistematski pregled vseh slik za watermark-e + popravki
+
+Work Log:
+- Po odstranitvi Alamy watermarka iz hero slike (Task 32), sem sistematsko preveril VSE 22 slik destinacij
+- VLM preveril vseh 22 slik za watermark-e
+- 7 destinacij je imelo Alamy watermark: bled, crnomelj, dravograd, postojna, rogaska, slovenj-gradec, vintgar
+- Za vsako pridobil novo sliko z z-ai image-search
+- VLM preveril nove slike — rogaska je bila še vedno z Alamy, ponovno iskal
+- Končno vseh 7 novih slik čistih (brez watermarka)
+- Posodobljen src/lib/slovenia-data.ts:
+  - bled: 65ea408c89ea → 807d1fbe824a (Unsplash — brezplačna, OK)
+  - postojna: 48f79b432fcb → 0e69d67205a0
+  - vintgar: 13c851e9bce1 → 03fcfaa925cc
+  - rogaska: 3f259fe258bb → 95c33b82385b (še vedno alamy) → c8fa184cdd13 (čista)
+  - slovenj-gradec: dd232cc0e58b → 6ecd34eb43c3
+  - dravograd: ffe5d13f2516 → bfc1494a06a6
+  - crnomelj: 425509152cd6 → 824e16866694
+- Agent Browser verification:
+  - Vseh 7 destinacij ima nove slike (potrjeno preko DOM check)
+  - Hero slika: 6e61d0d8dc53 (čista, iz Task 32)
+  - 0 runtime errorjev
+- Lint: 0 errorjev
+
+Stage Summary:
+- ✅ Sistematski pregled vseh 22 slik destinacij zaključen
+- ✅ 7 destinacij z Alamy watermarkom popravljeno z novimi čistimi slikami
+- ✅ Hero slika čista (iz Task 32)
+- ✅ Vse destinacije zdaj prikazujejo profesionalne slike brez watermarkov
+- ✅ 0 runtime errorjev, lint čist
+- PLATFORMA JE VIZUALNO PROFESIONALNA — brez watermarkov, primerna za production

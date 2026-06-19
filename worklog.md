@@ -901,3 +901,39 @@ Stage Summary:
 - ✅ Nov tip "castle" (Otočec)
 - ✅ 0 runtime errorjev, lint čist
 - Platforma zdaj dejansko pokriva "I Feel Slovenia" — vse regije, od Alp do Panonije, od Jadrana do Madžarske meje
+
+---
+Task ID: 15
+Agent: main (Z.ai Code)
+Task: Popravek napačne slike Otočec + sistematično preverjanje vseh 22 slik
+
+Work Log:
+- Uporabnik opozoril: slika za Otočec je bila napačna (prikazovala Bled)
+- VLM potrdil: trenutni URL (53dc797cac9d.jpg) je bil dejansko Blejsko jezero z otokom
+- Nov image search z specifičnim query "Otočec castle island river Krka Slovenia hotel" — 5 kandidatov
+- VLM preveril 3 kandidate — vsi so pravi Otočec grad na otoku
+- Zamenjal sliko z a50accb13d5e.jpg (castle with red roofs and round towers reflected in calm moat)
+- Sistematično preverjanje VSEH 22 slik z VLM:
+  - Download vseh 22 slik v /tmp/verify/
+  - Za vsako: VLM vprašanje "Ali slika prikazuje [destinacijo]?"
+  - Rezultati: 20 DA, 1 delno (Bled prikazuje grad ne otok — še vedno relevantno), 1 napaka (Murska Sobota — pokvarjena datoteka)
+- Murska Sobota: nov image search → e63eaac243b6.jpg (caption "DOŽIVI POMURJE") — VLM potrdil povezava s Prekmurjem
+- Agent Browser verify: Otočec modal prikazuje pravi grad na otoku
+- Agent Browser verify: Otočec kartica v gridu prikazuje pravi grad na otoku
+- Lint: 0 errorjev, 0 opozoril
+- 0 runtime errorjev
+
+Preverjene destinacije (vse prave):
+✅ bled, bohinj, ljubljana, postojna, piran, soca, triglav, kobarid, maribor,
+✅ portoroz, vintgar, rogaska, ptuj, celje, nova-gorica, slovenj-gradec,
+✅ dravograd, lendava, novo-mesto, otocec (popravljeno), crnomelj, murska-sobota (popravljeno)
+
+Stage Summary:
+- ✅ Otočec slika popravljena (prej Bled, zdaj pravi grad na otoku)
+- ✅ Murska Sobota slika popravljena (prej pokvarjena, zdaj "DOŽIVI POMURJE")
+- ✅ Vseh 22 slik sistematično preverjenih z VLM
+- ✅ 20/22 potrjeno prave, 2 popravljena
+- ✅ Bled slika prikazuje grad (še vedno relevantno za Bled)
+- ✅ Agent Browser verify: Otočec modal + kartica pravilna
+- ✅ 0 runtime errorjev, lint čist
+- Pomembna lekcija: vedno preveriti slike z VLM pred uporabo, ne zaupati caption-u samemu

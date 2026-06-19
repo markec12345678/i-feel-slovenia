@@ -2069,3 +2069,57 @@ Stage Summary:
   - 16 blog člankov
   - 8 zbirk za navigacijo
   - AI priporočila za upsell/cross-sell
+
+---
+Task ID: 31
+Agent: main (Z.ai Code)
+Task: Celovito testiranje celotne platforme (12 testov)
+
+Work Log:
+- Test 1: Homepage — vseh 12 sekcij prisotnih (vrh, destinacije, načrtuj, zemljevid, lokali, trznica, izkušnje, dogodki, blog, rezerviraj, pridruzi-se, partnerji) + navigation (6 linkov) + beta banner + theme toggle ✅
+- Test 2: Destinacije — 22 destinacij prikazanih, 5 naprednih filtrov (regija, interes, tip, cena, ocena), destination modal z "Lokali v bližini" + affiliate CTA ✅
+- Test 3: AI Itinerer — generiral 3-dnevni itinerer, booking panel prisoten ("Rezerviraj ta dan"), 4 tabi (Nastanitev, Aktivnosti, Hrana, Transport) ✅
+- Test 4: Zemljevid — 28 destinacijskih markerjev, "Pokaži POI" gumb, "Vse destinacije" gumb prisotna ✅
+- Test 5: Tržnica — 28 izdelkov + 28 izkušenj, Tabs (Izdelki/Izkušnje), product modal z "Morda vam je všeč" AI priporočili + "Obišči prodajalca" CTA ✅
+- Test 6: Zbirke — vseh 8 zbirk prisotnih (Zimski, Poletni, Romantični, Družinsko, Kulinar, Adrenalin, Eko, Luxury) ✅
+- Test 7: Owner dashboard — prijava (beta-test2@demo.si), 5 tabov (Moji lokalci, Izdelki, Izkušnje, Naročnina, Statistika) ✅
+- Test 8: Admin dashboard — prijava (ifeelslovenia2025), 4 tabi (Lokali, Leadi, Naročnine, Statistika), MRR + Aktivne naročnine v Naročnine tab ✅
+- Test 9: i18n — 4 jeziki delujejo: / → "Odkrijte Slovenijo", /en → "Discover Slovenia", /de → "Entdecken Sie Slowenien", /it → "Scopri la Slovenia" ✅
+- Test 10: JoinUs lead form — API POST /api/leads → SUCCESS (lead_1781891220103_9zmfqnn), email avtomatizacija sprožena ✅
+- Test 11: SEO — sitemap.xml (31 URLs), robots.txt (disallow admin/owner/api), manifest.json (4 ikone, 4 shortcuts), sw.js (200), icon-192.png (200), icon-512.png (200), JSON-LD (WebSite + Organization) ✅
+- Test 12: API endpoints — 14 endpointov testiranih:
+  - /api/destinations ✅ 200
+  - /api/destinations/bled ✅ 200
+  - /api/weather ⚠️ 502 (Open-Meteo daily limit exceeded — zunanja težava)
+  - /api/beta-status ✅ 200
+  - /api/listings ✅ 200
+  - /api/listings/hotel-vila-bled ✅ 200
+  - /api/products ✅ 200
+  - /api/products/pucno-olje-prekmurje-500ml ✅ 200
+  - /api/experiences ✅ 200
+  - /api/experiences/rafting-na-soci ✅ 200
+  - /api/pois?category=museum ✅ 200
+  - /api/collections/zimski-paketi ✅ 200
+  - /api/owner/session ✅ 200
+  - /api/admin/leads ✅ 401 (pravilno — zahteva admin geslo)
+
+Test Results Summary:
+- ✅ 11/12 testov popolnoma uspešnih
+- ⚠️ 1 test delno: Weather API (zunanja Open-Meteo rate limit — ne naša koda)
+- ✅ 0 kritičnih runtime errorjev
+- ✅ 0 lint errorjev
+- ✅ Vse ključne funkcionalnosti delujejo end-to-end
+
+Platforma je PRODUKCIJSKO PRIPRAVLJENA:
+- Homepage z 12 sekcijami + beta banner
+- 22 destinacij z 5 filtri + modal z lokalci v bližini
+- AI itinerer z booking panel (4 tabi)
+- Zemljevid z 28 markerji + POI layer
+- Tržnica z 28 izdelki + 28 izkušnjami + AI priporočili
+- 8 zbirk za navigacijo
+- Owner dashboard (5 tabov) + Admin dashboard (4 tabi z MRR)
+- 4 jeziki (sl/en/de/it)
+- SEO (sitemap, robots, manifest, JSON-LD)
+- PWA (service worker, icons)
+- Email avtomatizacija (lead → email)
+- Pavšalni oglasni model (beta: brezplačno do 30 lokalov)

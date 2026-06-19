@@ -1320,3 +1320,56 @@ Stage Summary:
   3. Uporabnik rezervira izkušnjo
   4. Booking v bazi z status="confirmed"
   5. Admin/owner lahko vidi vse transakcije
+
+---
+Task ID: 22-23
+Agent: main (Z.ai Code)
+Task: Popravek monetizacijskega modela — odstranitev cart/checkout, preusmeritev na ponudnike
+
+Work Log:
+- UPORABNIK OPOZORIL: ne smemo pobirati plačil (PIS licenca, GDPR, chargeback tveganje)
+- Pravi model: uporabnik raziskuje pri nas → klik preusmeri na ponudnika → ponudnik plača nas za usmerjanje
+- Odstranjeno:
+  - src/lib/cart-store.ts (Zustand cart store)
+  - src/components/cart-drawer.tsx (Sheet košarica)
+  - src/components/checkout-modal.tsx (2-koračni checkout)
+  - src/app/api/checkout/route.ts (Stripe checkout API)
+  - src/app/api/orders/ (order lookup)
+  - src/components/booking-modal.tsx (rezervacijski modal)
+  - src/app/api/bookings/ (booking API)
+- Posodobljen layout.tsx — odstranjen <CartDrawer />
+- Posodobljen navigation.tsx — odstranjen cart icon + badge + useCart import
+- Posodobljen marketplace.tsx:
+  - ProductCard: "V košaro" → "Pri prodajalcu" (window.open sellerWebsite)
+  - ExperienceCard: "Rezerviraj" → "Pri ponudniku" (window.open providerWebsite)
+  - Odstranjen BookingModal import + handleBookExperience + bookingExperience state
+  - Odstranjen onBook prop iz ExperienceCard
+- Posodobljen product-modal.tsx:
+  - "Dodaj v košaro" → "Obišči prodajalca" (link na sellerWebsite)
+  - Fallback: "Povpraševanje pri prodajalcu" (mailto: sellerEmail) če ni website
+  - Fallback: "Brez kontakt prodajalca" če ni ne website ne email
+  - Odstranjen useCart + addItem
+- Posodobljen experience-modal.tsx:
+  - "Rezerviraj" → "Rezerviraj pri ponudniku" (link na providerWebsite)
+  - Odstranjen onBook prop
+- Agent Browser verification:
+  1. Cart icon ODSRANJEN iz navigation (0 ShoppingBag refs)
+  2. ProductCard: "Pri prodajalcu" gumb (prej "V košaro")
+  3. ExperienceCard: "Pri ponudniku" gumb (prej "Rezerviraj")
+  4. ProductModal: CTA prisoten (Obišči/Povpraševanje)
+  5. 0 runtime errorjev
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ Cart sistem popolnoma odstranjen
+- ✅ Checkout/Order API odstranjena
+- ✅ Booking modal + API odstranjena
+- ✅ Vsi CTA gumbi preusmerjajo na ponudnike (ne pobiramo plačil)
+- ✅ Fallback: mailto: če prodajalec nima spleta
+- ✅ 0 runtime errorjev, lint čist
+- NOVI monetizacijski model (čist, brez tveganja):
+  1. Mesečna naročnina za listings (premium €149 / enterprise €499)
+  2. Sponsored AI priporočila (premium/enterprise = sponsored)
+  3. Click tracking za PPC poročanje (TODO)
+  4. Affiliate provizije (Booking, DiscoverCars, Viator — to je že redirect model)
+- Platforma je zdaj ČIST "traffic referral" sistem — ni tveganja, ni licence, ni davkov na transakcije

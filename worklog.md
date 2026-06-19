@@ -437,3 +437,77 @@ Stage Summary:
 - ✅ 0 runtime errorjev, lint čist
 - Platforma je zdaj popoln showroom + začetek monetizacije (lead capture)
 - Naslednja faza (A): listings sistem za lokale — ko bo dovolj leadov
+
+---
+Task ID: 8-c
+Agent: full-stack-developer
+Task: ListingsSection + ListingModal + integracija v DestinationModal
+
+Work Log:
+- Prebral `worklog.md` (celoten kontekst "I Feel Slovenia" platforme) in `destination-modal.tsx` (obstoječa struktura modal-a)
+- Preveril API: `GET /api/listings?category=&destinationId=&plan=&featured=&limit=&sort=` vrača `{listings, total}` s parsanimi JSON polji (images, specialties). Test curl: `?destinationId=bled` vrne 3 lokale (Vila Bled, Penzion Berc, Bled Taxi) ✓
+- Preveril Prisma `Listing` model in seed-listings.ts (10 lokalov: hoteli, restavracije, aktivnosti, bar, transport; mix free/premium/enterprise)
+- Ustvaril `src/lib/listings-types.ts` — `Listing` interface, `ListingCategory`/`ListingPlan` union tipi, `CATEGORY_LABELS` (slovenski), `CATEGORY_ICONS` (emoji), `PLAN_LABELS` (slovenski)
+- Ustvaril `src/components/sections/listing-modal.tsx` ("use client") — Dialog z: galerijo slik (glavna + thumbnail strip z izbiro), badge kategorije + plan + verified, rating/priceRange/featured, kratek opis + longDescription (v ločeni kartici), grid 2x2 info (Kategorija/Lokacija/Naslov/Odpiralni čas), specialties badge lista, kontakt gumbi (phone/email/website), statistika (viewCount + clickCount), glavni CTA "Obišči spletno stran", povezava na #destinacije (zapre modal + scrolla)
+- Ustvaril `src/components/sections/listings.tsx` ("use client", `id="lokali"`) — Header "Lokali v Sloveniji" + podnaslov, 3 filtri (kategorija Vse+7, destinacija Vse+12, sort Izpostavljeni/Najvišja ocena/Najnovejši), fetch z useEffect+useCallback (odvisno od filtrov), loading 6x Skeleton kartic, grid `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`, kartica z razliko po plan-u (free=siva, premium=`border-primary`+amber "★ Premium", enterprise=`border-2 border-primary shadow-lg scale-[1.02]`+primary badge), vsebina: slika aspect-video + category badge top-left + plan badge top-right + verified badge bottom-left, ime+opis line-clamp-2, rating+reviewCount, lokacija MapPin, cena+openingHours Clock, specialties chipi (prve 3), CTA "Podrobnosti" + "Spletna stran" (external). Empty state, error state, štever "X lokalov", footer note z linkom #pridruzi-se
+- Posodobil `src/components/sections/destination-modal.tsx` — dodal useEffect ki fetch-a `/api/listings?destinationId=${destination.id}&limit=4&sort=featured` ko se destinacija spremeni (cancelled flag preprečuje race condition). Vstavil "Lokali v bližini" sekcijo PRED affiliate CTA: SectionTitle z Building2 ikono, 2x2 grid mini-kartic (NearbyListingCard: aspect-square slika, plan badge top-right, category badge secondary, ime line-clamp-1, rating z zvezdico), Loading 4x NearbySkeleton, Empty state "Ni registriranih lokalov v bližini. Postanite prvi!" z linkom #pridruzi-se, link na dnu "Vsi lokalci v regiji →" (#lokali, onClick zapre modal). ListingModal integriran znotraj DestinationModal-a (click na mini-kartico odpre ListingModal) — obe modala sta neodvisni (ListingModal je renderiran OUTSIDE DialogContent-a DestinationModal-a ampak znotraj Dialog-a, kar omogoča dvojno odpiranje)
+- Lint: `bun run lint` → 0 errors, exit 0 ✓
+- API test: `?destinationId=bled` vrača 3 lokale, `?limit=4` vrača 4 ✓
+- Dev server: compilation successful, no runtime errors, Prisma queries izvedene pravilno
+
+Stage Summary:
+- Ustvarjene datoteke:
+  - `src/lib/listings-types.ts` (~55 vrstic) — tipi + slovenske oznake
+  - `src/components/sections/listing-modal.tsx` (~290 vrstic) — podrobnosti lokala z galerijo
+  - `src/components/sections/listings.tsx` (~360 vrstic) — javni imenik s filtri
+- Posodobljene datoteke:
+  - `src/components/sections/destination-modal.tsx` — dodana "Lokali v bližini" sekcija (PRED affiliate CTA), NearbyListingCard + NearbySkeleton komponenti, useEffect fetch, ListingModal integracija
+- Tehnologije: shadcn/ui (Card, Badge, Button, Dialog, Select, Skeleton), lucide-react (Star, MapPin, Clock, Phone, Mail, Globe, ExternalLink, CheckCircle2, Eye, MousePointerClick, Building2, Filter, X, ArrowRight, Store, Sparkles, Tag, Compass)
+- Barvna paleta: NO indigo/blue — primary (zelena), accent (terakota), muted, amber za premium badge
+- Slovenski UI (oznake kategorij, paketov, akcij)
+- Mobile-first responsive (grid 1/2/3, mini-card 2x2)
+- TypeScript strict, 0 ESLint napak
+- NISO dodane v `src/app/page.tsx` — to bo naredil glavni agent (integra v obstoječi layout)
+
+---
+Task ID: 9
+Agent: main (Z.ai Code)
+Task: Faza A — Listings sistem za lokale (B2B monetizacija) — integracija + verify
+
+Work Log:
+- Prisma schema: dodan Listing model (id, name, slug, description, category, destinationId, plan, featured, verified, rating, images JSON, specialties JSON, viewCount, clickCount, etc.)
+- db:push uspešno sinhroniziral shemo
+- Seed script (prisma/seed-listings.ts): 10 slovenskih lokalov:
+  - Hoteli: Hotel Vila Bled (enterprise), Hotel Park Ljubljana (premium), Piran Boutique Hotel (premium)
+  - Restavracije: Restavracija JB (enterprise, Michelin), Penzion Berc (premium), Restavracija Trta (free)
+  - Aktivnosti: Soča Rafting Bovec (premium), Vogel Cable Car (free)
+  - Bar: Čolnarna Ljubljana (free)
+  - Transport: Bled Taxi & Tours (premium)
+- API routes:
+  - GET /api/listings (filtri: category, destinationId, plan, featured, limit, sort)
+  - GET /api/listings/[slug] (posamezni lokal + view count increment)
+- Subagent (8-c) ustvaril:
+  - src/lib/listings-types.ts (tipi + CATEGORY_LABELS + CATEGORY_ICONS + PLAN_LABELS)
+  - src/components/sections/listings.tsx (javni imenik z 3 filtri, plan-aware kartice)
+  - src/components/sections/listing-modal.tsx (detail modal z galerijo, kontakt, statistika)
+  - Posodobil destination-modal.tsx z "Lokali v bližini" sekcijo (fetch by destinationId)
+- page.tsx: dodan <ListingsSection /> med MapSection in Experiences
+- navigation.tsx: posodobljeni linki (Destinacije, AI načrtovalec, Zemljevid, Lokali, Dogodki, Pridruži se)
+- Lint: 0 errorjev, 0 opozoril
+- Agent Browser self-verification:
+  1. ListingsSection (#lokali): VLM potrdil 10 lokalov, 3 filtri, premium (amber badge) in enterprise (zelena badge) vizualno izstopajo, "Overjeno" verified badge, števec "10 lokalov"
+  2. Destination modal integracija: "Lokali v bližini" sekcija znotraj Bled modala prikazuje 3 lokalce (Hotel Vila Bled enterprise, Penzion Berc premium, Bled Taxi & Tours premium)
+  3. Listing detail modal: klik na Hotel Vila Bled → poln modal z veliko sliko, opisom, oceno 4.9 (847 mnenj), €€€, Enterprise badge, kontakt
+  4. Mobile (390x844): 1 kolona, pravilno prikazano
+  5. 0 runtime errorjev
+
+Stage Summary:
+- ✅ Listings sistem popolnoma funkcionalen (Prisma + API + UI)
+- ✅ 10 seedanih lokalov (mix free/premium/enterprise)
+- ✅ Javni imenik z naprednimi filtri in plan-aware vizualno
+- ✅ Integracija v DestinationModal ("Lokali v bližini")
+- ✅ Detail modal za posamezni lokal
+- ✅ Mobile responsive
+- ✅ 0 runtime errorjev, lint čist
+- B2B monetizacijska infrastruktura pripravljena — lokalci se prikazujejo, premium/enterprise vizualno izstopajo
+- Naslednji koraki: admin za upravljanje lokalov (ko pridejo prve plačujoče stranke)

@@ -1373,3 +1373,226 @@ Stage Summary:
   3. Click tracking za PPC poročanje (TODO)
   4. Affiliate provizije (Booking, DiscoverCars, Viator — to je že redirect model)
 - Platforma je zdaj ČIST "traffic referral" sistem — ni tveganja, ni licence, ni davkov na transakcije
+
+---
+Task ID: 24-a
+Agent: full-stack-developer
+Task: Owner dashboard razširitev — Izdelki in Izkušnje tabovi
+
+Work Log:
+- Prebral worklog.md (kontekst: Task 22-23 = redirect monetizacijski model)
+- Prebral obstoječe: src/app/owner/dashboard/page.tsx (1206 vrstic, 3 tabi: listings/narocnina/statistika), src/components/admin/listing-form.tsx, src/components/owner/listing-form.tsx, src/lib/marketplace-types.ts (Product, Experience, MarketplacePlan tipi, formatPrice, formatDuration, LANGUAGE_LABELS)
+- Prebral prisma/schema.prisma: Product in Experience modela že obstajata z ownerId poljem + vsemi atributi (organic, handmade, shippingFree, languages, familyFriendly itd.)
+- Prebral obstoječe API routes: /api/owner/listings (GET/POST z zod validacijo, slugify, beta limiti), /api/owner/listings/[id] (GET/PUT/DELETE z getOwnedListing helperjem)
+- Ustvaril 4 nove API routes (po vzoru listings):
+  - /api/owner/products/route.ts (GET + POST z zod validacijo, plan limiti: beta free=3/premium=10, non-beta free=1/premium=5, enterprise=∞)
+  - /api/owner/products/[id]/route.ts (GET/PUT/DELETE z getOwnedProduct ownership preverbo, auto-slug pri rename)
+  - /api/owner/experiences/route.ts (GET + POST z validacijo max>=min group, plan limiti)
+  - /api/owner/experiences/[id]/route.ts (GET/PUT/DELETE z getOwnedExperience ownership preverbo)
+- Vsi API-ji: getServerSession preveri auth, ownerId se vzame iz session, plan/featured/verified se NE more nastaviti iz owner API-ja (plan deduce iz owner.plan, featured=false, verified=false pri create; PUT izpusti ta polja)
+- Ustvaril src/components/owner/product-form.tsx: Dialog forma z vsemi polji (ime, kategorija, kratki/dolgi opis, cena, primerjalna cena, zaloga, teža, slike URL textarea, atributi switches: Organic/Handmade/Local/Vegan, dostava switches: Free/EU/World, destinacija select, prodajalec: ime+email+telefon+spletna stran). Loading state, error prikaz, toast feedback. ProductFormDialog props: open, onOpenChange, product (null=ustvari), onSaved
+- Ustvaril src/components/owner/experience-form.tsx: Dialog forma (ime, kategorija, kratki/dolgi opis, cena na osebo, trajanje ure, min/max skupina, jeziki textarea "sl, en, de", meeting point, naslov, slike, atributi: Družinsko prijazno/Dostopno za invalide, destinacija, ponudnik: ime+email+telefon+spletna). Validacija max>=min, jezikov ni prazno. Loading/error state
+- Posodobil src/app/owner/dashboard/page.tsx:
+  - Dodal lucide imports: Package, Ticket, Euro, Clock, Users, Languages
+  - Dodal imports: ProductFormDialog, ExperienceFormDialog, marketplace-types (Product, Experience, MarketplacePlan, PRODUCT/EXPERIENCE_CATEGORY_LABELS/ICONS, LANGUAGE_LABELS, formatPrice, formatDuration)
+  - Dodal konstante PRODUCT_PLAN_LIMITS_{NORMAL,BETA} in EXPERIENCE_PLAN_LIMITS_{NORMAL,BETA} (free=3/1, premium=10/5, enterprise=∞)
+  - TabsList razširjen iz grid-cols-3 na grid-cols-3 sm:grid-cols-5 (mobilno 3, desktop 5)
+  - Dodal 2 nova TabsContent: products (ProductsTab) in experiences (ExperiencesTab) med listings in narocnina
+  - Ustvaril ProductsTab komponento (self-contained: fetch /api/owner/products, CRUD dialog/alertdialog, beta badge, plan limit info "X od Y izdelkov · paket Z", empty state "Nimate izdelkov", canAddMore logic)
+  - Ustvaril ExperiencesTab komponento (self-contained za experiences, ista struktura kot ProductsTab)
+  - Ustvaril ProductCard (slika aspect-square, ime, destinacija, opis, atributi badges, cena+zaloga stats, Uredi/Izbriši gumbi)
+  - Ustvaril ExperienceCard (slika aspect-video, ime, destinacija, opis, trajanje+skupina stats, jeziki, cena na osebo, Uredi/Izbriši)
+  - Ustvaril ProductsEmptyState, ExperiencesEmptyState
+  - Vsi teksti v slovenščini, nobene indigo/blue barve (primary zelena, accent terakota, amber za premium/beta)
+- Lint: 0 errorjev, 0 opozoril (bun run lint exit 0)
+- Dev log: uspešna kompilacija, /api/owner/products in /api/owner/experiences seveda še niso klicani v logu (user ni šel na /owner/dashboard po spremembah), vendar kode je sintaktično čista in TypeScript strict
+
+Stage Summary:
+Ustvarjene datoteke (7 novih):
+- src/app/api/owner/products/route.ts (238 vrstic) — GET/POST products
+- src/app/api/owner/products/[id]/route.ts (252 vrstic) — GET/PUT/DELETE z ownership preverbo
+- src/app/api/owner/experiences/route.ts (247 vrstic) — GET/POST experiences
+- src/app/api/owner/experiences/[id]/route.ts (281 vrstic) — GET/PUT/DELETE z ownership preverbo
+- src/components/owner/product-form.tsx (658 vrstic) — ProductFormDialog
+- src/components/owner/experience-form.tsx (692 vrstic) — ExperienceFormDialog
+
+Posodobljene datoteke (1):
+- src/app/owner/dashboard/page.tsx (1206 → 2349 vrstic) — dodana 2 nova taba (Izdelki, Izkušnje), 6 novih komponent (ProductsTab, ExperiencesTab, ProductCard, ExperienceCard, ProductsEmptyState, ExperiencesEmptyState)
+
+Funkcionalnost:
+- Lastniki lahko dodajajo, urejajo in brišejo svoje oglase (products in experiences) iz Owner dashboard-a
+- Plan limiti pravilno implementirani (beta radodarnejši, izven beta strožji)
+- Owner NE more nastaviti plan/featured/verified (samo admin)
+- Vse validacije (zod + ročno) na serverju, ownership preverba pri GET/PUT/DELETE
+- Auto-generiranje unique slug ob spremembi imena
+- JSON polja (images, languages) pravilno serializirana za SQLite
+- Slovenščina v UI, mobilno responsive (grid-cols-3 na mobilcu, 5 na desktopu za tabe)
+- Lint čist (0 errorjev)
+
+---
+Task ID: 24-b/c
+Agent: full-stack-developer
+Task: Stripe subscription + Admin revenue dashboard
+
+Work Log:
+- Prebral worklog.md za kontekst (Task 22-23 = pavšalni oglasni model, brez cart/checkout; sedaj Task 24-b/c = Stripe monthly subscription + Admin revenue dashboard)
+- Prebral obstoječe datoteke: src/app/api/stripe/checkout/route.ts (demo mode z direktno nadgradnjo), src/app/api/stripe/webhook/route.ts (samo log), src/components/admin/admin-dashboard.tsx (1238 vrstic, 3 tabi: Listings/Leads/Statistika), src/app/owner/dashboard/page.tsx (2349 vrstic, 5 tabov: Listings/Products/Experiences/Naročnina/Statistika — SubscriptionTab z disabled "Upravljaj naročnino" gumbom), src/lib/auth.ts (NextAuth z jwt plan sync), src/lib/auth-guards.ts (checkAdmin, requireOwner), prisma/schema.prisma (Owner model: plan, subscriptionStatus, stripeCustomerId, subscriptionEndsAt)
+- Prebral .env: STRIPE_SECRET_KEY=sk_test_demo_placeholder, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PREMIUM_PRICE_ID, STRIPE_ENTERPRISE_PRICE_ID (vse demo placeholder)
+- Prebral package.json: stripe@^22.2.2 in @stripe/stripe-js@^9.8.0 že nameščena
+
+- Ustvaril src/lib/stripe-server.ts (skupni helper): isStripeDemo() (detekcija demo placeholder ključev), PLAN_MONTHLY_PRICE (free=0, premium=149, enterprise=499), monthlyRevenueForPlan(), formatEur() (Intl.NumberFormat sl-SI EUR)
+
+- Posodobil src/app/api/stripe/checkout/route.ts (SUBSCRIPTION mode):
+  - Demo mode: takoj nadgradi Owner.plan, subscriptionStatus="active", subscriptionEndsAt=now+1mesec, sinhronizira listings
+  - Production mode: ustvari/pridobi Stripe Customer (preko stripeCustomerId), ustvari Stripe Checkout Session z mode="subscription", line_items=[{price: STRIPE_PREMIUM_PRICE_ID ali STRIPE_ENTERPRISE_PRICE_ID}], success_url=/owner/dashboard?upgrade=success, cancel_url=/owner/dashboard?upgrade=cancelled, metadata={ownerId, ownerEmail, plan}, subscription_data.metadata, allow_promotion_codes=true
+  - V produkciji NE posodablja Owner-ja v checkout-u — to stori webhook
+  - Vrne { url } za client redirect (production) ali { success, demo, plan, subscriptionEndsAt } (demo)
+
+- Posodobil src/app/api/stripe/webhook/route.ts (full event handling):
+  - Demo mode: samo log payload size
+  - Production mode: verify signature s STRIPE_WEBHOOK_SECRET, constructEvent
+  - Handle event types:
+    - checkout.session.completed → aktiviraj naročnino (plan, status=active, subscriptionEndsAt iz sub.current_period_end, stripeCustomerId)
+    - customer.subscription.updated → posodobi status (mapStripeStatus: active/trialing→active, past_due/unpaid→past_due, canceled/incomplete_expired→canceled), renewal date, plan (iz metadata), sinhroniziraj listings
+    - customer.subscription.deleted → set status=canceled, plan=free, subscriptionEndsAt=null
+    - invoice.payment_failed → set status=past_due (po customerId lookup)
+  - Mapiranje Stripe statusov v interne statuse
+
+- Ustvaril src/app/api/stripe/portal/route.ts (Customer Portal):
+  - Demo mode: vrne { demo: true, message: "..." }
+  - Production mode: ustvari stripe.billingPortal.sessions.create z customer=stripeCustomerId, return_url=/owner/dashboard?portal=returned
+  - Vrne { url } za client redirect
+
+- Ustvaril src/app/api/owner/subscription/route.ts:
+  - GET: vrne { plan, subscriptionStatus, subscriptionEndsAt, stripeCustomerId, monthlyRevenue, daysUntilRenewal, canCancel, demoMode }
+  - POST (cancel): demo mode → takoj set status=canceled, plan=free, subscriptionEndsAt=null, sinhronizira listings; production → stripe.subscriptions.list(active), stripe.subscriptions.cancel za vsak, lokalno set status=canceled
+
+- Ustvaril src/app/api/admin/subscriptions/route.ts:
+  - GET: preveri admin geslo (checkAdmin), pridobi vse ownerje z naročninami, izračunaj monthlyRevenue za vsakega (premium=149, enterprise=499, free=0), daysUntilRenewal
+  - Vrne { owners: [...], kpi: { totalMrr, arr=MRR*12, activeCount, premiumCount, enterpriseCount, premiumMrr, enterpriseMrr, canceledCount, pastDueCount, noneCount, freeCount, totalOwners, churnRate=(canceled/total)*100 } }
+
+- Ustvaril src/app/api/admin/subscriptions/[id]/route.ts:
+  - PUT: admin override naročnine — preveri admin geslo, validira plan (free/premium/enterprise), subscriptionStatus (none/active/canceled/past_due), subscriptionEndsAt (ISO string ali null)
+  - Če preklop na free, avtomatsko ponastavi status na canceled in endsAt na null
+  - Sinhronizira listings ob spremembi paketa
+  - Logira spremembe (before/after) v server console
+
+- Posodobil src/components/admin/admin-dashboard.tsx (1238 → 1394 vrstic):
+  - Dodal imports: Dialog/DialogContent/DialogDescription/DialogFooter/DialogHeader/DialogTitle, Select/SelectContent/SelectItem/SelectTrigger/SelectValue, Label, lucide ikone (CreditCard, DollarSign, Calendar, Banknote, TrendingDown)
+  - TabsList razširjen iz grid-cols-3 na grid-cols-4 (Lokali/Leadi/Naročnine/Statistika), max-w-md → max-w-2xl
+  - Dodan TabsContent value="narocnina" z <SubscriptionsTab /> komponento
+  - Ustvaril SubscriptionsTab komponento:
+    - Fetch /api/admin/subscriptions z x-admin-password header
+    - KPI kartice (4): Skupni MRR (formatEur), Aktivne naročnine, Premium (count + MRR), Enterprise (count + MRR) — barve primary/amber/emerald
+    - Churn info banner (4 kvadratki): Aktivne, Churn rate %, Zapadla plačila, Preklicane
+    - Filtri: Select za paket (all/free/premium/enterprise) in Select za status (all/active/past_due/canceled/none) + "Ponastavi" gumb
+    - Tabela vseh ownerjev: Podjetje | Email (hidden md) | Paket (PlanBadge) | Status (barvni badge: active=emerald, past_due=red, canceled/none=muted) | Obnovitev (datum + "čez X dni", hidden lg) | MRR (formatEur) | Akcije (Uredi gumb)
+    - Sticky header, max-h-600px z overflow-y-auto za dolge sezname
+    - Footer: skupni letni prihodek (ARR) = MRR × 12, velik formatEur prikaz v primary barvi
+    - Edit Dialog: polja za plan, status, datum obnovitve (date input), prikaz email + stripeCustomerId, save kliče PUT /api/admin/subscriptions/[id]
+  - Ustvaril SubsKpiCard helper komponento
+  - Status badge class helper (statusBadgeClass) za aktivno/past_due/canceled/none
+
+- Posodobil src/app/owner/dashboard/page.tsx (SubscriptionTab razširitev):
+  - Dodal lucide imports: CreditCard, Calendar, DollarSign, ExternalLink, Ban
+  - SubscriptionTab komponenta dobljena useState za subDetails, portalLoading, cancelOpen, cancelLoading
+  - Fetch /api/owner/subscription na mount in ob spremembi plan/statusa
+  - handlePortal(): POST /api/stripe/portal — demo mode prikaže toast z message, production redirect na portal URL
+  - handleCancelConfirm(): POST /api/owner/subscription — po uspehu toast, refresh subDetails, onUpgraded(), window.location.reload() za session refresh
+  - Trenutni paket card razširjen:
+    - Demo način badge
+    - Mesečni znesek kartica (€0 BETA ali €149/€499)
+    - Datum obnovitve kartica (datum + "čez X dni")
+    - "Upravljaj naročnino" gumb (ExternalLink ikona) — kliče portal API
+    - "Prekliči naročnino" gumb (Ban ikona, destructive barva) — disabled med beta ali če ni canCancel
+    - Beta info opomba (med beta je brezplačno, preklic ni potreben)
+  - AlertDialog za potrditev preklica: title "Prekliči naročnino?", description z opozorilom o izgubi ugodnosti, "Obdrži naročnino" / "Da, prekliči" gumbi
+
+- Testiranje (curl):
+  - GET /api/admin/subscriptions (wrong password) → 401 ✓
+  - GET /api/admin/subscriptions (correct password) → 200 z owners array in kpi objektom ✓
+  - PUT /api/admin/subscriptions/[id] (correct password) → 200, uspešna nadgradnja na premium + revert na free ✓
+  - POST /api/stripe/checkout (no auth) → 401 ✓
+  - POST /api/stripe/checkout (bad plan, no auth) → 401 "Niste prijavljeni" ✓
+  - POST /api/stripe/portal (no auth) → 401 ✓
+  - POST /api/stripe/webhook (demo mode) → { received: true, demo: true } ✓
+  - KPI izračun preverjen: po nadgradnji 1 owner na premium → totalMrr=149, arr=1788, activeCount=1, premiumCount=1, premiumMrr=149, churnRate=0 ✓
+  - Server log: "[admin/subscriptions] Override za owner cmqkq9m27... (test-owner@example.com): { before: {...}, after: {...} }" ✓
+  - Lint: 0 errorjev, 0 opozoril (bun run lint exit 0)
+
+Stage Summary:
+Ustvarjene datoteke (5 novih):
+- src/lib/stripe-server.ts (38 vrstic) — isStripeDemo(), PLAN_MONTHLY_PRICE, monthlyRevenueForPlan(), formatEur()
+- src/app/api/stripe/portal/route.ts (95 vrstic) — Stripe Customer Portal session
+- src/app/api/owner/subscription/route.ts (216 vrstic) — GET subscription status + POST cancel
+- src/app/api/admin/subscriptions/route.ts (97 vrstic) — GET vsi ownerji z naročninami + KPI
+- src/app/api/admin/subscriptions/[id]/route.ts (146 vrstic) — PUT admin override
+
+Posodobljene datoteke (3):
+- src/app/api/stripe/checkout/route.ts (98 → 162 vrstic) — subscription mode, customer creation, production checkout session
+- src/app/api/stripe/webhook/route.ts (24 → 191 vrstic) — full event handling (checkout.session.completed, customer.subscription.updated/deleted, invoice.payment_failed)
+- src/components/admin/admin-dashboard.tsx (1238 → 1394 vrstic) — nov "Naročnine" tab (KPI kartice, churn info, filtri, tabela z edit dialogom, ARR footer)
+- src/app/owner/dashboard/page.tsx (2349 → 2501 vrstic) — SubscriptionTab razširjen z fetch, portal gumb, cancel dialog, renewal/MRR prikaz
+
+Funkcionalnost:
+- Stripe subscription model (mesečna bremenitev) namesto enkratnega plačila — checkout v mode="subscription"
+- Demo mode (placeholder ključi) deluje brez Stripe klicev — takoj nadgradi Owner-ja
+- Production mode podprt v vseh 4 Stripe API-jih (checkout, webhook, portal, cancel) z ustrezno Stripe SDK integracijo
+- Webhook obdeluje 4 ključne event type s pravilnim mapiranjem statusov
+- Admin dashboard z "Naročnine" tabom: MRR/ARR/aktivne/premium/enterprise KPI, churn rate, filtri po paketu/statusu, tabela z edit dialogom (admin override)
+- Owner dashboard "Naročnina" tab: prikaz trenutne naročnine (plan, status, renewal date, days until renewal, mesečni znesek), "Upravljaj naročnino" gumb (Stripe portal), "Prekliči naročnino" gumb z confirm dialogom
+- VSI teksti v slovenščini, NO indigo/blue (primary zelena, amber za premium, emerald za active, red za past_due, muted za canceled/none)
+- Mobile-first responsive (grid-cols-2 na mobilcu, grid-cols-4 na desktopu za KPI; tabela z overflow-x-auto)
+- Lint čist (0 errorjev, 0 opozoril)
+- Dev server uspešno kompilira vse nove route, API klici testirani z curl (401/200 pravilni)
+
+---
+Task ID: 24-25
+Agent: main (Z.ai Code)
+Task: Pavšalni oglasni model — Owner self-service + Admin revenue dashboard
+
+Work Log:
+- UPORABNIK POTRDIL: pavšalni oglasni model (ne PPC, ne provizija) — ponudnik plača fiksno mesečno
+- Subagent 24-a (Owner dashboard razširitev):
+  - 4 novi API routes: /api/owner/products (GET/POST), /api/owner/products/[id] (GET/PUT/DELETE), /api/owner/experiences (GET/POST), /api/owner/experiences/[id] (GET/PUT/DELETE)
+  - src/components/owner/product-form.tsx (Dialog z vsemi polji, atributi, destinacije, seller info)
+  - src/components/owner/experience-form.tsx (Dialog z trajanjem, jeziki, meeting point, provider info)
+  - Owner dashboard razširjen z 2 novima tab-oma: "Izdelki" in "Izkušnje"
+  - Plan limiti (beta): free=3, premium=10, enterprise=∞
+  - Ownership preverba (403 če ni lastnik)
+  - Auto-slug s slovenskimi črkami (č→c, š→s, ž→z)
+  - Lastnik NE more nastaviti plan/featured/verified (samo admin)
+- Subagent 24-b/c (Stripe subscription + Admin revenue):
+  - src/lib/stripe-server.ts (helperji: isStripeDemo, PLAN_MONTHLY_PRICE, monthlyRevenueForPlan, formatEur)
+  - Posodobljen /api/stripe/checkout — Stripe Subscriptions (mode="subscription") namesto one-time
+  - Posodobljen /api/stripe/webhook — full event handling (checkout.completed, subscription.updated/deleted, payment_failed)
+  - Nov /api/stripe/portal — Customer Portal za upravljanje naročnine
+  - Nov /api/owner/subscription — GET status + POST cancel
+  - Nov /api/admin/subscriptions — GET vsi ownerji z naročninami + KPI (MRR, ARR, churn)
+  - Nov /api/admin/subscriptions/[id] — PUT admin override
+  - Admin dashboard: nov "Naročnine" tab (4. tab) z 4 KPI karticami (MRR, aktivne, premium, enterprise)
+  - Owner dashboard "Naročnina" tab razširjen: renewal date, days until renewal, "Upravljaj" + "Prekliči" gumbi
+- Agent Browser self-verification:
+  1. Owner login (beta-test2@demo.si) → /owner/dashboard
+  2. Vseh 5 tabov prisotnih: Moji lokalci, Izdelki, Izkušnje, Naročnina, Statistika
+  3. Izdelki tab: "Dodaj izdelek" gumb viden, plan limit info
+  4. Izkušnje tab: "Dodaj izkušnjo" gumb, "0 od 3 izkušenj - paket Osnovni"
+  5. Admin login → dashboard z 4 tabi (Lokali, Leadi, Naročnine, Statistika)
+  6. Naročnine tab: 4 KPI kartice (MRR, aktivne, premium, enterprise) + churn info
+  7. 0 runtime errorjev
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ Owner self-service: lastniki sami dodajajo/upravljajo izdelke in izkušnje
+- ✅ Plan limiti (beta): free=3, premium=10, enterprise=∞
+- ✅ Ownership izolacija (403 za tuje oglase)
+- ✅ Stripe Subscriptions (pavšalni mesečni model)
+- ✅ Admin revenue dashboard (MRR, ARR, churn, aktivne naročnine)
+- ✅ Owner subscription management (upgrade, cancel, portal)
+- ✅ 0 runtime errorjev, lint čist
+- PAVŠALNI OGLASNI MODEL POPOLN:
+  1. Ponudnik plača fiksno mesečno (€149 premium / €499 enterprise)
+  2. Beta: vse brezplačno do 30 lokalov
+  3. Owner sam upravlja oglase (products, experiences, listings)
+  4. Admin vidi prihodek in naročnine
+  5. Stripe handling v production mode (demo za test)

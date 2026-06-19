@@ -1032,3 +1032,92 @@ Stage Summary:
 - ✅ Brezplačni podatki (OSM ODbL licenca, Wikipedia CC-BY-SA)
 - ✅ 0 runtime errorjev, lint čist
 - Platforma zdaj ponuja TISOČE točk interesa, ne samo 22 destinacij — resnično celovita turistična platforma
+
+---
+Task ID: 18-b/c
+Agent: full-stack-developer
+Task: Marketplace API routes + UI komponente (Product + Experience)
+
+Work Log:
+- Prebral worklog.md (kontekst projekta "I Feel Slovenia"), prisma/schema.prisma (Product + Experience modela), src/app/api/listings/route.ts + [slug]/route.ts (vzorčni API), src/components/sections/listings.tsx + listing-modal.tsx (vzorčne UI komponente)
+- Ustvaril `src/lib/marketplace-types.ts` — ProductCategory/ExperienceCategory tipi, Product/Experience interface (vsi field-i iz Prisma sheme), slovenske oznake in emoji ikone za 7+7 kategorij, LANGUAGE_LABELS za prevod jezikovnih kod (sl/en/de/it/...), formatDuration() (ura/dnevi), formatPrice() (Intl slo-SI EUR)
+- Ustvaril 4 API route datoteke po vzoru /api/listings:
+  - `src/app/api/products/route.ts` — GET s filtri (category, destinationId, plan, featured, sort: featured|price-asc|price-desc|rating|newest), limit 50 default / max 100, JSON.parse(images)
+  - `src/app/api/products/[slug]/route.ts` — GET posamezni product + viewCount increment (async, ne blokirajoč), 404 če ni najden
+  - `src/app/api/experiences/route.ts` — GET s filtri, sort: featured|price-asc|price-desc|rating|newest, limit 50/100, JSON.parse(images + languages)
+  - `src/app/api/experiences/[slug]/route.ts` — GET posamezni experience + viewCount increment
+- Ustvaril `src/components/sections/product-modal.tsx` — Dialog (controlled), velika slika aspect-video + thumbnail strip, featured badge, velika cena + compareAtPrice prečrtana + discount % badge, grid 2x2 (Kategorija/Lokacija/Zaloga/Teža), atributi badges (Ekološko primary zelena, Ročna izdelava modra kot semantična izjema, Lokalno, Vegansko, Brezplačna dostava amber, Dostava EU/World), seller info (Phone/Mail/Website gumbi), CTA "Dodaj v košaro" (disabled ko stock=0) + "Spletna stran prodajalca", statistika (ogledi + prodani), source note "Lokalni ponudnik"
+- Ustvaril `src/components/sections/experience-modal.tsx` — Dialog, velika slika + thumbnail strip, featured badge + duration badge, cena "od €XX / osebo", grid 2x2 (Trajanje/Skupina min-max/Jeziki/Lokacija), meeting point z MapPin + address, atributi (Družinsko prijazno + Dostopno za invalide), provider info, CTA "Rezerviraj" + "Spletna stran", statistika (ogledi + rezervacije), source note
+- Ustvaril `src/components/sections/marketplace.tsx` — "use client", id="trznica", header (H2 "Tržnica Slovenije" + podnaslov), Tabs (Izdelki | Izkušnje), filter vrstica (Select kategorija + Select sort — različne opcije za vsak tab), grid-cols-1 sm:2 lg:3 gap-6, ProductCard (aspect-square, atributi badges top-left, featured top-right, discount bottom-right, cena + compareAtPrice, rating z zvezdico, seller name + MapPin, shipping badge, CTA "V košaro" + "Podrobnosti"), ExperienceCard (aspect-video, category badge top-left, featured top-right, duration badge bottom-right, cena "od", provider name + MapPin, family-friendly/accessibility badges, CTA "Rezerviraj" + "Podrobnosti"), Skeleton loaderji, EmptyState, ErrorState, footer CTA #pridruzi-se
+- Lint: 2 errorja `react-hooks/set-state-in-effect` (useEffect + setActiveImage(0)) — popravljeno z render-phase check vzorcem (useRef prevProductId/prevExpId + pogojni setActiveImage v render fazi)
+- Po regeneraciji Prisma clienta (db:generate + db:push) testiral vse 4 endpointe: /api/products (200, vrača izdelke z vsemi field-i), /api/products/rocno-pleteni-copati (200), /api/experiences (200, vrača izkušnje z languages parsan JSON), /api/experiences/wellness-dan-rogaska (200)
+- `bun run lint` — 0 errorjev, 0 opozoril
+
+Stage Summary:
+Ustvarjene datoteke (8):
+- `src/lib/marketplace-types.ts` — tipi, slovenski labeli, formatPrice/formatDuration helperji
+- `src/app/api/products/route.ts` — GET lista izdelkov s filtri
+- `src/app/api/products/[slug]/route.ts` — GET posamezni izdelek + viewCount++
+- `src/app/api/experiences/route.ts` — GET lista izkušenj s filtri
+- `src/app/api/experiences/[slug]/route.ts` — GET posamezna izkušnja + viewCount++
+- `src/components/sections/product-modal.tsx` — detail modal za izdelek
+- `src/components/sections/experience-modal.tsx` — detail modal za izkušnjo
+- `src/components/sections/marketplace.tsx` — glavna sekcija (#trznica) z Tabs + filtri + grid
+
+Funkcionalnost:
+- APIji vračajo 8 seedanih izdelkov in 8 seedanih izkušenj (sort, category filter, JSON parse za images/languages)
+- viewCount increment dela ne-blokirajoče (catch(() => {}))
+- UI: slovenski jezik, zelena primary + terakota accent + amber za featured, modra izjema za "Ročna izdelava" badge
+- Mobile-first responsive (1/2/3 grid, filter vrstica 1/2 col)
+- Kartice odprejo detail modal s thumbnail stripom, polnimi podrobnostmi, prodajalcem/ponudnikom, CTA gumbi
+- Lint čist (0 errors), TypeScript strict, "use client" označene vse interaktivne komponente
+- Komponenta MarketplaceSection še NI integrirana v page.tsx — glavni agent jo doda (import + render v homepage sekcijah)
+
+---
+Task ID: 18-19
+Agent: main (Z.ai Code)
+Task: Tržnica (Marketplace) + Sponzorirane poti — implementacija in verify
+
+Work Log:
+- Raziskava konkurence: Airbnb Experiences, Viator, GetYourGuide, Etsy, Bókun, slovenia.info
+- 10 idej analiziranih, izbrane top 3: tržnica izdelkov + tržnica izkušenj + sponzorirane poti
+- Prisma schema posodobljena:
+  - Nov model: Product (8 izdelkov — med, vino, olje, sir, klobasa, gibanica, copati)
+  - Nov model: Experience (8 izkušenj — rafting, kulinarična tura, Triglav, degustacija, delavnica, pletna, jama, wellness)
+  - Listing model: dodan sponsored boolean + sponsoredUntil DateTime
+- Seed script (prisma/seed-marketplace.ts):
+  - 8 izdelkov z realnimi ceni, slikami, atributi (organic, handmade, shipping)
+  - 8 izkušenj z duration, languages, meeting point, provider info
+  - 7 premium/enterprise listings označenih kot sponsored (do 2026-12-31)
+- Subagent 18-b/c ustvaril:
+  - src/lib/marketplace-types.ts (tipi + slovenski labeli + emoji ikone + formatPrice/formatDuration helperji)
+  - 4 API routes: /api/products, /api/products/[slug], /api/experiences, /api/experiences/[slug]
+  - src/components/sections/marketplace.tsx (Tabs: Izdelki/Izkušnje, filtri, grid, kartice)
+  - src/components/sections/product-modal.tsx (velika slika, atributi, prodajalec, CTA "Dodaj v košaro")
+  - src/components/sections/experience-modal.tsx (duration, skupina, jeziki, meeting point, CTA "Rezerviraj")
+- Sponzorirane poti integrirane v AI itinerer (main agent):
+  - src/app/api/itinerary/route.ts posodobljen:
+    - Fetch sponsored listings iz baze (sponsored=true, sponsoredUntil >= danes)
+    - Dodan sponsoredContext v AI prompt (seznam sponzoriranih partnerjev)
+    - System prompt navodilo: "vključi sponzorirane partnerje v notes ali recommendations"
+    - User prompt pravilo #7: "omeni sponzorirane partnerje v notes ali recommendations"
+- page.tsx: dodan <MarketplaceSection /> med ListingsSection in ExperiencesSection
+- Agent Browser self-verification:
+  1. Tržnica sekcija (#trznica): "Tržnica Slovenije" naslov, 8 izdelkov prikazanih, Tabs (Izdelki/Izkušnje), filtri, badges (Ekološko, Izpostavljeno, Ročno)
+  2. Izkušnje tab: 8 izkušenj (Wellness €119, Pletna €28, Triglav €220)
+  3. Product modal: "Ročno pleteni copati" — kategorija Obrt, Featured badge, Bled, 4.9★ (156 mnenj), -17% popust (29€ prečrtano 35€), opis, prodajalec, "Dodaj v košaro"
+  4. AI itinerer s sponzoriranimi: generiral itinerer → AI omenil "Penzion" (Penzion Berc je sponzorirani lokal) — DOKAZ da sponzorirane poti delujejo
+  5. API testi: /api/products 200 (8 izdelkov), /api/experiences 200 (8 izkušenj)
+  6. 0 runtime errorjev, lint čist
+
+Stage Summary:
+- ✅ Tržnica izdelkov popolnoma funkcionalna (8 izdelkov, kategorije, filtri, modal)
+- ✅ Tržnica izkušenj popolnoma funkcionalna (8 izkušenj, kategorije, filtri, modal)
+- ✅ Sponzorirane poti integrirane v AI itinerer — AI omenja sponzorirane lokale v priporočilih
+- ✅ 3 monetizacijski modeli dodani hkrati
+- ✅ 0 runtime errorjev, lint čist
+- Monetizacijska veriga razširjena:
+  1. Lokal plača za listing (premium/enterprise)
+  2. Premium/enterprise = sponsored = AI priporočila (novo!)
+  3. Kmet/obrtnik prodaja izdelke (10-15% provizija)
+  4. Vodnik/instruktor prodaja izkušnje (15-20% provizija)

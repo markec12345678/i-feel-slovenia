@@ -2189,3 +2189,39 @@ Stage Summary:
 - ✅ Vse destinacije zdaj prikazujejo profesionalne slike brez watermarkov
 - ✅ 0 runtime errorjev, lint čist
 - PLATFORMA JE VIZUALNO PROFESIONALNA — brez watermarkov, primerna za production
+
+---
+Task ID: 35
+Agent: main (Z.ai Code)
+Task: Celovit VLM pregled vseh 22 slik — ali se ujemajo z destinacijo
+
+Work Log:
+- UPORABNIK OPOZORIL: slike se morajo ujemati z naslovom (ne "Bled" pa "Koper")
+- Sistematski VLM pregled vseh 22 slik destinacij
+- Za vsako sliko vprašal: "Ali ta slika prikazuje: [destinacija + tagline]?"
+- Rezultati: 19 DA, 3 NE:
+  - bohinj: NE — prikazuje "Zelenci" (naravni rezervat, ne Bohinj)
+  - maribor: NE — prikazuje "most čez Dravo" ampak nejasno
+  - slovenj-gradec: NE — prikazuje "cerkev" (ne mesto)
+- Za vsako od 3 iskal nove slike (3 kandidatke vsaka)
+- VLM preveril vseh 9 kandidatk:
+  - bohinj-2 (ac493803c4e0): "jezero Bohinj in Julijske Alpe" ✅
+  - maribor: nobena od prvih 2 ni bila prava, ponovno iskal
+  - sg-2 (b44193c1c8f2): "mesto Slovenj Gradec" ✅
+- Za Maribor ponovno iskal — vseh 3 novih kandidatk je pravi Maribor
+  - Izbran 76344bd842e2: "zgodovinski center z rdečimi strehami"
+- VLM končna potrditev:
+  - Maribor 76344bd842e2: "mesto Maribor v Sloveniji, staro mesto ob reki Dravi" ✅
+- Posodobljen slovenia-data.ts:
+  - bohinj: 8a5651a06e91 → ac493803c4e0 (jezero Bohinj z Alpami)
+  - maribor: c1a887b9c8c2 → 76344bd842e2 (staro mesto ob Dravi)
+  - slovenj-gradec: 6ecd34eb43c3 → b44193c1c8f2 (mesto Slovenj Gradec)
+- Agent Browser verification: vseh 3 destinacij ima nove slike (potrjeno preko DOM)
+- 0 runtime errorjev, lint čist
+
+Stage Summary:
+- ✅ Celovit VLM pregled vseh 22 slik destinacij zaključen
+- ✅ 3 napačne slike popravljene (Bohinj, Maribor, Slovenj Gradec)
+- ✅ Vse 22 slik se zdaj ujema z naslovom in opisom destinacije
+- ✅ 0 runtime errorjev, lint čist
+- PLATFORMA JE VIZUALNO KONZISTENTNA — vsaka slika ustreza destinaciji

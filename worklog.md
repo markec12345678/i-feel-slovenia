@@ -842,3 +842,62 @@ Stage Summary:
 - ✅ 0 runtime errorjev, lint čist
 - Cold start problem rešen: noben lokal ne plača dokler platforma nima kritične mase
 - Ko dosežemo 30 lokalov: monetizacija se samodejno vklopi, beta uporabniki obdržijo ugodnosti 6 mesecev
+
+---
+Task ID: 14
+Agent: main (Z.ai Code)
+Task: Razširitev ponudbe na vse slovenske regije (9 regij, 22 destinacij)
+
+Work Log:
+- Strateška odločitev: "I Feel Slovenia" mora pokrivati VSO Slovenijo, ne le turistično popularne dele
+- Preimenovane regije iz angleških v slovenske tradicionalne:
+  - alpine → gorenjska
+  - coastal → primorska
+  - central → osrednja
+  - karst → kras
+  - pannonian → stajerska
+- Dodane 4 nove regije: koroska, prekmurje, dolenjska, bela-krajina
+- Posodobljen Region tip v types.ts (9 regij)
+- Posodobljen REGIONS array v slovenia-data.ts (9 slovenskih regij z pravilnimi imeni)
+- Posodobljeni vsi obstoječi destinaciji z novimi regijami
+- Dodano 10 novih destinacij z realnimi slikami (image-search):
+  - Štajerska: Ptuj, Celje
+  - Primorska: Nova Gorica
+  - Koroška: Slovenj Gradec, Dravograd
+  - Prekmurje: Murska Sobota, Lendava
+  - Dolenjska: Novo mesto, Otočec
+  - Bela krajina: Črnomelj
+- Dodan nov DestinationType: "castle" (za Otočec)
+- Posodobljen TYPE_LABELS v destination-modal.tsx (castle: "Grad")
+- Posodobljen TYPE_ICONS v map-view.tsx (castle: "🏰")
+- Posodobljen TYPE_OPTIONS v destinations.tsx (dodan castle filter)
+- Dodani 4 novi tipi v events-data.ts:
+  - EventRegion union posodobljen (9 regij)
+  - Vsi event-i posodobljeni z novimi regijami
+  - Dodani 4 novi dogodki za nove regije:
+    - Smučarski dnevi Ribnica (koroska)
+    - Festival bučk Murska Sobota (prekmurje)
+    - Festival cvička Novo mesto (dolenjska)
+    - Bela krajina koline Črnomelj (bela-krajina)
+    - Musica Cubicularis Slovenj Gradec (koroska)
+    - Porabje Lendava (prekmurje)
+- Image search: 10 novih slik pridobljenih preko z-ai image-search CLI
+- Agent Browser self-verification:
+  1. Destinations števec: "22 od 22 destinacij"
+  2. Regijski filter: vseh 9 regij prisotnih (Gorenjska, Primorska, Osrednja, Kras, Štajerska, Koroška, Prekmurje, Dolenjska, Bela krajina)
+  3. Zemljevid: 22 markerjev razporejenih po VSEJ Sloveniji (ne le severozahod)
+  4. Events števec: 18 dogodkov (12 originalnih + 6 novih)
+  5. Events filter: vseh 9 regij
+  6. 0 runtime errorjev
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ 22 destinacij v 9 regijah (prej 12 v 5)
+- ✅ Vsa Slovenija pokrita — od Bleda do Črnomlja, od Pirana do Lendave
+- ✅ 18 dogodkov z zastopanostjo vseh regij
+- ✅ 22 markerjev na zemljevidu
+- ✅ Prave slike za vse nove destinacije
+- ✅ Slovenska tradicionalna imena regij
+- ✅ Nov tip "castle" (Otočec)
+- ✅ 0 runtime errorjev, lint čist
+- Platforma zdaj dejansko pokriva "I Feel Slovenia" — vse regije, od Alp do Panonije, od Jadrana do Madžarske meje

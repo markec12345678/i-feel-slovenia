@@ -2225,3 +2225,139 @@ Stage Summary:
 - ✅ Vse 22 slik se zdaj ujema z naslovom in opisom destinacije
 - ✅ 0 runtime errorjev, lint čist
 - PLATFORMA JE VIZUALNO KONZISTENTNA — vsaka slika ustreza destinaciji
+
+---
+Task ID: R-9
+Agent: full-stack-developer (Z.ai Code)
+Task: Preveri/ustvari 6 content sekcij — beta-banner, events-data, events-calendar, blog-data, blog, pitch-deck
+
+Work Log:
+- Prebral worklog.md (2227 vrstic) — vseh 6 zahtevanih datotek ŽE OBSTAJA iz predhodnih taskov (1–35)
+- Sistematski pregled vsake datoteke proti specifikaciji R-9:
+  1. `src/components/beta-banner.tsx` — "use client", fetch /api/beta-status, zelena pasica, dismissable, CTA → #pridruzi-se ✅
+  2. `src/lib/events-data.ts` — 30 dogodkov (12 zahtevanih + 18 dod.), EventItem interface, formatEventDate/getEventsByMonth/getEventsByCategory/getFeaturedEvents, slovenski meseci ✅
+  3. `src/components/sections/events-calendar.tsx` — "use client", id="dogodki", 3 filtri (mesec/kategorija/regija), mesečni prikaz, kartice z vsemi zahtevanimi metapodatki, empty state ✅
+  4. `src/lib/blog-data.ts` — 16 člankov (6 zahtevanih + 10 dod.), BlogPost interface, 5 kategorij, getPostsByCategory ✅
+  5. `src/components/sections/blog.tsx` — "use client", id="blog", filter tabs, grid 1/2/3, Dialog z ReactMarkdown, empty state ✅
+  6. `src/components/sections/pitch-deck.tsx` — id="partnerji", 4 benefiti, 4-koračni proces, 3 pričevanja, final CTA "Brezplačno med beta" ✅
+- Verifikacija integracije v `src/app/page.tsx`: BetaBanner + EventsCalendar + BlogSection + PitchDeckSection vsi prisotni ✅
+- `bun run lint` — 0 errorjev, 0 opozoril ✅
+- Dev server: `GET / 200 in 327ms` ✅
+- Delovni zapis shranjen v `/agent-ctx/R-9-full-stack-developer.md`
+
+Stage Summary:
+- ✅ Vseh 6 content sekcij prisotnih in skladnih s specifikacijo
+- ✅ Slovenski diakritični znaki (č, š, ž) pravilno uporabljeni povsod
+- ✅ NO indigo/blue barve — uporabljena naravna paleta (primary zelena, emerald, amber, rose, violet, accent terakota)
+- ✅ Mobile-first dizajn z responsivnimi gridi (1/2/3)
+- ✅ A11y: aria-labels, sr-only naslovi, keyboard navigation, role=button
+- ✅ Lint čist, 0 runtime errorjev
+
+---
+Task ID: R-10
+Agent: infrastructure-developer (Z.ai Code)
+Task: Infrastrukturne komponente — sitemap, robots, PWA manifest, service worker, POI API (Overpass + Wikipedia), email (nodemailer + 5 dvojezičnih templateov), booking panel + bookings API
+
+Work Log:
+- Prebral `worklog.md` — ugotovljeno: vseh 10 zahtevanih datotek je že obstajalo iz prejšnjih faz (Task 1, 7, 18). Naloga = verificirati specifikacijo in popraviti odstopanja.
+- Verificiral vseh 10 datotek vsako posebej:
+  1. `src/app/sitemap.ts` — 9 statičnih + 22 dinamičnih URL-jev, base https://ifeelslovenia.si ✅
+  2. `src/app/robots.ts` — allow /, disallow /admin /owner /api/, sitemap ref ✅
+  3. `public/manifest.json` — POPRAVEK: `name` skrajšan na "I Feel Slovenia" (prej s podnaslovom); 4. shortcut zamenjan: Destinacije → Pridruži se; URL-ji iz `?section=X` v `#hash` format (ustrezajo <section id>)
+  4. `public/sw.js` — cache-first za statične (image/style/script/font), network-first za navigacije z offline fallback ✅
+  5. `src/app/api/pois/route.ts` — Overpass API, BBOX 45.4,13.4,46.9,16.6, kategorije (attraction|museum|restaurant|hotel|viewpoint|natural|religious|all + bonus shop), User-Agent, cache: no-store ✅
+  6. `src/app/api/pois/[id]/route.ts` — Wikidata JSON → sitelinks → Wikipedia REST extract + thumbnail, User-Agent obvezen ✅
+  7. `src/lib/email.ts` — nodemailer createTransport, demo fallback (console.log) ko SMTP_HOST=localhost/undefined, sendEmail + emailTemplate helperja ✅
+  8. `src/lib/email-templates.ts` — 5 dvojezičnih (SL+EN) templateov: welcomeEmail, paymentConfirmationEmail, renewalReminderEmail, leadNotificationEmail, adminAlertEmail ✅
+  9. `src/components/sections/booking-panel.tsx` — "use client", 4 tabi (Nastanitev/Aktivnosti/Hrana/Transport), affiliate link + listings/experiences/products iz baze, props: dayPlan + bookingData ✅
+  10. `src/app/api/itinerary/bookings/route.ts` — POST { destinationIds } → { [destId]: { listings, experiences, products } } iz Prisma, limit 3/destinacijo ✅
+
+- Live testi (port 3000):
+  - GET /sitemap.xml → 200, 31 <url> (9 statičnih + 22 dinamičnih)
+  - GET /robots.txt → 200, pravilna pravila
+  - GET /manifest.json → 200, name="I Feel Slovenia", 4 shortcuts: /#načrtuj, /#zemljevid, /#trznica, /#pridruzi-se
+  - GET /sw.js → 200
+  - GET /api/pois?category=museum&limit=3 → 200 z 3 OSM muzeji iz Slovenije
+  - GET /api/pois/node-123?wikidata=Q18552411 → 200 s SL extractom o Planšarskem muzeju + thumbnail URL
+  - POST /api/itinerary/bookings {"destinationIds":["bled","bohinj"]} → 200 z bled.listings = Hotel Vila Bled + več
+
+- Lint: `bun run lint` → 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ Vseh 10 infrastrukturnih komponent na mestu in ustreza specifikaciji
+- ✅ Eno popravljen odstopanje: public/manifest.json (name + 4. shortcut z hash URL)
+- ✅ SEO: sitemap (31 URL) + robots + JSON-LD + canonical
+- ✅ PWA: manifest + service worker (cache-first/network-first/offline)
+- ✅ POI API: Overpass (OpenStreetMap) z 8 kategorijami + Wikipedia opisi preko Wikidata
+- ✅ Email sistem: nodemailer z demo fallback + 5 dvojezičnih templateov
+- ✅ Booking: client komponenta z 4 tabi + API z limit 3/destinacijo
+- ✅ 0 runtime errorjev, lint čist
+
+Datoteke (poti):
+- /home/z/my-project/src/app/sitemap.ts
+- /home/z/my-project/src/app/robots.ts
+- /home/z/my-project/public/manifest.json
+- /home/z/my-project/public/sw.js
+- /home/z/my-project/src/app/api/pois/route.ts
+- /home/z/my-project/src/app/api/pois/[id]/route.ts
+- /home/z/my-project/src/lib/email.ts
+- /home/z/my-project/src/lib/email-templates.ts
+- /home/z/my-project/src/components/sections/booking-panel.tsx
+- /home/z/my-project/src/app/api/itinerary/bookings/route.ts
+
+Work record: /home/z/my-project/agent-ctx/R-10-infrastructure-developer.md
+
+---
+Task ID: R-8 to R-11
+Agent: main (Z.ai Code)
+Task: Rekonstrukcija B2B portalov + content sekcij + infrastructure
+
+Work Log:
+- 3 subagenti poženi vzporedno:
+  1. B2B portali (admin + owner login + owner dashboard)
+  2. Content (beta banner + events + blog + pitch deck)
+  3. Infrastructure (SEO + PWA + POI API + email + booking panel)
+
+- Subagent R-8 (B2B portali):
+  - /admin — login + 3 tabi (Lokali, Leadi, Statistika)
+  - /owner/prijava — 2 tabi (Prijava/Registracija)
+  - /owner/dashboard — 5 tabov (Moji lokalci, Izdelki, Izkušnje, Naročnina, Statistika)
+  - Admin login test: "ifeelslovenia2025" → dashboard z 3 tabi ✅
+
+- Subagent R-9 (Content):
+  - beta-banner.tsx (fetch /api/beta-status, dismissable)
+  - events-data.ts (12+ slovenskih dogodkov skozi leto)
+  - events-calendar.tsx (3 filtri, mesečni prikaz)
+  - blog-data.ts (6+ člankov z markdown)
+  - blog.tsx (filter tabs, Dialog z react-markdown)
+  - pitch-deck.tsx (4 benefiti, 4 koraki, 3 pričevanja)
+
+- Subagent R-10 (Infrastructure):
+  - sitemap.ts (31 URLs: 9 statičnih + 22 dinamičnih)
+  - robots.ts (disallow admin/owner/api)
+  - manifest.json (PWA z 4 shortcuts)
+  - sw.js (service worker z offline fallback)
+  - /api/pois (Overpass API za OSM POI-je)
+  - /api/pois/[id] (Wikipedia opis preko Wikidata)
+  - email.ts + email-templates.ts (5 dvojezičnih templates)
+  - booking-panel.tsx (4 tabi: Nastanitev/Aktivnosti/Hrana/Transport)
+  - /api/itinerary/bookings (POST za booking podatke)
+
+- Agent Browser verification:
+  1. Homepage: 12/12 sekcij (vrh, destinacije, načrtuj, zemljevid, lokali, trznica, izkušnje, dogodki, blog, rezerviraj, pridruzi-se, partnerji)
+  2. Beta banner: "Beta obdobje: Vsi paketi BREZPLAČNI"
+  3. H1: "Odkrijte Slovenijo"
+  4. Admin login: geslo → dashboard z 3 tabi (Lokali, Leadi, Statistika)
+  5. Owner login: 2 tabi (Prijava/Registracija)
+  6. VLM potrdil vse ključne sekcije: destinacije, AI načrtovalec, zemljevid, tržnica, dogodki, blog
+  7. 0 kritičnih runtime errorjev
+- Lint: 0 errorjev, 0 opozoril
+- API testi: vsi 16 route-i vračajo 200
+
+Stage Summary:
+- ✅ B2B portali: Admin (3 tabi) + Owner login + Owner dashboard (5 tabov)
+- ✅ Content: Beta banner + Events (12+) + Blog (6+) + Pitch deck
+- ✅ Infrastructure: SEO (sitemap/robots) + PWA (manifest/sw) + POI (OSM+Wikipedia) + Email + Booking panel
+- ✅ 12/12 sekcij na homepage
+- ✅ 0 runtime errorjev, lint čist
+- Projekt je skoraj popolnoma rekonstruiran — manjkajo še: i18n, collections (del), več seed data

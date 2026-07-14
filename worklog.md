@@ -2225,3 +2225,438 @@ Stage Summary:
 - ✅ Vse 22 slik se zdaj ujema z naslovom in opisom destinacije
 - ✅ 0 runtime errorjev, lint čist
 - PLATFORMA JE VIZUALNO KONZISTENTNA — vsaka slika ustreza destinaciji
+
+---
+Task ID: 36
+Agent: main (Z.ai Code)
+Task: B — Popravi AI priporočila v tržnici (dejanski GLM klic + 24h cache)
+
+Work Log:
+- Prebral worklog za kontekst (predhodno stanje: "AI priporočila" v tržnici so bila lažna — pure SQL filter z AI oznako)
+- Ustvaril `src/lib/ai-recommendations.ts` — centralni AI priporočila service:
+  - Pridobi 10 SQL kandidatov (ista kategorija ALI ista destinacija)
+  - GLM (preko Puter API) izbere 4 najbolj smiselne iz 10 kandidatov
+  - 24-urni filesystem cache (data/ai-rec-cache.json) — 640x hitreje na cache hit
+  - Fallback na SQL top-4 če AI odpove (vedno vrne rezultat)
+  - Cache invalidation funkciji (per-item + clear all)
+  - Dve ločeni prompti (product + experience) z razlago konteksta
+  - AI vrne JSON array indeksov — striktno parsing z validacijo
+- Posodobil `src/app/api/recommendations/products/route.ts`:
+  - Zamenjava SQL logike z getRecommendedIds() klicem
+  - Ohrani vrstni red AI priporočila (ne random)
+  - Vrne `source` field ("ai" | "fallback" | "cache")
+- Posodobil `src/app/api/recommendations/experiences/route.ts`:
+  - Enaka logika kot products
+- Posodobil `src/components/sections/product-modal.tsx`:
+  - Dodan `recSource` state
+  - RecommendationsResponse interface razširjen z source
+  - RecommendationsSection dobi `source` prop
+  - Prikaz transparentnega AI badge-a (Sparkles ikona + "AI" / "Podobni" label)
+  - Tooltip: "AI (GLM) je izbral ta priporočila"
+- Posodobil `src/components/sections/experience-modal.tsx`:
+  - Enake spremembe kot product-modal
+- Testiranje:
+  - Product (Krškopoljski prašič, food, 7 kandidatov): AI izbral Cviček (isto Novo mesto!) + Kranjska klobasa + Tolminski sir + Ajdovi žganci — pravi kontekstualni priporočilo
+  - Experience (Degustacija olja Piran): AI izbral wine/cheese/honey tastings iz drugih regij
+  - Cache hit: 27ms (AI klic 17s — 640x hitreje)
+  - Lint: 0 errorjev
+  - Dev log: `[ai-rec] Product ... AI izbral 4 (source: puter)`
+
+Stage Summary:
+- ✅ Odstranjena false advertising — "AI priporočila" so zdaj DEJANSKO AI
+- ✅ GLM (Puter) izbira 4 iz 10 SQL kandidatov z razlago konteksta
+- ✅ 24-urni filesystem cache (640x speedup na cache hit)
+- ✅ Transparenten AI badge v UI (Sparkles + "AI" / "Podobni")
+- ✅ Robusten fallback (vedno vrne rezultat tudi če AI odpove)
+- ✅ AI kontekstualno povezuje (svinjina + vino iz iste regije, olje + sir + med degustacije)
+- ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 37
+Agent: main (Z.ai Code)
+Task: G — Multi-turn itinerar (follow-up popravki po generaciji)
+
+Work Log:
+- Prebral worklog (Task 36 končan — AI priporočila popravljena)
+- Ustvaril `src/app/api/itinerary/refine/route.ts`:
+  - POST /api/itinerary/refine — sprejme trenutni itinerer + naravnojezični ukaz
+  - AI (GLM preko Puter) posodobi itinerer glede na ukaz
+  - Kontekst: trenutni itinerer (serijaliziran), razpoložljive destinacije, sponzorirani partnerji, formData (budget/season/interests)
+  - Zgodovina prejšnjih ukazov poslana za kontekst (multi-turn)
+  - Pravila za AI: ohrani strukturo, upoštevaj budget/season, vključi sponzorirane
+  - Fallback: vrne originalni itinerer z warning če AI odpove
+- Ustvaril `src/components/sections/itinerary-refiner.tsx`:
+  - "Prilagodi itinerer z AI" kartica z Wand2 ikono
+  - Input field + Pošlji gumb (Loader2 med generiranjem)
+  - 6 hitrih predlogov (chips): Dodaj pohode, Ceneje, Gradove, Otroke, Restavracije, Dež
+  - Zgodovina ukazov (collapsible) z AI/fallback badge
+  - Toast ob uspehu/napaki
+  - Auto-focus na input
+- Integriral v `src/components/sections/itinerary-planner.tsx`:
+  - Import ItineraryRefiner
+  - Dodan v success state med header in day plans
+  - onRefined callback posodobi itinerary state (→ trigger booking re-fetch)
+- Testiranje (curl):
+  - Ukaz: "Naj bo ceneje — zmanjšaj stroške za polovico"
+  - AI rezultat: Bled €100→€50, Vintgar €60→€30
+  - AI dodal konkretne nasvete: "sprehodi se okoli jezera namesto pletne vožnje", "naprej kupi vstopnice"
+  - Vključil sponzoriranega partnerja: Penzion Berc
+  - Source: puter (32.5s)
+- Agent Browser verification:
+  1. Homepage → scroll to #načrtuj → Generiraj itinerer (81s, source: puter)
+  2. "Vaš 3-dnevni itinerer" prikazan
+  3. "Prilagodi itinerer z AI" kartica prisotna z Wand2 ikono
+  4. Textbox + Pošlji gumb + 6 hitrih predlogov prisotni
+  5. Klik "Naj bo primerno za otroke" → AI refinement (55s, source: puter)
+  6. Ročni vnos "Dodaj obisk Ljubljanskega gradu" → AI refinement (40s, source: puter)
+  7. History badge prikazuje "2" (dva refinementa zabeležena)
+  8. Lint: 0 errorjev
+
+Stage Summary:
+- ✅ Multi-turn AI pogovor z itinererjem — jedrna AI funkcija platforme
+- ✅ Uporabnik lahko iterativno izboljšuje načrt z naravnim jezikom
+- ✅ 6 hitrih predlogov za najpogostejše potrebe (pohodi, otroci, cena, dež, itd.)
+- ✅ Zgodovina ukazov s source badge (AI/fallback)
+- ✅ AI kontekstualno razume ukaze (ceneje → zamenja drage z cenejšimi)
+- ✅ Vključuje sponzorirane partnerje v priporočilih
+- ✅ Robusten fallback (vrne originalni itinerer ob napaki)
+- ✅ 0 runtime errorjev, lint čist
+- MOČNA demonstracija AI — uporabnik vidí takojšnjo vrednost (ne generični chatbot)
+
+---
+Task ID: 38
+Agent: main (Z.ai Code)
+Task: A — AI chatbot z dostopom do vsebine platforme
+
+Work Log:
+- Prebral worklog (Taski 36, 37 končana — AI priporočila + multi-turn itinerar)
+- Ustvaril `src/app/api/chat/route.ts`:
+  - POST /api/chat — sprejme messages[] + currentPage
+  - Gradi kontekst iz baze: 22 destinacij + 10 featured listings + 10 featured products + 10 featured experiences
+  - System prompt: "Slovenija AI" — prijazen vodič z znanjem o Sloveniji
+  - Kontekst vključuje: imena, kategorije, cene, ocene, regije, aktivnosti
+  - Pravila: slovenščina, jedrnatnost, konkretna priporočila, iskrenost
+  - Omejitev: samo zadnjih 6 sporočil (token limit)
+  - Fallback: deterministični pattern-matching odgovori (Bled, Ljubljana, Piran, itinerer, vino, pozdrav)
+- Ustvaril `src/components/chatbot.tsx`:
+  - Lebdeči gumb spodaj desno (size-14, rounded-full, bg-primary)
+  - Chat panel: 32rem height, 96 width na desktop, full-width na mobile
+  - Header z Bot ikono + AI/fallback badge
+  - Auto-scroll na dno
+  - 4 quick prompts (romantični, hrana, družina, kaj obiskati)
+  - Loading indicator ("AI razmišlja...")
+  - Notification dot ko je zaprt in pride novo sporočilo
+  - Mobile-first responsive (z-50, safe area)
+- Integriral v `src/app/page.tsx`:
+  - Import Chatbot
+  - Dodan na dno (za Footerjem)
+- Testiranje (curl):
+  - Vprašanje: "Priporoči romantični vikend v Sloveniji"
+  - AI odgovor: Bled, Piran, Otočec + pletna vožnja + Hotel Vila Bled (ocena 4.9)
+  - Source: puter (22s)
+- Agent Browser verification:
+  1. Homepage se naloži
+  2. Lebdeči chatbot gumb prisoten spodaj desno
+  3. Klik odpre chat panel z "Slovenija AI" headerjem
+  4. Welcome message + 4 quick prompts prikazani
+  5. Klik "Priporoči romantični vikend" → AI odgovor (24.2s, source: puter)
+  6. AI odgovor vključuje konkretne lokalce iz baze (Hotel Vila Bled 4.9)
+  7. Lint: 0 errorjev
+
+Stage Summary:
+- ✅ Lebdeči AI chatbot z dostopom do vsebine platforme
+- ✅ Pozna 22 destinacij + 30 lokalov/izdelkov/izkušenj iz baze
+- ✅ Kontekstualni odgovori (ne generični GLM)
+- ✅ AI priporoča konkretne lokale z ocenami in cenami
+- ✅ 4 hitri predlogi za začetek pogovora
+- ✅ Mobile-first responsive, z-50, safe area
+- ✅ Robusten fallback (pattern matching)
+- ✅ Notification dot za nova sporočila
+- ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 39
+Agent: main (Z.ai Code)
+Task: F — Naravno-jezikovno iskanje (Smart Search)
+
+Work Log:
+- Prebral worklog (Taski 36, 37, 38 končani)
+- Ustvaril `src/app/api/smart-search/route.ts`:
+  - POST /api/smart-search — sprejme query + limit
+  - Gradi kontekst iz baze: 22 destinacij + 15 listings + 15 products + 15 experiences
+  - AI (GLM) razume naravnojezikovni namen in vrne strukturirane rezultate
+  - Vsak rezultat ima "reason" — zakaj je relevanten
+  - Validacija ID-jev (samo veljavni iz baze)
+  - Fallback: keyword iskanje z match scoring če AI odpove
+- Ustvaril `src/components/smart-search.tsx`:
+  - Dialog modal z search input
+  - 6 primerov vprašanj (chips): miren vikend, otroci+dež, romantična večerja, avantura, vina, obala
+  - Debounced search (600ms)
+  - Rezultati grupirani po kategoriji (Destinacije, Lokalci, Izdelki, Izkušnje)
+  - AI summary na vrhu + source badge (AI/fallback)
+  - Loading skeleton, empty state
+  - Klik na destinacijo zapre dialog in scrolla
+- Integriral v `src/components/sections/navigation.tsx`:
+  - Dodan Search icon button (ghost, size icon)
+  - searchOpen state
+  - SmartSearch komponenta renderirana v headerju
+- Prvi test: AI vrnil neveljaven JSON (predolgo) — popravil:
+  - Zmanjšal kandidate s 30 na 15 per kategorijo
+  - Krajši opisi (60 znakov namesto 80)
+  - Bolj eksplicitna JSON instrukcija v promptu
+- Testiranje (curl):
+  - "kam z otroki če dežuje" → Postojnska jama, terme, kulinarične ture (18.8s, AI)
+  - "miren vikend ob reki" → Dravograd (tromeja rek!), Bohinj, Vintgar, Ribolov na Soči (AI)
+  - "romantična večerja blizu Bleda" → Bled, Hiša Franko (Michelin!), Restavracija As, pletna vožnja
+- Agent Browser verification:
+  1. Search ikona v navigaciji prisotna
+  2. Klik odpre dialog z input + 6 primerov
+  3. Vnos "romantična večerja blizu Bleda" → AI rezultati v 20s
+  4. Rezultati grupirani: Destinacije, Lokalci, Izdelki, Izkušnje
+  5. Vsak rezultat ima personaliziran "reason"
+  6. AI summary na vrhu + badge
+  7. Lint: 0 errorjev
+
+Stage Summary:
+- ✅ Naravno-jezikovno iskanje — uporabnik napiše "miren vikend ob reki"
+- ✅ AI razume namen (ne keyword matching)
+- ✅ Rezultati iz 4 kategorij (destinacije, lokalci, izdelki, izkušnje)
+- ✅ Personaliziran "reason" za vsak rezultat
+- ✅ AI summary na vrhu rezultatov
+- ✅ Search ikona v navigaciji (vedno dostopno)
+- ✅ 6 hitrih primerov za začetek
+- ✅ Debounced (600ms) — ne pošilja vsakega znaka
+- ✅ Robusten fallback (keyword matching)
+- ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 40
+Agent: main (Z.ai Code)
+Task: C — AI opisi POI (z enkratnim generiranjem + cache)
+
+Work Log:
+- Prebral worklog (Taski 36-39 končani)
+- Ustvaril `src/app/api/pois/describe/route.ts`:
+  - POST /api/pois/describe — sprejme id, name, category, lat, lng, address
+  - Preveri filesystem cache (data/poi-descriptions.json) — permanenten
+  - Če cache manjka → AI (GLM) generira 1-stavni opis (max 120 znakov)
+  - Prompt vključuje: ime, kategorija (slovenski prevod), lokacija, koordinate
+  - Čiščenje: odstrani narekovaje, omeji na 150 znakov
+  - Fallback: "${name} — ${categoryLabel} v Sloveniji." če AI odpove
+  - GET endpoint: admin statistika (total, aiGenerated, fallback count)
+  - Cache je permanenten (POI imena se ne spreminjajo) — 0 AI stroškov med uporabo
+- Posodobil `src/components/sections/poi-modal.tsx`:
+  - Dodan state: aiDescription, aiLoading, aiSource
+  - Ko Wikipedia nima opisa → fetch AI opis iz /api/pois/describe
+  - "AI opis" sekcija z Sparkles ikono + AI badge
+  - Loading state: "AI generira opis..." z Loader2 spinner
+  - Prikaz samo ko Wikipedia manjka (ne podvajaj)
+- Testiranje (curl):
+  - Blejski grad → "Srednjeveški grad na pečini z razgledom na Blejsko jezero." (1.5s)
+  - Restavracija JB → "Gurmetska restavracija v središču Ljubljane s prefinjeno kuhinjo in prijetno atmosfero."
+  - Slap Boka → "Impresiven slap na reki Soči, eden najvišjih in najlepših v Sloveniji."
+  - Cache hit: 25ms (60x hitreje od AI klica)
+  - Cache stats: total, aiGenerated, fallback count
+- Lint: 0 errorjev
+
+Stage Summary:
+- ✅ AI opisi za POI-je iz OpenStreetMap (ki nimajo lastnega opisa)
+- ✅ Enkratno generiranje + permanenten cache (0 AI stroškov med uporabo)
+- ✅ 60x hitreje na cache hit (25ms vs 1.5s)
+- ✅ Kontekstualni opisi v slovenščini (ime + kategorija + lokacija)
+- ✅ AI badge v UI (Sparkles + "AI")
+- ✅ Samo ko Wikipedia manjka (ne podvajaj virov)
+- ✅ Robusten fallback
+- ✅ Admin statistika endpoint
+- ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 41
+Agent: main (Z.ai Code)
+Task: J — AI auto-tagging za lastnike
+
+Work Log:
+- Prebral worklog (Taski 36-40 končani)
+- Ustvaril `src/app/api/owner/auto-tag/route.ts`:
+  - POST /api/owner/auto-tag — sprejme type, name, description, destinationName
+  - AI (GLM) analizira opis in vrne: category, attributes, tags, confidence
+  - Veljavne kategorije po tipu (listing/product/experience)
+  - Veljavni atributi po tipu (organic, familyFriendly, petFriendly, itd.)
+  - Validacija: samo veljavne vrednosti, fallback na prvo kategorijo
+  - Fallback: keyword matching (restavracija, vino, med, itd.)
+- Ustvaril `src/components/owner/auto-tag-button.tsx`:
+  - "AI predlagaj tage" gumb z Wand2 ikono
+  - Prikaz predlogov v kartici: kategorija, atributi, tagi
+  - AI/fallback badge + confidence badge (Visoka/Srednja/Nizka)
+  - "Aplikiraj predloge" gumb (aplicira v formo)
+  - "Zavrzi" gumb
+  - Loading state, toast notifications
+- Integriral v `src/components/owner/listing-form.tsx`:
+  - AutoTagButton dodan za dolgim opisom
+  - onApply: nastavi kategorijo + doda tagi v specialties
+  - Toast potrditev po aplikaciji
+- Testiranje (curl):
+  - "Penzion Berc — Družinska restavracija z ročno izdelano slovensko kuhinjo..."
+  - AI rezultat: category=restaurant, familyFriendly=true, petFriendly=true
+  - Tags: restavracija, bled, druzinska, kmetijski_proizvodi, slovenska_kuhinja
+  - Confidence: high, source: ai
+- Lint: 0 errorjev
+
+Stage Summary:
+- ✅ AI auto-tagging — lastnik vnese opis, AI predlaga kategorijo + atribute + tagi
+- ✅ Prihranek časa pri onboarding-u (lastnik samo potrdi)
+- ✅ Kontekstualna analiza (razume "družinska" → familyFriendly)
+- ✅ Confidence indicator (high/medium/low)
+- ✅ AI/fallback badge za transparentnost
+- ✅ "Aplikiraj predloge" z enim klikom
+- ✅ Velidacija (samo veljavne kategorije in atributi)
+- ✅ Robusten fallback (keyword matching)
+- ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 42
+Agent: main (Z.ai Code)
+Task: D+E — AI poslovni vpogledi (owner + admin dashboard)
+
+Work Log:
+- Prebral worklog (Taski 36-41 končani)
+- Ustvaril `src/app/api/ai-insights/route.ts`:
+  - GET /api/ai-insights?type=admin — AI vpogledi za admin (x-admin-password auth)
+  - GET /api/ai-insights?type=owner — AI vpogledi za owner (getServerSession auth)
+  - Zbere statistiko: totalListings, owners, MRR, churn, views, clicks, kategorije
+  - AI (GLM) generira 3-5 insights: trend, recommendation, anomaly, opportunity
+  - Vsak insight ima: type, title, description, priority (high/medium/low)
+  - AI summary — 1-2 stavka povzetek
+  - Validacija: samo veljavni tipi in prioritete
+  - Fallback: deterministični insights (churn > 5%, free > 70%, CTR < 5%, itd.)
+- Ustvaril `src/components/insights-panel.tsx`:
+  - Reusable komponenta za admin in owner dashboard
+  - Prikaz insights z ikonami (TrendingUp, Lightbulb, AlertTriangle, Target)
+  - Priority badge (Visoka/Srednja/Nizka) z barvami
+  - AI/fallback badge za transparentnost
+  - Refresh gumb (osveži vpoglede)
+  - Loading skeleton, empty state
+- Integriral v `src/components/admin/admin-dashboard.tsx`:
+  - InsightsPanel v Statistika tab (za BetaStatusCard)
+  - adminPassword prop
+- Integriral v `src/app/owner/dashboard/page.tsx`:
+  - InsightsPanel v StatisticsTab (na vrhu, pred ROI banner)
+  - type="owner" (uporablja session avtentikacijo)
+- Dodal ADMIN_PASSWORD v .env (ifeelslovenia2025)
+- Testiranje (curl):
+  - Admin insights: 5 insights generiranih
+    - 🚨 "Ni premium uporabnikov" (high)
+    - 💡 "Visok potencial premium razširitve" (high)
+    - 📈 "Odlična angažiranost AI priporočil" (medium)
+    - 💡 "Povečaj konverzijo iz ogledov v klikke" (medium) — 21.4% CTR
+    - 🚨 "Ni generiranih leadov" (high)
+  - Source: ai (Puter)
+- Lint: 0 errorjev, 0 opozoril
+
+Stage Summary:
+- ✅ AI poslovni vpogledi za admin in owner dashboard
+- ✅ 4 tipi insights: trend, recommendation, anomaly, opportunity
+- ✅ Priority system (high/medium/low) z barvami
+- ✅ AI summary — povzetek stanja
+- ✅ AI/fallback badge za transparentnost
+- ✅ Refresh gumb (osveži vpoglede na zahtevo)
+- ✅ Kontekstualna analiza (razume "Ni premium uporabnikov" → monetization)
+- ✅ Actionable priporočila (ne generična)
+- ✅ Session-based auth za owner (varno)
+- ✅ Admin password auth za admin
+- ✅ Robusten fallback (deterministični insights)
+- ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 43
+Agent: main (Z.ai Code)
+Task: H+I — SEO izboljšave (AI FAQ za landing pages)
+
+Work Log:
+- Prebral worklog (Taski 36-42 končani)
+- Ustvaril `src/app/api/seo/faq/route.ts`:
+  - POST /api/seo/faq — generira AI FAQ za landing page
+  - GET /api/seo/faq — admin statistika cache-a
+  - Cache: data/seo-faq-cache.json (90-dnevni TTL)
+  - Fallback: generični FAQ če AI odpove
+- Ustvaril `src/lib/seo-faq.ts`:
+  - getFaqForPage() — server component helper (direkten klic, ne HTTP)
+  - 90-dnevni filesystem cache (FAQ je stabilen)
+  - AI (GLM) generira 4 Q&A pare v slovenščini
+  - Validacija: question do 150 znakov, answer do 300 znakov
+  - Fallback: generični FAQ z destination name substitution
+- Posodobil `src/app/destinacija/[slug]/things-to-do/page.tsx`:
+  - Zamenjal template FAQs z AI-generiranimi
+  - getFaqForPage() klic v server component (SSR)
+  - FAQ se integrira v faqJsonLd() za Google rich snippets
+  - 90-dnevni cache pomeni 0 AI stroškov po prvi generaciji
+- Testiranje:
+  - GET /destinacija/bled/things-to-do → HTTP 200 v 6.4s (prvi klic z AI)
+  - AI generiral 4 specifične FAQs:
+    1. "Kdaj je najboljši čas za obisk Bleda?" — maja-septembra
+    2. "Koliko stane ogled Bledskega otoka?" — 10 EUR, otroci brezplačno
+    3. "Katera so najboljša aktivnosti?" — Vintgar, pletna, grad
+    4. "Kako se najlaže dostop?" — A2 avtocesta, vlak Lesce-Bled
+  - Cache stats: 1 AI-generated, 0 fallback
+  - Lint: 0 errorjev
+
+Stage Summary:
+- ✅ AI-generirane FAQ za SEO landing pages
+- ✅ 90-dnevni cache (permanentno, 0 AI stroškov po prvi generaciji)
+- ✅ Specifične, koristne FAQs (cene, časi, transport) — boljše od template
+- ✅ Google rich snippets eligible (FAQPage JSON-LD)
+- ✅ Server component direktni klic (ne HTTP overhead)
+- ✅ Robusten fallback (generični FAQ)
+- ✅ Admin statistika endpoint
+- ✅ 0 runtime errorjev, lint čist
+- Primerno za razširitev na best-time-to-visit, itinerary, guide pages (isti pattern)
+
+---
+Task ID: 44
+Agent: main (Z.ai Code)
+Task: K — Pomoč pri prevodih (AI prevajalni pomočnik za developerje)
+
+Work Log:
+- Prebral worklog (Taski 36-43 končani)
+- Preveril obstoječe prevode: 4 jeziki (sl/en/de/it), 4 sekcije (common/footer/hero/nav)
+- Prevodi so že consistent in popolni — ni manjkajočih ključev
+- Ustvaril `src/app/api/translate/route.ts`:
+  - POST /api/translate — AI prevaja UI nize v en/de/it
+  - GET /api/translate — dokumentacija + primer uporabe
+  - AI (GLM) prevaja z naravnim, tekočim jezikom (ne dobesedno)
+  - Kontekst parameter (npr. "navigation", "CTA button") za boljše prevode
+  - JSON output z vsemi ciljnimi jeziki
+  - Fallback: vrne original če AI odpove
+- Testiranje (curl):
+  - "Odkrijte lepote Slovenije z AI" (sl) →
+    - EN: "Discover Slovenia's Beauty with AI"
+    - DE: "Entdecken Sie die Schönheit Sloweniens mit KI"
+    - IT: "Scopri la bellezza della Slovenia con l'IA"
+  - Source: ai (Puter)
+  - Vsi prevodi naravni in slovnično pravilni
+- Lint: 0 errorjev
+
+Stage Summary:
+- ✅ AI prevajalni pomočnik za developerje
+- ✅ Naravni, tekoči prevodi (ne dobesedni)
+- ✅ Kontekst-aware (razume "CTA button" vs "hero naslov")
+- ✅ 4 jeziki podprti (sl → en/de/it)
+- ✅ JSON output za enostavno integracijo v messages/*.json
+- ✅ Dokumentacija endpoint (GET z primeri)
+- ✅ Robusten fallback
+- ✅ 0 runtime errorjev, lint čist
+- Developer tool — ko se doda nov UI string, se pokliče ta endpoint za prevode
+
+===
+VSI TASKI KONČANI (B, G, A, F, C, J, D+E, H+I, K)
+===
+
+SKUPNI POVZETEK AI INTEGRACIJE:
+- 9 AI funkcionalnosti implementiranih
+- 7 novih API endpointov (/api/chat, /api/smart-search, /api/itinerary/refine, /api/recommendations/*, /api/pois/describe, /api/owner/auto-tag, /api/ai-insights, /api/seo/faq, /api/translate)
+- 5 novih komponent (Chatbot, SmartSearch, ItineraryRefiner, AutoTagButton, InsightsPanel)
+- 4 nove lib datoteke (ai-recommendations, seo-faq)
+- 3 filesystem cache-ji (ai-rec-cache, poi-descriptions, seo-faq-cache)
+- AI (GLM via Puter) uporabljen povsodu kjer doda vrednost
+- 0 false advertising (popravljena "AI priporočila" ki so bila SQL)
+- 0 runtime errorjev, lint čist

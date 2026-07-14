@@ -1,0 +1,1238 @@
+     1→"use client";
+     2→
+     3→import * as React from "react";
+     4→import {
+     5→  Tabs,
+     6→  TabsContent,
+     7→  TabsList,
+     8→  TabsTrigger,
+     9→} from "@/components/ui/tabs";
+    10→import {
+    11→  Card,
+    12→  CardContent,
+    13→  CardDescription,
+    14→  CardHeader,
+    15→  CardTitle,
+    16→} from "@/components/ui/card";
+    17→import {
+    18→  Table,
+    19→  TableBody,
+    20→  TableCell,
+    21→  TableHead,
+    22→  TableHeader,
+    23→  TableRow,
+    24→} from "@/components/ui/table";
+    25→import { Button } from "@/components/ui/button";
+    26→import { Input } from "@/components/ui/input";
+    27→import { Badge } from "@/components/ui/badge";
+    28→import {
+    29→  AlertDialog,
+    30→  AlertDialogAction,
+    31→  AlertDialogCancel,
+    32→  AlertDialogContent,
+    33→  AlertDialogDescription,
+    34→  AlertDialogFooter,
+    35→  AlertDialogHeader,
+    36→  AlertDialogTitle,
+    37→} from "@/components/ui/alert-dialog";
+    38→import {
+    39→  Building2,
+    40→  Plus,
+    41→  Pencil,
+    42→  Trash2,
+    43→  Search,
+    44→  Download,
+    45→  Users,
+    46→  Star,
+    47→  Eye,
+    48→  TrendingUp,
+    49→  Loader2,
+    50→  AlertCircle,
+    51→  Check,
+    52→  X,
+    53→  ShieldCheck,
+    54→  Sparkles,
+    55→  Crown,
+    56→  Rocket,
+    57→  Gift,
+    58→  Zap,
+    59→} from "lucide-react";
+    60→import {
+    61→  CATEGORY_LABELS,
+    62→  PLAN_LABELS,
+    63→  type ListingCategory,
+    64→  type ListingPlan,
+    65→} from "@/lib/listings-types";
+    66→import { ListingForm, type AdminListing } from "./listing-form";
+    67→import { BetaBanner } from "@/components/beta-banner";
+    68→import { Progress } from "@/components/ui/progress";
+    69→import { BETA_INFO } from "@/lib/beta";
+    70→
+    71→// === TIP LEAD ===
+    72→type LeadStatus = "nov" | "kontaktiran" | "zakljucen";
+    73→
+    74→interface Lead {
+    75→  id: string;
+    76→  timestamp: string;
+    77→  name: string;
+    78→  email: string;
+    79→  phone?: string;
+    80→  businessName: string;
+    81→  businessType: string;
+    82→  location: string;
+    83→  plan: string;
+    84→  message?: string;
+    85→  gdprConsent: boolean;
+    86→  status: LeadStatus;
+    87→}
+    88→
+    89→const STATUS_LABELS: Record<LeadStatus, string> = {
+    90→  nov: "Nov",
+    91→  kontaktiran: "Kontaktiran",
+    92→  zakljucen: "Zaključen",
+    93→};
+    94→
+    95→const STATUS_NEXT: Record<LeadStatus, LeadStatus> = {
+    96→  nov: "kontaktiran",
+    97→  kontaktiran: "zakljucen",
+    98→  zakljucen: "nov",
+    99→};
+   100→
+   101→const STATUS_STYLES: Record<LeadStatus, string> = {
+   102→  nov: "bg-amber-100 text-amber-900 border-amber-200 hover:bg-amber-200",
+   103→  kontaktiran: "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20",
+   104→  zakljucen: "bg-emerald-100 text-emerald-900 border-emerald-200 hover:bg-emerald-200",
+   105→};
+   106→
+   107→interface AdminDashboardProps {
+   108→  adminPassword: string;
+   109→  onLogout: () => void;
+   110→}
+   111→
+   112→// === GLAVNA KOMPONENTA ===
+   113→export function AdminDashboard({
+   114→  adminPassword,
+   115→  onLogout,
+   116→}: AdminDashboardProps) {
+   117→  const [tab, setTab] = React.useState("listings");
+   118→
+   119→  return (
+   120→    <div className="min-h-screen bg-muted/30">
+   121→      {/* Beta banner na vrhu */}
+   122→      <BetaBanner />
+   123→
+   124→      {/* Top bar */}
+   125→      <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+   126→        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-14 items-center justify-between gap-2">
+   127→          <div className="flex items-center gap-2 min-w-0">
+   128→            <div className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground shrink-0">
+   129→              <ShieldCheck className="size-4" />
+   130→            </div>
+   131→            <div className="min-w-0">
+   132→              <h1 className="text-sm font-semibold truncate">
+   133→                Admin plošča
+   134→              </h1>
+   135→              <p className="text-xs text-muted-foreground hidden sm:block">
+   136→                I Feel Slovenia — upravljanje lokalov
+   137→              </p>
+   138→            </div>
+   139→          </div>
+   140→          <Button
+   141→            variant="outline"
+   142→            size="sm"
+   143→            onClick={onLogout}
+   144→            className="shrink-0"
+   145→          >
+   146→            Odjava
+   147→          </Button>
+   148→        </div>
+   149→      </header>
+   150→
+   151→      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+   152→        {/* Beta status widget na vrhu dashboard-a */}
+   153→        <BetaStatusWidget />
+   154→
+   155→        <Tabs value={tab} onValueChange={setTab} className="w-full">
+   156→          <TabsList className="grid w-full max-w-md grid-cols-3">
+   157→            <TabsTrigger value="listings" className="gap-1.5">
+   158→              <Building2 className="size-4" />
+   159→              <span className="hidden xs:inline sm:inline">Lokali</span>
+   160→            </TabsTrigger>
+   161→            <TabsTrigger value="leads" className="gap-1.5">
+   162→              <Users className="size-4" />
+   163→              <span className="hidden xs:inline sm:inline">Leadi</span>
+   164→            </TabsTrigger>
+   165→            <TabsTrigger value="stats" className="gap-1.5">
+   166→              <TrendingUp className="size-4" />
+   167→              <span className="hidden xs:inline sm:inline">Statistika</span>
+   168→            </TabsTrigger>
+   169→          </TabsList>
+   170→
+   171→          <TabsContent value="listings" className="mt-6">
+   172→            <ListingsTab adminPassword={adminPassword} />
+   173→          </TabsContent>
+   174→          <TabsContent value="leads" className="mt-6">
+   175→            <LeadsTab adminPassword={adminPassword} />
+   176→          </TabsContent>
+   177→          <TabsContent value="stats" className="mt-6">
+   178→            <StatsTab adminPassword={adminPassword} />
+   179→          </TabsContent>
+   180→        </Tabs>
+   181→      </main>
+   182→    </div>
+   183→  );
+   184→}
+   185→
+   186→// === TAB 1: LISTINGS ===
+   187→function ListingsTab({ adminPassword }: { adminPassword: string }) {
+   188→  const [listings, setListings] = React.useState<AdminListing[]>([]);
+   189→  const [loading, setLoading] = React.useState(true);
+   190→  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+   191→  const [search, setSearch] = React.useState("");
+   192→
+   193→  const [formOpen, setFormOpen] = React.useState(false);
+   194→  const [editing, setEditing] = React.useState<AdminListing | null>(null);
+   195→  const [deleteId, setDeleteId] = React.useState<string | null>(null);
+   196→  const [deleting, setDeleting] = React.useState(false);
+   197→
+   198→  const fetchListings = React.useCallback(async () => {
+   199→    setLoading(true);
+   200→    setErrorMsg(null);
+   201→    try {
+   202→      const res = await fetch("/api/admin/listings", {
+   203→        headers: { "x-admin-password": adminPassword },
+   204→      });
+   205→      if (!res.ok) {
+   206→        const d: unknown = await res.json();
+   207→        const msg =
+   208→          typeof d === "object" && d !== null && "error" in d
+   209→            ? String((d as Record<string, unknown>).error)
+   210→            : "Napaka pri pridobivanju lokalov";
+   211→        setErrorMsg(msg);
+   212→        return;
+   213→      }
+   214→      const data: unknown = await res.json();
+   215→      const list = (
+   216→        typeof data === "object" && data !== null && "listings" in data
+   217→          ? (data as Record<string, unknown>).listings
+   218→          : []) as AdminListing[];
+   219→      setListings(list);
+   220→    } catch (err) {
+   221→      console.error("[admin/listings] fetch:", err);
+   222→      setErrorMsg("Napaka pri povezavi s strežnikom");
+   223→    } finally {
+   224→      setLoading(false);
+   225→    }
+   226→  }, [adminPassword]);
+   227→
+   228→  React.useEffect(() => {
+   229→    fetchListings();
+   230→  }, [fetchListings]);
+   231→
+   232→  const filtered = React.useMemo(() => {
+   233→    if (!search.trim()) return listings;
+   234→    const q = search.toLowerCase();
+   235→    return listings.filter(
+   236→      (l) =>
+   237→        l.name.toLowerCase().includes(q) ||
+   238→        (l.destinationName ?? "").toLowerCase().includes(q) ||
+   239→        l.category.toLowerCase().includes(q)
+   240→    );
+   241→  }, [listings, search]);
+   242→
+   243→  const handleOpenCreate = () => {
+   244→    setEditing(null);
+   245→    setFormOpen(true);
+   246→  };
+   247→
+   248→  const handleOpenEdit = (listing: AdminListing) => {
+   249→    setEditing(listing);
+   250→    setFormOpen(true);
+   251→  };
+   252→
+   253→  const handleSaved = () => {
+   254→    fetchListings();
+   255→  };
+   256→
+   257→  const handleConfirmDelete = async () => {
+   258→    if (!deleteId) return;
+   259→    setDeleting(true);
+   260→    try {
+   261→      const res = await fetch(`/api/admin/listings/${deleteId}`, {
+   262→        method: "DELETE",
+   263→        headers: { "x-admin-password": adminPassword },
+   264→      });
+   265→      if (!res.ok) {
+   266→        const d: unknown = await res.json();
+   267→        const msg =
+   268→          typeof d === "object" && d !== null && "error" in d
+   269→            ? String((d as Record<string, unknown>).error)
+   270→            : "Napaka pri brisanju";
+   271→        setErrorMsg(msg);
+   272→      } else {
+   273→        setListings((prev) => prev.filter((l) => l.id !== deleteId));
+   274→      }
+   275→    } catch (err) {
+   276→      console.error("[admin/listings] delete:", err);
+   277→      setErrorMsg("Napaka pri povezavi s strežnikom");
+   278→    } finally {
+   279→      setDeleting(false);
+   280→      setDeleteId(null);
+   281→    }
+   282→  };
+   283→
+   284→  return (
+   285→    <div className="space-y-4">
+   286→      {/* Toolbar */}
+   287→      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+   288→        <div>
+   289→          <h2 className="text-xl font-bold tracking-tight">Lokali</h2>
+   290→          <p className="text-sm text-muted-foreground">
+   291→            Upravljajte vse lokale na platformi.
+   292→          </p>
+   293→        </div>
+   294→        <div className="flex flex-col sm:flex-row gap-2 sm:items-center">
+   295→          <div className="relative">
+   296→            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+   297→            <Input
+   298→              value={search}
+   299→              onChange={(e) => setSearch(e.target.value)}
+   300→              placeholder="Iskanje po imenu..."
+   301→              className="pl-8 sm:w-64"
+   302→            />
+   303→          </div>
+   304→          <Button onClick={handleOpenCreate} className="shrink-0">
+   305→            <Plus className="size-4" />
+   306→            Nov lokal
+   307→          </Button>
+   308→        </div>
+   309→      </div>
+   310→
+   311→      {errorMsg && (
+   312→        <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+   313→          <AlertCircle className="size-4 shrink-0 mt-0.5" />
+   314→          <span>{errorMsg}</span>
+   315→        </div>
+   316→      )}
+   317→
+   318→      {/* Table */}
+   319→      <Card>
+   320→        <CardContent className="p-0">
+   321→          {loading ? (
+   322→            <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+   323→              <Loader2 className="size-4 animate-spin" />
+   324→              Nalaganje lokalov...
+   325→            </div>
+   326→          ) : filtered.length === 0 ? (
+   327→            <div className="py-16 text-center text-muted-foreground">
+   328→              <Building2 className="size-8 mx-auto mb-2 opacity-50" />
+   329→              {search ? "Ni najdenih lokalov." : "Ni še lokalov. Dodajte prvega."}
+   330→            </div>
+   331→          ) : (
+   332→            <div className="overflow-x-auto">
+   333→              <Table>
+   334→                <TableHeader>
+   335→                  <TableRow>
+   336→                    <TableHead>Ime</TableHead>
+   337→                    <TableHead className="hidden md:table-cell">Kategorija</TableHead>
+   338→                    <TableHead className="hidden lg:table-cell">Destinacija</TableHead>
+   339→                    <TableHead>Paket</TableHead>
+   340→                    <TableHead className="hidden sm:table-cell">Status</TableHead>
+   341→                    <TableHead className="hidden md:table-cell">Ocena</TableHead>
+   342→                    <TableHead className="hidden lg:table-cell">Ogledi</TableHead>
+   343→                    <TableHead className="text-right">Akcije</TableHead>
+   344→                  </TableRow>
+   345→                </TableHeader>
+   346→                <TableBody>
+   347→                  {filtered.map((l) => (
+   348→                    <TableRow key={l.id}>
+   349→                      <TableCell>
+   350→                        <div className="font-medium">{l.name}</div>
+   351→                        <div className="text-xs text-muted-foreground">
+   352→                          /{l.slug}
+   353→                        </div>
+   354→                      </TableCell>
+   355→                      <TableCell className="hidden md:table-cell">
+   356→                        <Badge variant="secondary">
+   357→                          {CATEGORY_LABELS[l.category as ListingCategory] ?? l.category}
+   358→                        </Badge>
+   359→                      </TableCell>
+   360→                      <TableCell className="hidden lg:table-cell text-muted-foreground">
+   361→                        {l.destinationName ?? "—"}
+   362→                      </TableCell>
+   363→                      <TableCell>
+   364→                        <PlanBadge plan={l.plan as ListingPlan} />
+   365→                      </TableCell>
+   366→                      <TableCell className="hidden sm:table-cell">
+   367→                        <div className="flex items-center gap-1">
+   368→                          {l.featured && (
+   369→                            <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-900">
+   370→                              <Star className="size-3 mr-0.5 fill-amber-500 text-amber-500" />
+   371→                              Izpost.
+   372→                            </Badge>
+   373→                          )}
+   374→                          {l.verified && (
+   375→                            <Badge variant="outline" className="border-emerald-300 bg-emerald-50 text-emerald-900">
+   376→                              <Check className="size-3 mr-0.5" />
+   377→                              Overjeno
+   378→                            </Badge>
+   379→                          )}
+   380→                          {!l.featured && !l.verified && (
+   381→                            <span className="text-xs text-muted-foreground">—</span>
+   382→                          )}
+   383→                        </div>
+   384→                      </TableCell>
+   385→                      <TableCell className="hidden md:table-cell">
+   386→                        <div className="flex items-center gap-1 text-sm">
+   387→                          <Star className="size-3.5 fill-amber-400 text-amber-400" />
+   388→                          <span className="font-medium">{l.rating.toFixed(1)}</span>
+   389→                          <span className="text-xs text-muted-foreground">({l.reviewCount})</span>
+   390→                        </div>
+   391→                      </TableCell>
+   392→                      <TableCell className="hidden lg:table-cell">
+   393→                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+   394→                          <Eye className="size-3.5" />
+   395→                          {l.viewCount}
+   396→                        </div>
+   397→                      </TableCell>
+   398→                      <TableCell className="text-right">
+   399→                        <div className="flex items-center justify-end gap-1">
+   400→                          <Button
+   401→                            size="sm"
+   402→                            variant="ghost"
+   403→                            onClick={() => handleOpenEdit(l)}
+   404→                            aria-label={`Uredi ${l.name}`}
+   405→                          >
+   406→                            <Pencil className="size-4" />
+   407→                            <span className="sr-only">Uredi</span>
+   408→                          </Button>
+   409→                          <Button
+   410→                            size="sm"
+   411→                            variant="ghost"
+   412→                            onClick={() => setDeleteId(l.id)}
+   413→                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+   414→                            aria-label={`Izbriši ${l.name}`}
+   415→                          >
+   416→                            <Trash2 className="size-4" />
+   417→                            <span className="sr-only">Izbriši</span>
+   418→                          </Button>
+   419→                        </div>
+   420→                      </TableCell>
+   421→                    </TableRow>
+   422→                  ))}
+   423→                </TableBody>
+   424→              </Table>
+   425→            </div>
+   426→          )}
+   427→        </CardContent>
+   428→      </Card>
+   429→
+   430→      <div className="text-xs text-muted-foreground text-right">
+   431→        Skupno: {filtered.length} od {listings.length} lokalov
+   432→      </div>
+   433→
+   434→      {/* Create/Edit Dialog */}
+   435→      <ListingForm
+   436→        open={formOpen}
+   437→        onOpenChange={setFormOpen}
+   438→        listing={editing}
+   439→        adminPassword={adminPassword}
+   440→        onSaved={handleSaved}
+   441→      />
+   442→
+   443→      {/* Delete confirmation */}
+   444→      <AlertDialog
+   445→        open={!!deleteId}
+   446→        onOpenChange={(o) => !o && setDeleteId(null)}
+   447→      >
+   448→        <AlertDialogContent>
+   449→          <AlertDialogHeader>
+   450→            <AlertDialogTitle>Izbriši lokal?</AlertDialogTitle>
+   451→            <AlertDialogDescription>
+   452→              Ta akcija je trajna. Lokal in vsi njegovi podatki bodo odstranjeni s platforme.
+   453→            </AlertDialogDescription>
+   454→          </AlertDialogHeader>
+   455→          <AlertDialogFooter>
+   456→            <AlertDialogCancel disabled={deleting}>Prekliči</AlertDialogCancel>
+   457→            <AlertDialogAction
+   458→              onClick={handleConfirmDelete}
+   459→              disabled={deleting}
+   460→              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+   461→            >
+   462→              {deleting ? (
+   463→                <>
+   464→                  <Loader2 className="size-4 animate-spin" />
+   465→                  Brisanje...
+   466→                </>
+   467→              ) : (
+   468→                <>
+   469→                  <Trash2 className="size-4" />
+   470→                  Izbriši
+   471→                </>
+   472→              )}
+   473→            </AlertDialogAction>
+   474→          </AlertDialogFooter>
+   475→        </AlertDialogContent>
+   476→      </AlertDialog>
+   477→    </div>
+   478→  );
+   479→}
+   480→
+   481→// === TAB 2: LEADS ===
+   482→function LeadsTab({ adminPassword }: { adminPassword: string }) {
+   483→  const [leads, setLeads] = React.useState<Lead[]>([]);
+   484→  const [loading, setLoading] = React.useState(true);
+   485→  const [errorMsg, setErrorMsg] = React.useState<string | null>(null);
+   486→
+   487→  const fetchLeads = React.useCallback(async () => {
+   488→    setLoading(true);
+   489→    setErrorMsg(null);
+   490→    try {
+   491→      const res = await fetch("/api/admin/leads", {
+   492→        headers: { "x-admin-password": adminPassword },
+   493→      });
+   494→      if (!res.ok) {
+   495→        const d: unknown = await res.json();
+   496→        const msg =
+   497→          typeof d === "object" && d !== null && "error" in d
+   498→            ? String((d as Record<string, unknown>).error)
+   499→            : "Napaka pri pridobivanju leadov";
+   500→        setErrorMsg(msg);
+   501→        return;
+   502→      }
+   503→      const data: unknown = await res.json();
+   504→      const list = (
+   505→        typeof data === "object" && data !== null && "leads" in data
+   506→          ? (data as Record<string, unknown>).leads
+   507→          : []) as Lead[];
+   508→      setLeads(list);
+   509→    } catch (err) {
+   510→      console.error("[admin/leads] fetch:", err);
+   511→      setErrorMsg("Napaka pri povezavi s strežnikom");
+   512→    } finally {
+   513→      setLoading(false);
+   514→    }
+   515→  }, [adminPassword]);
+   516→
+   517→  React.useEffect(() => {
+   518→    fetchLeads();
+   519→  }, [fetchLeads]);
+   520→
+   521→  const handleCycleStatus = async (lead: Lead) => {
+   522→    const next = STATUS_NEXT[lead.status];
+   523→    // Optimistic update
+   524→    setLeads((prev) =>
+   525→      prev.map((l) => (l.id === lead.id ? { ...l, status: next } : l))
+   526→    );
+   527→    try {
+   528→      const res = await fetch("/api/admin/leads", {
+   529→        method: "PUT",
+   530→        headers: {
+   531→          "Content-Type": "application/json",
+   532→          "x-admin-password": adminPassword,
+   533→        },
+   534→        body: JSON.stringify({ id: lead.id, status: next }),
+   535→      });
+   536→      if (!res.ok) {
+   537→        // Revert on failure
+   538→        setLeads((prev) =>
+   539→          prev.map((l) => (l.id === lead.id ? { ...l, status: lead.status } : l))
+   540→        );
+   541→        const d: unknown = await res.json();
+   542→        const msg =
+   543→          typeof d === "object" && d !== null && "error" in d
+   544→            ? String((d as Record<string, unknown>).error)
+   545→            : "Napaka pri posodabljanju";
+   546→        setErrorMsg(msg);
+   547→      }
+   548→    } catch (err) {
+   549→      console.error("[admin/leads] update:", err);
+   550→      setLeads((prev) =>
+   551→        prev.map((l) => (l.id === lead.id ? { ...l, status: lead.status } : l))
+   552→      );
+   553→      setErrorMsg("Napaka pri povezavi s strežnikom");
+   554→    }
+   555→  };
+   556→
+   557→  const handleExportCsv = () => {
+   558→    if (leads.length === 0) return;
+   559→    const headers = [
+   560→      "Datum",
+   561→      "Ime",
+   562→      "Email",
+   563→      "Telefon",
+   564→      "Lokal",
+   565→      "Tip",
+   566→      "Kraj",
+   567→      "Paket",
+   568→      "Status",
+   569→      "Sporočilo",
+   570→    ];
+   571→    const rows = leads.map((l) => [
+   572→      new Date(l.timestamp).toLocaleString("sl-SI"),
+   573→      l.name,
+   574→      l.email,
+   575→      l.phone ?? "",
+   576→      l.businessName,
+   577→      l.businessType,
+   578→      l.location,
+   579→      l.plan,
+   580→      STATUS_LABELS[l.status],
+   581→      (l.message ?? "").replace(/[\r\n]+/g, " "),
+   582→    ]);
+   583→    const csv = [headers, ...rows]
+   584→      .map((row) =>
+   585→        row
+   586→          .map((cell) => {
+   587→            const s = String(cell ?? "");
+   588→            if (s.includes(";") || s.includes('"') || s.includes("\n")) {
+   589→              return `"${s.replace(/"/g, '""')}"`;
+   590→            }
+   591→            return s;
+   592→          })
+   593→          .join(";")
+   594→      )
+   595→      .join("\n");
+   596→
+   597→    // BOM za Excel UTF-8
+   598→    const blob = new Blob(["\uFEFF" + csv], {
+   599→      type: "text/csv;charset=utf-8;",
+   600→    });
+   601→    const url = URL.createObjectURL(blob);
+   602→    const a = document.createElement("a");
+   603→    a.href = url;
+   604→    a.download = `leads-${new Date().toISOString().slice(0, 10)}.csv`;
+   605→    document.body.appendChild(a);
+   606→    a.click();
+   607→    document.body.removeChild(a);
+   608→    URL.revokeObjectURL(url);
+   609→  };
+   610→
+   611→  return (
+   612→    <div className="space-y-4">
+   613→      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+   614→        <div>
+   615→          <h2 className="text-xl font-bold tracking-tight">Leadi</h2>
+   616→          <p className="text-sm text-muted-foreground">
+   617→            Prijave lokalov, zbrane prek obrazca &ldquo;Pridruži se&rdquo;.
+   618→          </p>
+   619→        </div>
+   620→        <Button
+   621→          variant="outline"
+   622→          onClick={handleExportCsv}
+   623→          disabled={leads.length === 0}
+   624→          className="shrink-0"
+   625→        >
+   626→          <Download className="size-4" />
+   627→          Izvozi CSV
+   628→        </Button>
+   629→      </div>
+   630→
+   631→      {errorMsg && (
+   632→        <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+   633→          <AlertCircle className="size-4 shrink-0 mt-0.5" />
+   634→          <span>{errorMsg}</span>
+   635→        </div>
+   636→      )}
+   637→
+   638→      <Card>
+   639→        <CardContent className="p-0">
+   640→          {loading ? (
+   641→            <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+   642→              <Loader2 className="size-4 animate-spin" />
+   643→              Nalaganje leadov...
+   644→            </div>
+   645→          ) : leads.length === 0 ? (
+   646→            <div className="py-16 text-center text-muted-foreground">
+   647→              <Users className="size-8 mx-auto mb-2 opacity-50" />
+   648→              Ni še leadov.
+   649→            </div>
+   650→          ) : (
+   651→            <div className="overflow-x-auto">
+   652→              <Table>
+   653→                <TableHeader>
+   654→                  <TableRow>
+   655→                    <TableHead className="hidden md:table-cell">Datum</TableHead>
+   656→                    <TableHead>Ime</TableHead>
+   657→                    <TableHead className="hidden sm:table-cell">Kontakt</TableHead>
+   658→                    <TableHead className="hidden lg:table-cell">Lokal</TableHead>
+   659→                    <TableHead className="hidden xl:table-cell">Tip</TableHead>
+   660→                    <TableHead className="hidden lg:table-cell">Kraj</TableHead>
+   661→                    <TableHead className="hidden md:table-cell">Paket</TableHead>
+   662→                    <TableHead>Status</TableHead>
+   663→                  </TableRow>
+   664→                </TableHeader>
+   665→                <TableBody>
+   666→                  {leads.map((l) => (
+   667→                    <TableRow key={l.id}>
+   668→                      <TableCell className="hidden md:table-cell text-xs text-muted-foreground whitespace-nowrap">
+   669→                        {new Date(l.timestamp).toLocaleDateString("sl-SI", {
+   670→                          day: "2-digit",
+   671→                          month: "2-digit",
+   672→                          year: "numeric",
+   673→                        })}
+   674→                      </TableCell>
+   675→                      <TableCell>
+   676→                        <div className="font-medium">{l.name}</div>
+   677→                        <div className="text-xs text-muted-foreground md:hidden">
+   678→                          {l.businessName}
+   679→                        </div>
+   680→                      </TableCell>
+   681→                      <TableCell className="hidden sm:table-cell">
+   682→                        <div className="text-xs">
+   683→                          <div className="text-foreground">{l.email}</div>
+   684→                          {l.phone && (
+   685→                            <div className="text-muted-foreground">{l.phone}</div>
+   686→                          )}
+   687→                        </div>
+   688→                      </TableCell>
+   689→                      <TableCell className="hidden lg:table-cell">
+   690→                        <div className="text-sm">{l.businessName}</div>
+   691→                        <div className="text-xs text-muted-foreground xl:hidden">
+   692→                          {l.businessType}
+   693→                        </div>
+   694→                      </TableCell>
+   695→                      <TableCell className="hidden xl:table-cell text-sm">
+   696→                        {l.businessType}
+   697→                      </TableCell>
+   698→                      <TableCell className="hidden lg:table-cell text-sm">
+   699→                        {l.location}
+   700→                      </TableCell>
+   701→                      <TableCell className="hidden md:table-cell">
+   702→                        <PlanBadge plan={l.plan as ListingPlan} />
+   703→                      </TableCell>
+   704→                      <TableCell>
+   705→                        <button
+   706→                          type="button"
+   707→                          onClick={() => handleCycleStatus(l)}
+   708→                          className={`inline-flex items-center rounded-md border px-2 py-1 text-xs font-medium transition-colors ${STATUS_STYLES[l.status]}`}
+   709→                          title="Klik za naslednji status"
+   710→                        >
+   711→                          {STATUS_LABELS[l.status]}
+   712→                        </button>
+   713→                      </TableCell>
+   714→                    </TableRow>
+   715→                  ))}
+   716→                </TableBody>
+   717→              </Table>
+   718→            </div>
+   719→          )}
+   720→        </CardContent>
+   721→      </Card>
+   722→
+   723→      {leads.length > 0 && (
+   724→        <div className="text-xs text-muted-foreground text-right">
+   725→          Skupno: {leads.length} leadov · klik na status za preklop
+   726→        </div>
+   727→      )}
+   728→    </div>
+   729→  );
+   730→}
+   731→
+   732→// === TAB 3: STATISTIKA ===
+   733→function StatsTab({ adminPassword }: { adminPassword: string }) {
+   734→  const [listings, setListings] = React.useState<AdminListing[]>([]);
+   735→  const [leads, setLeads] = React.useState<Lead[]>([]);
+   736→  const [loading, setLoading] = React.useState(true);
+   737→
+   738→  React.useEffect(() => {
+   739→    let cancelled = false;
+   740→    (async () => {
+   741→      setLoading(true);
+   742→      try {
+   743→        const [lRes, leadsRes] = await Promise.all([
+   744→          fetch("/api/admin/listings", {
+   745→            headers: { "x-admin-password": adminPassword },
+   746→          }),
+   747→          fetch("/api/admin/leads", {
+   748→            headers: { "x-admin-password": adminPassword },
+   749→          }),
+   750→        ]);
+   751→        const lData: unknown = await lRes.json();
+   752→        const leadsData: unknown = await leadsRes.json();
+   753→        if (cancelled) return;
+   754→        const lList = (
+   755→          typeof lData === "object" && lData !== null && "listings" in lData
+   756→            ? (lData as Record<string, unknown>).listings
+   757→            : []) as AdminListing[];
+   758→        const leadsList = (
+   759→          typeof leadsData === "object" && leadsData !== null && "leads" in leadsData
+   760→            ? (leadsData as Record<string, unknown>).leads
+   761→            : []) as Lead[];
+   762→        setListings(lList);
+   763→        setLeads(leadsList);
+   764→      } catch (err) {
+   765→        console.error("[admin/stats] fetch:", err);
+   766→      } finally {
+   767→        if (!cancelled) setLoading(false);
+   768→      }
+   769→    })();
+   770→    return () => {
+   771→      cancelled = true;
+   772→    };
+   773→  }, [adminPassword]);
+   774→
+   775→  // Kategorije — useMemo MORA biti pred morebitnim zgodnjim returnom
+   776→  const byCategory = React.useMemo(() => {
+   777→    const map = new Map<string, number>();
+   778→    for (const l of listings) {
+   779→      map.set(l.category, (map.get(l.category) ?? 0) + 1);
+   780→    }
+   781→    const arr = Array.from(map.entries()).map(([cat, count]) => ({
+   782→      cat: cat as ListingCategory,
+   783→      label: CATEGORY_LABELS[cat as ListingCategory] ?? cat,
+   784→      count,
+   785→    }));
+   786→    arr.sort((a, b) => b.count - a.count);
+   787→    return arr;
+   788→  }, [listings]);
+   789→
+   790→  if (loading) {
+   791→    return (
+   792→      <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+   793→        <Loader2 className="size-4 animate-spin" />
+   794→        Nalaganje statistike...
+   795→      </div>
+   796→    );
+   797→  }
+   798→
+   799→  const total = listings.length;
+   800→  const premium = listings.filter(
+   801→    (l) => l.plan === "premium" || l.plan === "enterprise"
+   802→  ).length;
+   803→  const totalLeads = leads.length;
+   804→  const totalViews = listings.reduce((sum, l) => sum + (l.viewCount ?? 0), 0);
+   805→
+   806→  const top5 = [...listings]
+   807→    .sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))
+   808→    .slice(0, 5);
+   809→
+   810→  const maxCat = Math.max(1, ...byCategory.map((c) => c.count));
+   811→
+   812→  return (
+   813→    <div className="space-y-6">
+   814→      <div>
+   815→        <h2 className="text-xl font-bold tracking-tight">Statistika</h2>
+   816→        <p className="text-sm text-muted-foreground">
+   817→          Pregled ključnih metrik platforme.
+   818→        </p>
+   819→      </div>
+   820→
+   821→      {/* Beta status kartica */}
+   822→      <BetaStatusCard />
+   823→
+   824→      {/* KPI kartice */}
+   825→      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+   826→        <KpiCard
+   827→          icon={<Building2 className="size-5" />}
+   828→          label="Skupno lokalov"
+   829→          value={total}
+   830→          color="primary"
+   831→        />
+   832→        <KpiCard
+   833→          icon={<Crown className="size-5" />}
+   834→          label="Premium / Enterprise"
+   835→          value={premium}
+   836→          color="amber"
+   837→        />
+   838→        <KpiCard
+   839→          icon={<Users className="size-5" />}
+   840→          label="Skupno leadov"
+   841→          value={totalLeads}
+   842→          color="accent"
+   843→        />
+   844→        <KpiCard
+   845→          icon={<Eye className="size-5" />}
+   846→          label="Skupno ogledov"
+   847→          value={totalViews}
+   848→          color="emerald"
+   849→        />
+   850→      </div>
+   851→
+   852→      {/* Top 5 + Kategorije */}
+   853→      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+   854→        <Card>
+   855→          <CardHeader>
+   856→            <CardTitle className="flex items-center gap-2 text-base">
+   857→              <TrendingUp className="size-4 text-primary" />
+   858→              Top 5 lokalov po ogledih
+   859→            </CardTitle>
+   860→            <CardDescription>
+   861→              Najbolj obiskani lokalci na platformi.
+   862→            </CardDescription>
+   863→          </CardHeader>
+   864→          <CardContent>
+   865→            {top5.length === 0 ? (
+   866→              <p className="text-sm text-muted-foreground py-4">
+   867→                Ni podatkov.
+   868→              </p>
+   869→            ) : (
+   870→              <ol className="space-y-3">
+   871→                {top5.map((l, idx) => (
+   872→                  <li key={l.id} className="flex items-center gap-3">
+   873→                    <span
+   874→                      className={`flex size-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+   875→                        idx === 0
+   876→                          ? "bg-amber-100 text-amber-900"
+   877→                          : idx === 1
+   878→                          ? "bg-muted-foreground/15 text-foreground"
+   879→                          : idx === 2
+   880→                          ? "bg-accent/15 text-accent-foreground"
+   881→                          : "bg-muted text-muted-foreground"
+   882→                      }`}
+   883→                    >
+   884→                      {idx + 1}
+   885→                    </span>
+   886→                    <div className="min-w-0 flex-1">
+   887→                      <div className="text-sm font-medium truncate">{l.name}</div>
+   888→                      <div className="text-xs text-muted-foreground">
+   889→                        {l.destinationName ?? "—"} ·{" "}
+   890→                        {CATEGORY_LABELS[l.category as ListingCategory] ?? l.category}
+   891→                      </div>
+   892→                    </div>
+   893→                    <div className="flex items-center gap-1 text-sm font-semibold tabular-nums">
+   894→                      <Eye className="size-3.5 text-muted-foreground" />
+   895→                      {l.viewCount}
+   896→                    </div>
+   897→                  </li>
+   898→                ))}
+   899→              </ol>
+   900→            )}
+   901→          </CardContent>
+   902→        </Card>
+   903→
+   904→        <Card>
+   905→          <CardHeader>
+   906→            <CardTitle className="flex items-center gap-2 text-base">
+   907→              <Sparkles className="size-4 text-primary" />
+   908→              Lokali po kategorijah
+   909→            </CardTitle>
+   910→            <CardDescription>Razporeditev po tipih lokalov.</CardDescription>
+   911→          </CardHeader>
+   912→          <CardContent>
+   913→            {byCategory.length === 0 ? (
+   914→              <p className="text-sm text-muted-foreground py-4">
+   915→                Ni podatkov.
+   916→              </p>
+   917→            ) : (
+   918→              <div className="space-y-3">
+   919→                {byCategory.map((c) => (
+   920→                  <div key={c.cat} className="space-y-1">
+   921→                    <div className="flex items-center justify-between text-sm">
+   922→                      <span className="font-medium">{c.label}</span>
+   923→                      <span className="text-muted-foreground tabular-nums">
+   924→                        {c.count}
+   925→                      </span>
+   926→                    </div>
+   927→                    <div className="h-2 rounded-full bg-muted overflow-hidden">
+   928→                      <div
+   929→                        className="h-full bg-primary rounded-full transition-all"
+   930→                        style={{ width: `${(c.count / maxCat) * 100}%` }}
+   931→                      />
+   932→                    </div>
+   933→                  </div>
+   934→                ))}
+   935→              </div>
+   936→            )}
+   937→          </CardContent>
+   938→        </Card>
+   939→      </div>
+   940→    </div>
+   941→  );
+   942→}
+   943→
+   944→// === BETA STATUS WIDGET (na vrh dashboard-a) ===
+   945→interface BetaStatus {
+   946→  isActive: boolean;
+   947→  listingCount: number;
+   948→  remainingToMonetization: number;
+   949→  message: string;
+   950→  betaEndDate: string;
+   951→}
+   952→
+   953→function useBetaStatus() {
+   954→  const [status, setStatus] = React.useState<BetaStatus | null>(null);
+   955→  const [loading, setLoading] = React.useState(true);
+   956→
+   957→  React.useEffect(() => {
+   958→    let cancelled = false;
+   959→    fetch("/api/beta-status")
+   960→      .then((r) => r.json())
+   961→      .then((d: BetaStatus) => {
+   962→        if (!cancelled) {
+   963→          setStatus(d);
+   964→          setLoading(false);
+   965→        }
+   966→      })
+   967→      .catch(() => {
+   968→        if (!cancelled) setLoading(false);
+   969→      });
+   970→    return () => {
+   971→      cancelled = true;
+   972→    };
+   973→  }, []);
+   974→
+   975→  return { status, loading };
+   976→}
+   977→
+   978→function BetaStatusWidget() {
+   979→  const { status, loading } = useBetaStatus();
+   980→
+   981→  if (loading) {
+   982→    return (
+   983→      <Card className="mb-6 border-amber-300/50">
+   984→        <CardContent className="p-5 flex items-center gap-3 text-muted-foreground">
+   985→          <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+   986→          <span className="text-sm">Nalagam beta status...</span>
+   987→        </CardContent>
+   988→      </Card>
+   989→    );
+   990→  }
+   991→
+   992→  if (!status) return null;
+   993→
+   994→  const pct = Math.min(
+   995→    100,
+   996→    (status.listingCount / BETA_INFO.threshold) * 100
+   997→  );
+   998→
+   999→  if (!status.isActive) {
+  1000→    return (
+  1001→      <Card className="mb-6 border-primary/40 bg-primary/5">
+  1002→        <CardContent className="p-5">
+  1003→          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+  1004→            <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+  1005→              <Check className="size-6" aria-hidden="true" />
+  1006→            </div>
+  1007→            <div className="flex-1 min-w-0">
+  1008→              <div className="flex items-center gap-2 mb-1">
+  1009→                <h3 className="text-base font-bold">Monetizacija aktivna</h3>
+  1010→                <Badge className="bg-primary text-primary-foreground border-0 gap-1">
+  1011→                  <ShieldCheck className="size-3" aria-hidden="true" />
+  1012→                  BETA ZAKLJUČEN
+  1013→                </Badge>
+  1014→              </div>
+  1015→              <p className="text-sm text-muted-foreground">
+  1016→                Dosegli smo {BETA_INFO.threshold} aktivnih lokalov in redni
+  1017→                cenik je vklopljen. Beta uporabniki obdržijo svoje ugodnosti 6 mesecev.
+  1018→              </p>
+  1019→            </div>
+  1020→          </div>
+  1021→        </CardContent>
+  1022→      </Card>
+  1023→    );
+  1024→  }
+  1025→
+  1026→  return (
+  1027→    <Card className="mb-6 border-amber-400/60 bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/10">
+  1028→      <CardContent className="p-5 sm:p-6">
+  1029→        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+  1030→          <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300">
+  1031→            <Rocket className="size-6" aria-hidden="true" />
+  1032→          </div>
+  1033→          <div className="flex-1 min-w-0">
+  1034→            <div className="flex flex-wrap items-center gap-2 mb-2">
+  1035→              <h3 className="text-base sm:text-lg font-bold text-amber-900 dark:text-amber-200">
+  1036→                BETA AKTIVEN
+  1037→              </h3>
+  1038→              <Badge className="bg-amber-400 text-amber-950 hover:bg-amber-400 border-0 gap-1">
+  1039→                <Zap className="size-3 fill-amber-950" aria-hidden="true" />
+  1040→                Vsi paketi BREZPLAČNI
+  1041→              </Badge>
+  1042→            </div>
+  1043→
+  1044→            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-3">
+  1045→              <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+  1046→                {status.listingCount} / {BETA_INFO.threshold} lokalov do monetizacije
+  1047→              </p>
+  1048→              <span className="hidden sm:inline text-amber-700/40">·</span>
+  1049→              <p className="text-xs text-amber-700/90 dark:text-amber-300/80">
+  1050→                Še {status.remainingToMonetization} {status.remainingToMonetization === 1 ? "lokal" : status.remainingToMonetization < 5 ? "lokala" : "lokalov"}
+  1051→              </p>
+  1052→            </div>
+  1053→
+  1054→            <Progress
+  1055→              value={pct}
+  1056→              className="h-2.5 bg-amber-200/60 dark:bg-amber-900/40"
+  1057→            />
+  1058→
+  1059→            <p className="mt-3 text-xs text-amber-800/90 dark:text-amber-300/80 leading-relaxed">
+  1060→              Ko dosežemo {BETA_INFO.threshold} lokalov, se monetizacija samodejno
+  1061→              vklopi. Beta uporabniki obdržijo svoje ugodnosti 6 mesecev.
+  1062→            </p>
+  1063→          </div>
+  1064→
+  1065→          <div className="hidden lg:flex flex-col items-center gap-1 shrink-0 rounded-xl bg-amber-200/40 dark:bg-amber-900/30 px-4 py-3 text-center">
+  1066→            <Gift className="size-6 text-amber-700 dark:text-amber-300" aria-hidden="true" />
+  1067→            <span className="text-xs font-semibold text-amber-900 dark:text-amber-200">
+  1068→              Beta konča
+  1069→            </span>
+  1070→            <span className="text-xs text-amber-700 dark:text-amber-300">
+  1071→              {status.betaEndDate}
+  1072→            </span>
+  1073→          </div>
+  1074→        </div>
+  1075→      </CardContent>
+  1076→    </Card>
+  1077→  );
+  1078→}
+  1079→
+  1080→// === BETA STATUS KOMPAKTNA KARTICA (v Statistika tab) ===
+  1081→function BetaStatusCard() {
+  1082→  const { status, loading } = useBetaStatus();
+  1083→
+  1084→  if (loading) {
+  1085→    return (
+  1086→      <Card>
+  1087→        <CardContent className="p-5 flex items-center gap-3 text-muted-foreground">
+  1088→          <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+  1089→          <span className="text-sm">Nalagam beta status...</span>
+  1090→        </CardContent>
+  1091→      </Card>
+  1092→    );
+  1093→  }
+  1094→
+  1095→  if (!status) return null;
+  1096→
+  1097→  const pct = Math.min(
+  1098→    100,
+  1099→    (status.listingCount / BETA_INFO.threshold) * 100
+  1100→  );
+  1101→
+  1102→  return (
+  1103→    <Card
+  1104→      className={
+  1105→        status.isActive
+  1106→          ? "border-amber-300/60 bg-amber-50/70 dark:bg-amber-950/20"
+  1107→          : "border-primary/40 bg-primary/5"
+  1108→      }
+  1109→    >
+  1110→      <CardHeader>
+  1111→        <CardTitle className="flex items-center gap-2 text-base">
+  1112→          <Rocket
+  1113→            className={
+  1114→              status.isActive
+  1115→                ? "size-4 text-amber-600"
+  1116→                : "size-4 text-primary"
+  1117→            }
+  1118→            aria-hidden="true"
+  1119→          />
+  1120→          Beta status platforme
+  1121→        </CardTitle>
+  1122→        <CardDescription>
+  1123→          {status.isActive
+  1124→            ? "Beta obdobje je aktivno — vsi paketi so brezplačni."
+  1125→            : "Monetizacija je vklopljena."}
+  1126→        </CardDescription>
+  1127→      </CardHeader>
+  1128→      <CardContent className="space-y-3">
+  1129→        <div className="flex items-center justify-between gap-2">
+  1130→          <span className="text-sm text-muted-foreground">
+  1131→            Lokalov na platformi
+  1132→          </span>
+  1133→          <span className="text-sm font-bold tabular-nums">
+  1134→            {status.listingCount} / {BETA_INFO.threshold}
+  1135→          </span>
+  1136→        </div>
+  1137→        <Progress
+  1138→          value={pct}
+  1139→          className={
+  1140→            status.isActive
+  1141→              ? "h-2 bg-amber-200/60 dark:bg-amber-900/40"
+  1142→              : "h-2 bg-primary/20"
+  1143→          }
+  1144→        />
+  1145→        <div className="flex items-center justify-between gap-2">
+  1146→          <span className="text-xs text-muted-foreground">
+  1147→            {status.isActive
+  1148→              ? `Še ${status.remainingToMonetization} do monetizacije`
+  1149→              : "Beta zaključen"}
+  1150→          </span>
+  1151→          {status.isActive ? (
+  1152→            <Badge className="bg-amber-400 text-amber-950 hover:bg-amber-400 border-0 gap-1">
+  1153→              <Zap className="size-3 fill-amber-950" aria-hidden="true" />
+  1154→              BETA AKTIVEN
+  1155→            </Badge>
+  1156→          ) : (
+  1157→            <Badge className="bg-primary text-primary-foreground border-0 gap-1">
+  1158→              <Check className="size-3" aria-hidden="true" />
+  1159→              MONETIZACIJA
+  1160→            </Badge>
+  1161→          )}
+  1162→        </div>
+  1163→        <p className="text-xs text-muted-foreground pt-2 border-t border-border/60">
+  1164→          {status.message}
+  1165→        </p>
+  1166→      </CardContent>
+  1167→    </Card>
+  1168→  );
+  1169→}
+  1170→
+  1171→// === POMOŽNE ===
+  1172→function PlanBadge({ plan }: { plan: ListingPlan }) {
+  1173→  if (plan === "enterprise") {
+  1174→    return (
+  1175→      <Badge className="bg-primary text-primary-foreground hover:bg-primary">
+  1176→        <Crown className="size-3 mr-0.5" />
+  1177→        {PLAN_LABELS[plan]}
+  1178→      </Badge>
+  1179→    );
+  1180→  }
+  1181→  if (plan === "premium") {
+  1182→    return (
+  1183→      <Badge
+  1184→        variant="outline"
+  1185→        className="border-amber-300 bg-amber-50 text-amber-900"
+  1186→      >
+  1187→        <Sparkles className="size-3 mr-0.5" />
+  1188→        {PLAN_LABELS[plan]}
+  1189→      </Badge>
+  1190→    );
+  1191→  }
+  1192→  return (
+  1193→    <Badge variant="secondary" className="text-muted-foreground">
+  1194→      {PLAN_LABELS[plan]}
+  1195→    </Badge>
+  1196→  );
+  1197→}
+  1198→
+  1199→function KpiCard({
+  1200→  icon,
+  1201→  label,
+  1202→  value,
+  1203→  color,
+  1204→}: {
+  1205→  icon: React.ReactNode;
+  1206→  label: string;
+  1207→  value: number;
+  1208→  color: "primary" | "amber" | "accent" | "emerald";
+  1209→}) {
+  1210→  const colorClasses: Record<typeof color, string> = {
+  1211→    primary: "bg-primary/10 text-primary",
+  1212→    amber: "bg-amber-100 text-amber-900",
+  1213→    accent: "bg-accent/15 text-accent-foreground",
+  1214→    emerald: "bg-emerald-100 text-emerald-900",
+  1215→  };
+  1216→  return (
+  1217→    <Card>
+  1218→      <CardContent className="p-4 sm:p-5">
+  1219→        <div className="flex items-start justify-between gap-2">
+  1220→          <div className="min-w-0">
+  1221→            <p className="text-xs sm:text-sm text-muted-foreground truncate">
+  1222→              {label}
+  1223→            </p>
+  1224→            <p className="text-2xl sm:text-3xl font-bold tabular-nums mt-1">
+  1225→              {value.toLocaleString("sl-SI")}
+  1226→            </p>
+  1227→          </div>
+  1228→          <div
+  1229→            className={`flex size-9 sm:size-10 shrink-0 items-center justify-center rounded-md ${colorClasses[color]}`}
+  1230→          >
+  1231→            {icon}
+  1232→          </div>
+  1233→        </div>
+  1234→      </CardContent>
+  1235→    </Card>
+  1236→  );
+  1237→}
+  1238→

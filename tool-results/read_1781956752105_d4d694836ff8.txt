@@ -1,0 +1,1064 @@
+     1→// Slovenski blog članki — SEO vsebina za "I Feel Slovenia" platformo.
+     2→// 16 člankov, ki pokrivajo naravo, kulinariko, kulturo, avanturo in nasvete.
+     3→
+     4→export type BlogCategory =
+     5→  | "narava"
+     6→  | "kulinarika"
+     7→  | "kultura"
+     8→  | "avantura"
+     9→  | "nasveti";
+    10→
+    11→export interface BlogPost {
+    12→  slug: string;
+    13→  title: string;
+    14→  excerpt: string; // 1-2 stavka povzetek
+    15→  content: string; // markdown vsebina (3-5 odstavkov)
+    16→  image: string;
+    17→  category: BlogCategory;
+    18→  author: string;
+    19→  date: string; // ISO datum
+    20→  readTime: number; // minute
+    21→  relatedDestination?: string; // id destinacije iz slovenia-data.ts
+    22→}
+    23→
+    24→export const BLOG_CATEGORIES: { value: BlogCategory | "all"; label: string }[] = [
+    25→  { value: "all", label: "Vsi" },
+    26→  { value: "narava", label: "Narava" },
+    27→  { value: "kulinarika", label: "Kulinarika" },
+    28→  { value: "kultura", label: "Kultura" },
+    29→  { value: "avantura", label: "Avantura" },
+    30→  { value: "nasveti", label: "Nasveti" },
+    31→];
+    32→
+    33→export const BLOG_POSTS: BlogPost[] = [
+    34→  {
+    35→    slug: "blejsko-jezero-vodic",
+    36→    title: "Blejsko jezero: Vodič za popoln obisk",
+    37→    excerpt:
+    38→      "Blejsko jezero je najbolj prepoznavna slovenska razglednica. Spoznajte najboljše čas obiska, kaj početi in kako izkoristiti dan ob alkanskem biseru.",
+    39→    content: `## Zakaj Blejsko jezero?
+    40→
+    41→Blejsko jezero je nedvoumen simbol Slovenije — srednjeveški grad na pečini, otok s cerkvijo sred jezera in kristalno čista voda obkrožena z Julijci. Le 45 minut vožnje od Ljubljane in 2 uri od Dunaja, Bled je idealen za enodnevni izlet ali romantični vikend.
+    42→
+    43→## Najboljši čas obiska
+    44→
+    45→Najlepše je od **maja do oktobra**, ko so temperature prijetne in jezero primerno za plavanje. Zjutraj ob šesti uri jezeru vlada tišina in mehka jutranja svetloba — raj za fotografije. Pozimi jezero včasih zaledeni in ponuja edinstven prizor, a večina aktivnosti je takrat omejena.
+    46→
+    47→## Kaj ne sme manjti
+    48→
+    49→1. **Pletna vožnja do otoka** — tradicionalna lesena čolna, ki jih vlečejo s posebnimi vesli, vodijo že generacije Bledcev. Voznja traja 15 minut, nato se 99 stopnic vzpenja do cerkve.
+    50→2. **Blejski grad** — najstarejši slovenski grad (prvič omenjen 1011) s skoraj 100 metrov visoke pečine ponuja najboljši razgled na jezero.
+    51→3. **Vintgarska soteska** — 1,6 km dolga soteska ob reki Radovni, le 4 km stran.
+    52→4. **Kremšnita** — v slaščičarni Smon ob jezeru so to znamenito sladico pripravljali že od leta 1953.
+    53→
+    54→## Nasveti za obisk
+    55→
+    56→- **Vstopnice za grad**: ~€15 za odrasle, vključuje muzej in razgledišče.
+    57→- **Pletna vožnja**: ~€16 na osebo (pogosto čakalne vrste ob vikendih).
+    58→- **Brezplačno**: sprehod okoli jezera (3,5 km, ~1 ura), plavanje na plavalnem pomolu.
+    59→- Najem kolesa (€10/dan) je odličen način za raziskovanje okolice.
+    60→
+    61→## Kje spati
+    62→
+    63→Izbira je velika — od luksuznega Grand Hotel Toplice ob jezeru do prijaznih penzionov v vaseh Podhom in Ribno. Rezervirajte zgodaj, še posebej poleti.`,
+    64→    image: "https://sfile.chatglm.cn/images-ppt/65ea408c89ea.jpg",
+    65→    category: "narava",
+    66→    author: "Tanja Novak",
+    67→    date: "2025-03-12",
+    68→    readTime: 5,
+    69→    relatedDestination: "bled",
+    70→  },
+    71→  {
+    72→    slug: "soca-adrenalinski-vodnik",
+    73→    title: "Soča: Adrenalinski vodnik za poletje",
+    74→    excerpt:
+    75→      "Smaragdna reka med Julijci je raj za adrenalinže. Od raftinga do canyoninga — spoznajte najboljše adrenalinske aktivnosti ob Soči.",
+    76→    content: `## Smaragdna lepota
+    77→
+    78→Reka Soča je ena redkih rek na svetu, ki ohranja svojo značilno smaragdno barvo skozi vse leto. Vije se 138 km skozi Tolmin, Bovec in Kobarid, skozi Julijce in Triglavski narodni park. Njen slavni opis »reka, ki teče neba« je zapisal pesnik Simon Gregorčič.
+    79→
+    80→## Najboljše adrenalinske aktivnosti
+    81→
+    82→### Rafting
+    83→Klasična tura od Bovca do Trnega ob Soči traja 2 uri in je primerna tudi za začetnike. Cena: €35–45 na osebo. Najboljši pogoji so od maja do septembra.
+    84→
+    85→### Kajakaštvo
+    86→Za izkušene veslače Soča ponuja odseke razreda III–IV. Začetniki lahko začnejo na umirjenem odseku pri Srpenici. Tura z vodičem: €50–65.
+    87→
+    88→### Canyoning
+    89→Sestopanje po divjih grapah s skoki v naravne bazene, drsenje po naravnih toboganih. Suša, Fratarca in Predelica so najbolj znane soteske. Cena: €50–70, trajanje 3–4 ure.
+    90→
+    91→### Zip-line
+    92→Pletena mreža jeklenic nad dolino Učja (najdaljša 700 m) omogoča let nad drevesnimi krošnjami. €40–55.
+    93→
+    94→## Kaj storiti za vreme
+    95→
+    96→Soška dolina je redko deževna poleti, a pozorno spremljajte vremensko napoved — nevihte v gorah lahko povzročijo nenadno dvig vode. V primeru dežja obiščite:
+    97→
+    98→- **Kobaridski muzej** — zgodovina Soške fronte
+    99→- **Trdnjava Kluže** — utrdba iz 15. stoletja
+   100→- **Tolminska korita** — najgloblja soteska v Sloveniji
+   101→
+   102→## Kje počivati
+   103→
+   104→Bovec je epicenter aktivnosti, a Cezsoča in Čezsoča ponujajo tišje nastanitve. Za avanturiste je na voljo tudi kamp Soča Rocks.`,
+   105→    image: "https://sfile.chatglm.cn/images-ppt/5f720abe0af2.jpg",
+   106→    category: "avantura",
+   107→    author: "Matej Horvat",
+   108→    date: "2025-02-18",
+   109→    readTime: 6,
+   110→    relatedDestination: "soca",
+   111→  },
+   112→  {
+   113→    slug: "slovenska-kulinarika-7-jedi",
+   114→    title: "Slovenska kulinarika: 7 jedi ki jih morate poskusiti",
+   115→    excerpt:
+   116→      "Od štrukljev do potice — slovenska kuhinja je presenetljivo raznolika. Tu je 7 jedi, ki definirajo slovensko mizo.",
+   117→    content: `## Mali narod, velika kulinarična raznolikost
+   118→
+   119→Slovenska kuhinja je križanje treh svetov — alpskega, sredozemskega in panonskega. Na majhnem ozemlju boste našli sveže morske sadeže, divjačino iz gozdov, vinske sorte, ki jih drugod ne poznajo, in sladice, ki se prenašajo skozi generacije.
+   120→
+   121→## 7 jedi, ki jih morate poskusiti
+   122→
+   123→### 1. Štruklji
+   124→Kuhani ali pečeni zavitki iz vlečenega testa s skoraj neštetimi polnili — od tunine do oreščkov. Najbolj znani so s toleranco, jabolkom ali makom.
+   125→
+   126→### 2. Žlikrofi
+   127→Idrijski žlikrofi so slovenska različica raviolijev — mali dvignjeni žepki iz testa s krompirjevo oblogo. Zaščiteni z oznako tradicionalne uglednosti od leta 2002.
+   128→
+   129→### 3. Kranjska klobasa
+   130→Zaščitena z geografsko označbo EU. Sestavine: svinjsko meso, slanina, česen, sol in poper. Nikoli ne dodajamo krompirja ali mleka. Najboljša je z žgancem in kislim zeljem.
+   131→
+   132→### 4. Ajdovi žganci
+   133→Tradicionalna jed kmečke kuhinje — ajdova kaša z drobtinami, pogosto postrežena s kislim mlekom ali ocvirki. Preprosto, nasitno in polno pomembnih mineralov.
+   134→
+   135→### 5. Soška postrv
+   136→Slovenska Soča je dom soške postrvi — endemit z rožnatim mesom. Pripravljajo jo na žaru, v bujonski juhi ali prekajeno. Najboljša je sveže ujeta, seveda.
+   137→
+   138→### 6. Prekmurska gibanica
+   139→Najbolj znana slovenska sladica — plastnata pita s skuto, makom, orehi in jabolki. Vsaka plast je ločena z vlečenim testom. Zaščitena z oznako tradicionalne uglednosti.
+   140→
+   141→### 7. Potica
+   142→Praznični zavitek, ki ga pripravljajo za vsako slovensko priložnost — od božiča do porok. Klasična je z orehi ali rozinami, a obstaja več kot 80 različic.
+   143→
+   144→## Kje jih poskusiti
+   145→
+   146→Za pristno izkušnjo obiščite restavracije **Hiša Franko** (Kobarid), **Gostilna As** (Ljubljana) ali **Ošterija Debeluh** (Brežice). Za proračunsko varianto poizkusite lokalne **gostilne** v vaseh, kjer se recepti prenašajo skozi generacije.`,
+   147→    image:
+   148→      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=800&fit=crop&q=80",
+   149→    category: "kulinarika",
+   150→    author: "Petra Kovač",
+   151→    date: "2025-01-22",
+   152→    readTime: 7,
+   153→  },
+   154→  {
+   155→    slug: "triglav-vzpon-vodic",
+   156→    title: "Triglav: Vzpon na najvišji vrh Slovenije",
+   157→    excerpt:
+   158→      "Triglav (2864 m) je narodni simbol in najvišji vrh Slovenije. Pripravite se pravilno — vodnik o opremi, poteh in najboljšem času za vzpon.",
+   159→    content: `## Zakaj Triglav?
+   160→
+   161→Triglav ni le najvišji vrh Slovenije — je narodni simbol, ki krasa državni grb. Legenda pravi, da je pravi Slovenec dolžan vsaj enkrat v življenju stopiti na njegov vrh. Na njem stoji Aljažev stolp, najvišje ležeče zatočišče v državi.
+   162→
+   163→## Dve glavni poti
+   164→
+   165→### 1. Preko Triglavske koče (lahka variant, 2 dni)
+   166→Najbolj priljubljena smer. Iz doline Vrata po markantni poti do Triglavske koče (1525 m), prenočitev, naslednji dan vzpon preko Tominškove poti. Najtežji del je vzpon po grebenu z jeklenicami.
+   167→
+   168→### 2. Preko Staničeve koče (težja variant, 2 dni)
+   169→Lepa, a zahtevnejša pot. Zahteva več plezanja po fixnih vrvih.
+   170→
+   171→### Enodnevni vzpon?
+   172→Možen je za izkušene pohodnike, a priporočamo prenočitev — poleg tega boste videli sončni vzhod z vrha.
+   173→
+   174→## Oprema
+   175→
+   176→**Obvezno:**
+   177→- Pohodni čevlji z dobrim oprijemom
+   178→- Čelada (padajo kamenje)
+   179→- Najmanj 2 l vode
+   180→- Topla oblačila (tudi poleti je na vrhu 10–15 °C)
+   181→- Klopčič in predpasnik za sedenje na grebenu
+   182→- Razdalja med jeklenicami je 20–30 m — uporabite samozavarovanje
+   183→
+   184→**Priporočeno:**
+   185→- Pohodne palice
+   186→- Klobuk in sončna očala
+   187→- Rezervne nogavice
+   188→- Prva pomoč
+   189→
+   190→## Najboljši čas
+   191→
+   192→Vzpon je mogoč od **julija do septembra**. Zunaj te sezone so razmere alpske, potrebna je zimska oprema in izkušnje. Tudi poleti preverite vremensko napoved — nevihte v gorah so nevarne.
+   193→
+   194→## Nasveti
+   195→
+   196→- Rezervirajte prenočišče v koči vsaj 2 meseca vnaprej (poleti polne).
+   197→- Začnite zgodaj zjutraj (ob 5–6 uri) za varnejše razmere na grebenu.
+   198→- Na vrhu ne ostanite predolgo — vreme se lahko hitro spremeni.
+   199→- Spoštljivo do narave: vzemite smeti s seboj.
+   200→
+   201→Triglav ni cilj — je pot. Uživajte v pohodu, ne le v vrhu.`,
+   202→    image: "https://sfile.chatglm.cn/images-ppt/f1fdf5ca02fe.jpg",
+   203→    category: "avantura",
+   204→    author: "Blaž Zupan",
+   205→    date: "2025-02-03",
+   206→    readTime: 8,
+   207→    relatedDestination: "triglav",
+   208→  },
+   209→  {
+   210→    slug: "piran-slovenska-obala-24-ur",
+   211→    title: "Piran in slovenska obala v 24 urah",
+   212→    excerpt:
+   213→      "Kako izkoristiti 24 ur na slovenski obali? Spoznajte Piran, Portorož in soline Sečovlje v enem dnevu — z najboljšo hrano in razgledi.",
+   214→    content: `## Slovenska obala — majhna a čudovita
+   215→
+   216→Slovenija ima le 47 km obale, a je vsak meter vreden obiska. Piran je najbolj slikovito mestece — beneško arhitekturo, ozke uličice in Tartinijev trg. Portorož je bolj sodoben, z hoteli in casinojem. Soline Sečovlje so naravni rezervat z edinstveno solinsko tradicijo.
+   217→
+   218→## Jutranji sprehod po Piranu
+   219→
+   220→Začnite dan ob 8. uri na Tartinijevem trgu — srednjeevropsko največji marmornati trg. Včasih je bil pristanišče, zdaj je srce mesta. Spoznajte rojstno hišo violinista Giuseppeja Tartinija (1692–1770), katerega kip stoji na sredini trga.
+   221→
+   222→Vzpnite se po strmih stopnicah do **cerkve sv. Jurija** (14. st.) — najboljši razgled na mesto in morje. Zvonik je replika beneškega zvonika sv. Marka.
+   223→
+   224→## Kosilo: morska hrana
+   225→
+   226→Slovenska obala ponuja najboljšo morsko hrano v državi. Top priporočila:
+   227→
+   228→- **Pavel** (Piran) — fine dining z lokalnimi sestavinami
+   229→- **Fritolin pri Cantini** (Izola) — sveža riba na preprost način
+   230→- **Ribic** (Portorož) — lokalna gostilna z odličnimi morskimi sadeži
+   231→
+   232→Naročite **sipe na žaru**, **črn riž s squidom** ali **tuno iz Koperja**.
+   233→
+   234→## Popoldan: soline Sečovlje
+   235→
+   236→10 minut vožnje od Portoroža so soline Sečovlje — edinstven solinski rezervat z 700-letno tradicijo. Sprehodite se po solnih poljih, spoznajte delo solinarjev in obiščite muzej. Vstop: €5.
+   237→
+   238→Tukajšnje **soline so dom najmanjše kopenske želve v Sloveniji** — navadne močvirnice. Če imate srečo, jih boste opazili.
+   239→
+   240→## Večer: sončni zahod in vino
+   241→
+   242→Piran je znan po sončnih zahodih. Najboljši razgled je s pomola ob cerkvi sv. Jurija, kjer se za obzorjem potopi v Jadransko morje. Po zahodu se usedite v eno od občanskih vinotek in poskusite **malvazijo** ali **refošk** — dve lokalni sorti.
+   243→
+   244→## Nasveti za enodnevni obisk
+   245→
+   246→- **Parkirajte v Fiesi** (€1,5/h) in se peljite z avtobusom v Piran (brezplačno).
+   247→- Če imate čas, obiščite še Koper in Izolo — avtobusni prevozi vozijo vsakih 30 minut.
+   248→- Kopalna sezona je od junija do septembra.
+   249→- Najem kolesa (€10/dan) je odličen način za obisk cele obale.`,
+   250→    image: "https://sfile.chatglm.cn/images-ppt/1ca2f342127f.jpg",
+   251→    category: "kultura",
+   252→    author: "Maja Dolenc",
+   253→    date: "2025-03-04",
+   254→    readTime: 6,
+   255→    relatedDestination: "piran",
+   256→  },
+   257→  {
+   258→    slug: "zima-v-sloveniji-smucanje-thermalni",
+   259→    title: "Zima v Sloveniji: Smučanje in termalni vrelci",
+   260→    excerpt:
+   261→      "Slovenska zima ponuja dve strani — adrenalinsko smučanje na Julijcih in sprostitev v termalnih vrelcih. Spoznajte najboljše destinacije za zimske mesece.",
+   262→    content: `## Dvojna slovenska zima
+   263→
+   264→Slovenska zima je presenetljiva. En dan smučate po prahu na 2000 m višine, naslednji dan se sproščate v 38 °C topli termalni vodi. Vse to v pol dneh vožnje. Za tiste, ki iščejo aktivno zimo, je Slovenija skrita evropska destinacija.
+   265→
+   266→## Najboljše smučišča
+   267→
+   268→### Kranjska Gora
+   269→Najbolj znano smučišče v Sloveniji z 18 progami in 30 km prog. Vsako leto gosti svetovni pokal v alpskem smučanju (Vitranc). Primerno za družine in začetnike. Dnevna karta: €38–45.
+   270→
+   271→### Mariborsko Pohorje
+   272→Največje nočno smučanje v Sloveniji in dom legendarnega Zlati lisjak smučarskega tekmovanja. 41 km prog, le 10 min od središča Maribora. Dnevna karta: €33–40.
+   273→
+   274→### Vogel (Bohinj)
+   275→Smučanje z najlepšim razgledom v Sloveniji — pogled na Bohinjsko jezero in Triglav. 22 km prog, višina 1800 m. Dnevna karta: €37–42.
+   276→
+   277→### Kanin (Bovec)
+   278→Najvišje ležeče smučišče v Sloveniji (do 2300 m). Pogosto odprto do maja. Zahtevnejše proge, primerno za izkušene smučarje. Dnevna karta: €42–48.
+   279→
+   280→## Termalni vrelci
+   281→
+   282→Po napornem dnevu na smučišču ni nič boljšega kot topla termalna voda. Slovenska termalna mesta imajo dolgo tradicijo.
+   283→
+   284→### Rogaška Slatina
+   285→Elegantno zdravilišče z 400-letno tradicijo. Mineralna voda Donat Mg z najvišjo vsebnostjo magnezija na svetu. Bazeni z vodo do 36 °C.
+   286→
+   287→### Terme Čatež
+   288→Največje termalno letovišče v Sloveniji s poletno in zimno različico bazenov. Idealno za družine. Voda do 36 °C.
+   289→
+   290→### Terme Dobrna
+   291→Najstarejše slovensko zdravilišče (1418). Romantično vzdušje, manj komercialno kot druge terme. Odlično za pare.
+   292→
+   293→### Terme Olimia
+   294→Sodobno zdravilišče z wellness centrom in največjim kompleksom savn v Sloveniji (Sauna Village). Voda do 35 °C.
+   295→
+   296→## Idealni zimski vikend
+   297→
+   298→**Petek**: Prihod v Kranjsko Goro, smučanje popoldan, večerja v gostilni.
+   299→**Sobota**: Zjutraj smučanje, popoldan prevoz do Terme Čatež (1,5 h vožnje), sprostitev v termalni vodi.
+   300→**Nedelja**: Jutranji zajtrk, savna, pot domov.
+   301→
+   302→## Nasveti za zimski obisk
+   303→
+   304→- **Snežne razmere** spremljajte na portalu slovenia.info.
+   305→- **Družinski paketi**: mnoga smučišča ponujajo brezplačne karte za otroke do 6 let.
+   306→- **Termalna letovišča** so pogosto cenejši od smučiščnih hotelov — kombinacija je smiselna.
+   307→- **Decembrski božični sejmi** v Ljubljani in Mariboru so obvezni obisk.`,
+   308→    image:
+   309→      "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=1200&h=800&fit=crop&q=80",
+   310→    category: "nasveti",
+   311→    author: "Saša Krajnc",
+   312→    date: "2025-01-08",
+   313→    readTime: 7,
+   314→  },
+   315→  // === NOVI ČLANKI — Task 30-a (+10 = 16 skupaj) ===
+   316→  {
+   317→    slug: "vintgarska-soteska-vodic",
+   318→    title: "Vintgarska soteska: Vodič po naravnem bisuu ob Bledu",
+   319→    excerpt:
+   320→      "1,6 km dolga soteska ob reki Radovni le 4 km od Bleda — lesen most, slap Šum in kristalno čista voda. Vse za popoln obisk.",
+   321→    content: `## Naravni biser 4 km od Bleda
+   322→
+   323→Vintgarska soteska (Vintgar Gorge) je 1,6 km dolga soteska, ki jo je reka Radovna vrezala v apnenec med Bledom in Gorami. Odkrita leta 1891, ko je lokalni župan Jakob Žumer ob nizki vodi stopil v sotesko in presenečen objavil naravni biser. Od takrat je ena najbolj obiskanih naravnih znamenitosti v Sloveniji.
+   324→
+   325→## Sprehod po lesenih potih
+   326→
+   327→Skozi sotesko vodijo lesene poti, vrezane v skalne stene ob reki. Pohod traja 1-1,5 ure in je primeren za vse starosti. Ob poti boste videli brzice, tolmune, naravne bazene in končno slap Šum — največji slovenski rečni slap po pretoku.
+   328→
+   329→## Kaj si ogledati
+   330→
+   331→1. **Slap Šum** — 13 metrov visok slap, ki zaključuje sotesko
+   332→2. **Leseni mostovi** — podirljive konstrukcije, vrezane v skalne stene
+   333→3. **Hudomušnica** — najbolj razburljiv del soteske z najhitrejšo vodo
+   334→4. **Razgledna točka** — pogled na Blejsko kotlino in Košuto
+   335→
+   336→## Najboljši čas obiska
+   337→
+   338→Soteska je odprta od aprila do oktobra. Najlepše je v **juniju in septembru**, ko je voda najbolj bistra. V juliju in avgustu je mnogo obiskovalcev — začnite zgodaj zjutraj ob 8. uri. Po dežju se voda dvigne in soteska postane še bolj dramatična, a so lahko lesene poti zaprte zaradi visoke vode.
+   339→
+   340→## Nasveti za obisk
+   341→
+   342→- **Vstopnica**: €10 za odrasle, €2 za otroke. Parkirišče je brezplačno.
+   343→- **Vremenska omejitev**: pri visoki vodi sotesko zaprejo — preverite na spletni strani.
+   344→- **Oblačila**: lahka pohodna obutev, v soteski je 5-10 °C hladneje kot zunaj.
+   345→- **Fotoaparati**: vzemite polarizacijski filter za manj odsevov na vodi.
+   346→
+   347→## Kombinacija z Bledom
+   348→
+   349→Vintgarska soteska je idealen dodatek k obisku Bleda. Priporočamo jutranji obisk soteske (8:00) in popoldanski Bled — grad in kremšnita. Skupaj naredite popoln enodnevni izlet.`,
+   350→    image:
+   351→      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop&q=80",
+   352→    category: "narava",
+   353→    author: "Lara Zupan",
+   354→    date: "2025-04-05",
+   355→    readTime: 5,
+   356→    relatedDestination: "vintgar",
+   357→  },
+   358→  {
+   359→    slug: "cvicek-in-dolenjska-kuhinja",
+   360→    title: "Cviček in dolenjska kuhinja: Vodič po lokalnih okusih",
+   361→    excerpt:
+   362→      "Cviček je kralj dolenjskih vin, dolenjska kuhinja pa je kmečka, enostavna in polna okusa. Spoznajte najboljše jedi in vinarje.",
+   363→    content: `## Cviček — dolenjski kralj
+   364→
+   365→Cviček je tradicionalno dolenjsko vino z zaščiteno označbo porekla. Narejen iz mešanice rdečih in belih sort (žlahtna metka, modra frankinja, kraljevina, laški rizling). Nizka vsebnost alkohola (8-10%), sveža kislina, rdeča barva z rubinastim odtenkom. Cviček je namenjen vsakodnevni mizi in najboljša spremljava dolenjski kulinariki.
+   366→
+   367→## Kulinarična dediščina Dolenjske
+   368→
+   369→Dolenjska kuhinja je kmečka, enostavna in polna okusa. Temelji na lokalnih sestavinah — krompirju, zelju, svinjini, divjačini in gobah. Vsaka jed ima svojo zgodovino in pripada določenemu letnemu času.
+   370→
+   371→## 5 jedi, ki jih morate poskusiti
+   372→
+   373→### 1. Štruklji
+   374→Dolenjski štruklji so kuhani ali pečeni zavitki iz vlečenega testa, najpogosteje s skuto, tolaranco ali jabolki. Postrežejo se kot priloga ali sladica.
+   375→
+   376→### 2. Matevž
+   377→Tradicionalna jed iz bobov in krompirja, pireja z ocvirki. Bogata z beljakovinami, enostavna za pripravo, popolnoma slovenska.
+   378→
+   379→### 3. Ajdovi žganci
+   380→Ajdova kaša z drobtinami, postrežena s kislim mlekom ali ocvirki. Preprosto, nasitno in polno mineralov.
+   381→
+   382→### 4. Koline in krvavica
+   383→Koline so v Dolenjski še vedno pomemben december dogodek. Krvavica (krvna klobasa) z ajdovo kašo in drobnim drobtinami je klasika.
+   384→
+   385→### 5. Pogača
+   386→Dolenjska pogača je kvasna pogača s cracklingi (ocvirki). Postreže se topla, najbolje z rcviii.
+   387→
+   388→## Najboljše vinarije
+   389→
+   390→- **Vinska klet Cviček** (Novo mesto) — specializirana za cviček z degustacijami
+   391→- **Klet Golje** (Vipava) — bolj primorska, a odlična kombinacija
+   392→- **Domačija Škerl** (Dolenjske Toplice) — družinska klet z avtentično kuhinjo
+   393→
+   394→## Kulinarična tura po Dolenjski
+   395→
+   396→Za popolno izkušnjo rezervirajte 1-dnevno vinsko-kuharično turo: jutranja degustacija v Novem mestu, kosilo v domačiji ob Krki, popoldanski sprehod po Otočcu in večerna večerja v gradu. Cena: €80-120 na osebo.
+   397→
+   398→## Nasveti
+   399→
+   400→- Cviček je najboljši svež — ne hranite ga dlje kot 1 leto.
+   401→- Dolenjske gostilne so pogosto zaprte ob nedeljah zvečer — preverite odpiralne ure.
+   402→- Najboljši čas za obisk: september in oktober, ko so trgatev in koline.`,
+   403→    image:
+   404→      "https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=1200&h=800&fit=crop&q=80",
+   405→    category: "kulinarika",
+   406→    author: "Petra Kovač",
+   407→    date: "2025-07-12",
+   408→    readTime: 6,
+   409→    relatedDestination: "novo-mesto",
+   410→  },
+   411→  {
+   412→    slug: "bohinj-pozimi",
+   413→    title: "Bohinj pozimi: Smučanje, pohodi in tople jazbe",
+   414→    excerpt:
+   415→      "Bohinj pozimi je tihi, snežni raj. Smučanje na Voglu, pohodi na Komno in sprostitev v toplih jazbah — vodnik za zimski obisk.",
+   416→    content: `## Zimski mir v Triglavskem narodnem parku
+   417→
+   418→Bohinj pozimi je vse, kar Bled ni — tihi, divji, pristen. Ko se turistični vrvež Bleda poleže, Bohinj ohranja svoj mir. Snežne planine, zaledeno jezero in dim iz kaminov v vaseh. Za tiste, ki iščejo pravo alpsko zimo, je Bohinj najboljša izbira.
+   419→
+   420→## Smučanje na Voglu
+   421→
+   422→Vogel je smučišče z najlepšim razgledom v Sloveniji — pogled na Bohinjsko jezero in Triglav s smučarske žičnice. 22 km prog, višina 1800 m. Dnevna karta: €37-42. Smučišče je odprto od decembra do aprila, najboljše razmere so v februarju in marcu.
+   423→
+   424→Za družine z otroki je idealno vzporedno smučišče Soriška planina — manjše, cenejše in manj obiskano.
+   425→
+   426→## Pohodi v zimskem času
+   427→
+   428→### Komna (1520 m)
+   429→Najlažji zimski pohod. Iz Koče na Voglu z vlečnico, nato 2 uri pohoda do Komne. Prenočitev v planinski koči, vrnitev naslednji dan. Pogled na Julijce.
+   430→
+   431→### Slap Savica
+   432→Znamenit slap Savica je dostopen tudi pozimi. 20-minutni sprehod iz parkirišča. Zima je najbolj dramatičen čas — slap delno zamrzne.
+   433→
+   434→### Pokljuka
+   435→Planina Pokljuka je smučarska in biatlonska arena. Zimske turneje po gozdu in planotah, dostopno z avtom.
+   436→
+   437→## Topla jazba v naravi
+   438→
+   439→Bohinj ima dolgo tradicijo toplih jazb. Najbolj znana je **Jazba v Stari Fužini** — lesena zgradba z vrtoglavim pogledom na zasneženo dolino. Vstop: €25 za 2 uri.
+   440→
+   441→## Kje jesti in spati
+   442→
+   443→- **Hotel Jezero** (Ribčev Laz) — leži ob jezeru, sproščujoče vzdušje
+   444→- **Penzion Mantova** (Stara Fužina) — družinski penzion z odlično kuhinjo
+   445→- **Gostilna Rupa** (Stara Fužina) — tradicionalna bohinjska kuhinja
+   446→
+   447→Za proračunsko varianto: apartmaji v vasi Srednja vas (€50-70/noc).
+   448→
+   449→## Nasveti za zimski obisk
+   450→
+   451→- **Zimska oprema**: snežne verige obvezne za avto, smučarska oprema v najemu na Voglu.
+   452→- **Vremenska napoved**: preverite na planinske-razmere, preden greste v gore.
+   453→- **Odprtje prog**: Vogel odpre, ko je vsaj 30 cm snega — sledite na vogel.si.
+   454→- **Bohinjsko jezero**: vsako leto preveri ali jezero zamrzne — ne zaupajte ledu, če ni uradno odprto za drsanje.
+   455→
+   456→Bohinj pozimi ni le destinacija — je izkušnja miru in narave v njeni najbolj pristni obliki.`,
+   457→    image:
+   458→      "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=1200&h=800&fit=crop&q=80",
+   459→    category: "narava",
+   460→    author: "Lara Zupan",
+   461→    date: "2025-04-18",
+   462→    readTime: 6,
+   463→    relatedDestination: "bohinj",
+   464→  },
+   465→  {
+   466→    slug: "kolesarjenje-ob-dravi",
+   467→    title: "Kolesarjenje ob Dravi: Od Maribora do Ptuja",
+   468→    excerpt:
+   469→      "Kolesarska pot ob Dravi je ena najlepših v Sloveniji. 35 km od Maribora do Ptuja skozi vinograde in vasice. Vodnik za enodnevni izlet.",
+   470→    content: `## Kolesarski raj ob reki Dravi
+   471→
+   472→Kolesarska pot Drava je 35 km dolga proga od Maribora do Ptuja, ki poteka ob reki Dravi. Ena najbolj priljubljenih kolesarskih poti v Sloveniji, primerna za družine in rekreativce. Teren je raven, asfaltiran, ločen od avtomobilskega prometa.
+   473→
+   474→## Izhodišče: Maribor
+   475→
+   476→Začnite v Mariboru, na Lentu — najstarejšem delu mesta ob Dravi. Ogled Stare trte (najstarejša trta na svetu, 400+ let) in Glavnega trga. Pred najemom kolesa (€15/dan) se okrepčajte z lokalno kavo v eni od lentnih kavarn.
+   477→
+   478→## Kolesarjenje skozi Halozanske vinograde
+   479→
+   480→Po 10 km zapustite Maribor in vstopite v Halozanske vinograde. Cesta se vije ob Dravi skozi vasice:
+   481→- **Mariborsko jezero** — umetno jezero, poletna plaža
+   482→- **Kamnica** — prva vasica z vinsko kletjo
+   483→- **Limbuš** — lokalno znana po rečni terasi s pogledom
+   484→- **Selnica ob Dravi** — tradicionalna kmečka vas
+   485→
+   486→## Postanek v Vurberku
+   487→
+   488→Na polovici poti je Vurberk — vas z gradom (turška utrdba iz 13. stoletja) in eno najstarejših vinskih kleti v regiji. Postanite za kosilo v gostilni Vurberk — tradicionalna štajerska kuhinja z renskim rizlingom.
+   489→
+   490→## Prihod v Ptuj
+   491→
+   492→Po 35 km in 3-4 urah kolesarjenja prispete v Ptuj — najstarejše mesto v Sloveniji. Obvezno si oglejte:
+   493→- **Ptujski grad** na hribu nad mestom z muzejem
+   494→- **Stari trg** z baročno mestno hišo
+   495→- **Rimske izkopanine** — ostanki Poetovie
+   496→- **Terme Ptuj** — za sprostitev po kolesarjenju
+   497→
+   498→## Najem koles in logistika
+   499→
+   500→- **Najem kolesa**: v Mariboru na postajah Sobotnič (€15/dan)
+   501→- **Vračilo kolesa**: v Ptuju v lokalu Sobotnič ali vrnitev v Mariboru z vlakom (€5)
+   502→- **Osebno kolo**: povsod dovoljeno, klobuk obvezn
+   503→- **Lokalni prevoz**: vlak Ptuj-Maribor vozí vsako uro, prevoz koles €3
+   504→
+   505→## Nasveti
+   506→
+   507→- **Najboljši čas**: april do oktober. Najlepše v maju (cvetoče sadno drevje) in septembru (trgatev).
+   508→- **Vreme**: poleti je vetrno — pripravite se na prevladujoč severni veter.
+   509→- **Oprema**: klobuk, sončna očala, vsaj 2 l vode na osebo.
+   510→- **Družine**: pot je primerna za otroke od 8. leta dalje. Za manjše otroke priporočamo kolesarski prikolico.
+   511→
+   512→Kolesarjenje ob Dravi je idealen enodnevni izlet, ki združuje naravo, zgodovino in kulinariko v eni nepozabni izkušnji.`,
+   513→    image:
+   514→      "https://images.unsplash.com/photo-1530841379378-3c06a9c2b1c0?w=1200&h=800&fit=crop&q=80",
+   515→    category: "avantura",
+   516→    author: "Matej Horvat",
+   517→    date: "2025-05-22",
+   518→    readTime: 5,
+   519→    relatedDestination: "maribor",
+   520→  },
+   521→  {
+   522→    slug: "kam-na-pohorju",
+   523→    title: "Kam na Pohorju: Vodnik po smučanju, pohodih in turizmu",
+   524→    excerpt:
+   525→      "Pohorje je največja slovenska planota — smučanje, pohodi, gondola in tradicionalna kuhinja. Vodnik po najboljših destinacijah na Pohorju.",
+   526→    content: `## Pohorje — največja slovenska planota
+   527→
+   528→Pohorje je največja slovenska planota, ki se razprostira od Maribora do Slovenj Gradca. Pozimi smučišče, poleti pohodniški raj. Dolžina 60 km, najvišji vrh Črni vrh (1543 m). Najbolj znani centri: Mariborsko Pohorje, Ribniško Pohorje in Kope.
+   529→
+   530→## Smučanje pozimi
+   531→
+   532→### Mariborsko Pohorje
+   533→Največje smučišče v Sloveniji z 41 km prog in največjim nočnim smučanjem. Domača proga legendarnega Zlati lisjak (svetovni pokal v ženskem veleslalomu). Dnevna karta: €33-40. Odprto od decembra do marca.
+   534→
+   535→### Ribniško Pohorje
+   536→Družinsko smučišče, manj obiskano. 13 km prog, primerno za začetnike in otroke. Dnevna karta: €25-30. Počitniške hišice in apartmaji v bližini.
+   537→
+   538→### Kope
+   539→Najbolj zahodni del Pohorja ob meji z Avstrijo. Manjše smučišče, odlično za turno smuko in tekaško smučanje.
+   540→
+   541→## Pohodi poleti
+   542→
+   543→### Črni vrh (1543 m)
+   544→Najvišji vrh Pohorja. Izhodišče v Slovenj Gradcu, 4-5 ur pohoda. Na vrhu razgledni stolp z najboljšim pogledom na Koroško.
+   545→
+   546→### Bistriški slom
+   547→Eden najlepših slapov na Pohorju. 20 m visok, dostopen z avtom. Vhod €3, otvoritveno od maja do oktobra.
+   548→
+   549→### Lovrenška jezera
+   550→Sedem visokogorskih jezer na višini 1500 m. Dostopno iz Hoč s pohodom 3 ure. Edinstvena flora in favna.
+   551→
+   552→## Turizem in atrakcije
+   553→
+   554→### Gondola Mariborsko Pohorje
+   555→Najnovejša atrakcija — gondola izpod Maribora na vrh Pohorja. 10 minut vožnje, panoramski pogled na mesto in vinograde. Vstop: €12 povratno.
+   556→
+   557→### Hubelj in Dvojni izvir
+   558→Največji izvir na Pohorju, ki napaja reko Hubelj. Dostopen iz Slovenj Gradca, pohod 1,5 ure.
+   559→
+   560→### Boč
+   561→Najvzhodnejši del Pohorja, botanični rezervat z redkimi rastlinami. Pohod iz Poljčane (2 uri).
+   562→
+   563→## Kulinarične znamenitosti Pohorja
+   564→
+   565→- **Pohorski žlikrofi** — lokalna različica idrijskih žlikrofov, s kurjim mesom
+   566→- **Pohorska omaka** — gosta gobeva omaka z žganci
+   567→- **Bukovniška voda** — tradicionalni bukov sok iz lokalnih dreves
+   568→- **Pohorski sir** — trdi sir iz kmetijskih sirarn na pašnikih
+   569→
+   570→## Kje spati
+   571→
+   572→- **Hotel Arena** (Mariborsko Pohorje) — sodoben 4* hotel ob smučišču
+   573→- **Planinska koča Črni vrh** — preprosta koča na vrhu, prenočitev €25
+   574→- **Turistična kmetija Žigon** (Ribnica na Pohorju) — družinska kmetija s hrano
+   575→- **Apartmaji Ribnica** — samostojni apartmaji €50-70/night
+   576→
+   577→## Nasveti
+   578→
+   579→- **Smučarske karte** pred rezervirajte na spletu (20% popust)
+   580→- **Pohodne poti**: preverite na planinske-razmere, da so odprte
+   581→- **Družine**: Mariborsko Pohorje je najboljše za otroke (vsestranska ponudba)
+   582→- **Večerna aktivnost**: nočno smučanje na Mariborskem Pohorju vsak petek in soboto
+   583→
+   584→Pohorje je celoletna destinacija, ki ponuja nekaj za vsak okus — od adrenalina na smučišču do miru v gozdu.`,
+   585→    image:
+   586→      "https://images.unsplash.com/photo-1551524559-8af4e6624178?w=1200&h=800&fit=crop&q=80",
+   587→    category: "nasveti",
+   588→    author: "Blaž Zupan",
+   589→    date: "2025-11-08",
+   590→    readTime: 7,
+   591→    relatedDestination: "maribor",
+   592→  },
+   593→  {
+   594→    slug: "slapovi-slovenije",
+   595→    title: "Slapovi Slovenije: 10 najlepših za obisk",
+   596→    excerpt:
+   597→      "Slovenija je dežela slapov — od 80-metrskega Bokovega do najbolj obiskanega Blediškega. Spoznajte 10 najlepših slapov in kako jih obiskati.",
+   598→    content: `## Dežela slapov
+   599→
+   600→Slovenija je ena najbogatejših dežel z slapovi na svetu glede na površino. Več kot 300 večjih slapov, večina v alpski in predalpski regiji. So naravni bisji, ki popestrijo vsak pohod. Tukaj je 10 najlepših slapov za obisk.
+   601→
+   602→## 1. Slap Boka (106 m)
+   603→
+   604→Najvišji slovenski slap, ki pada izpod vrha Bokove peči v Soško dolino. Dostopen iz vasi Žaga pri Bovcu (1 ura pohoda). Najbolj dramatičen spomladi, ko je voda najmočnejša.
+   605→
+   606→## 2. Slap Savica (78 m)
+   607→
+   608→Najbolj znan slovenski slap — zaključuje Vintgarsko sotesko in napaja Bohinjsko jezero. Poezijo »Krst pri Savici« je France Prešeren navdihnil ravno ob tem slapu. Vstop €3, dostopen z avtom.
+   609→
+   610→## 3. Slap Kozjak (15 m)
+   611→
+   612→Najbolj slikovit slovenski slap v soteski Kozjak pri Kobaridu. Pada v kraško vrtačo, obdan z zeleno modrim tolmunom. Vstop €3, dostop 20 min iz Kobarida.
+   613→
+   614→## 4. Slap Peričnik (52 m)
+   615→
+   616→Slap v vasi Gozd Martuljek, le 5 km od Kranjske Gore. Dvoplasten, s potjo za hrbtom slapa. Dostopen z avtom, brezplačno.
+   617→
+   618→## 5. Slap Šum (13 m)
+   619→
+   620→Slap, ki zaključuje Vintgarsko sotesko. Najbolj obiskan slovenski slap zaradi soteske. Vstop v sotesko €10.
+   621→
+   622→## 6. Slap Rinka (90 m)
+   623→
+   624→Slap v Logarski dolini (Solčavska regija). Eden najlepših slovenskih slapov, pade izpod Okrešlja. Vstop €3, dostopen z avtom do izhodišča.
+   625→
+   626→## 7. Slap Kozjača (30 m)
+   627→
+   628→Skriti slap v dolini Kamniške Bistrice. Pohod 3 ure iz izhodišča, najboljši v maju in juniju.
+   629→
+   630→## 8. Slap Virje (12 m)
+   631→
+   632→Manjši, a romantičen slap v vasi Virje ob reki Bistrica. Dostopen z avtom, idealen za kopanje poleti.
+   633→
+   634→## 9. Slap Bistriški slom (20 m)
+   635→
+   636→Slap na Pohorju pri Bistrici. Dostopen z avtom, vstop €3. Najboljši za družine.
+   637→
+   638→## 10. Slap Iglica (28 m)
+   639→
+   640→Slap v dolini Vrat pod Triglavom. Pada izpod stene Mojstrovke. Dostopen z avtom, pogled iz glavne ceste.
+   641→
+   642→## Najboljši čas obiska
+   643→
+   644→- **Pomlad (april-junij)**: najmočnejši pretok, najbolj dramatičen videz
+   645→- **Poletje (julij-avgust)**: manj vode, a bolj dostopno in vreme stabilno
+   646→- **Jesen (september-oktober)**: listje v barvah, manj obiskovalcev
+   647→- **Zima**: nekateri slapovi zamrznejo — edinstven prizor, a dostop otežen
+   648→
+   649→## Oprema za obisk slapov
+   650→
+   651→- **Pohodni čevlji** — drsne skalne površine
+   652→- **Klobuk in sončna očala** — tudi v senci odsevi
+   653→- **Polarizacijski filter** za fotoaparat — odstrani odseve na vodi
+   654→- **Dežni plašč** — ob visokem pretoku je vodna prha
+   655→
+   656→## Nasveti
+   657→
+   658→- **Spoštujte naravo**: ne stopajte v vodo blizu slapu — erozija lahko povzroči padec
+   659→- **Varnost**: otroci naj bodo pod nadzorom — tolmuni so globoki
+   660→- **Foto**: najboljši čas za fotografiranje je jutranja ali večerna svetloba
+   661→
+   662→Slovenski slapovi so naravna galerija, ki jo obiščete lahko v eni pustolovščini.`,
+   663→    image:
+   664→      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop&q=80",
+   665→    category: "narava",
+   666→    author: "Lara Zupan",
+   667→    date: "2025-05-09",
+   668→    readTime: 7,
+   669→  },
+   670→  {
+   671→    slug: "ljubljana-v-48-urah",
+   672→    title: "Ljubljana v 48 urah: Popoln itinerer za vikend",
+   673→    excerpt:
+   674→      "Kako izkoristiti 48 ur v Ljubljani? Vodnik po najboljših znamenitostih, restavracijah in skritih kotičkih slovenske prestolnice.",
+   675→    content: `## Ljubljana — majhna a čarobna prestolnica
+   676→
+   677→Ljubljana je ena najmanjših evropskih prestolnic — komaj 300.000 prebivalcev. A kar manjka v velikosti, nadomešča v čaru. Srednjeveški grad na hribu, Zmajev most, zelene obale Ljubljanice in živahna kulinarična scena. 48 ur je dovolj za popoln vpogled.
+   678→
+   679→## Dan 1: Zgodovina in kultura
+   680→
+   681→### Jutro (9:00-13:00)
+   682→Začnite na **Prešernovem trgu** — glavnem trgu z Zmajevim mostom in Plečnikovo cerkvijo. Sprehod po Tromostovju (trije mostovi) do **Plečnikove tržnice** — odprte tržnice z lokalno hrano.
+   683→
+   684→Ob 10:00 se vzpnite z **žičnico na Ljubljanski grad** (€10 povratno). Na vrhu obiščite muzej, razgledni stolp in virtualno trdnjavo. Kosilo v restavraciji na gradu z mestnim pogledom.
+   685→
+   686→### Popoldan (14:00-18:00)
+   687→Sprehod po **Starem trgu** — najstarejši ulici mesta z baročnimi hišami. Obiščite **Mestni muzej** in **Muzej novejše zgodovine**. Sprostitev ob Ljubljanici s kavo v eni od rečnih kavarn.
+   688→
+   689→### Večer (19:00-)
+   690→Večerja v **Restavraciji As** — Michelin priporočena slovenska kuhinja. Po večerji sprehod po **Metelkovi** — alternativni četrti z ulično umetnostjo in barvo.
+   691→
+   692→## Dan 2: Narava in lokalno življenje
+   693→
+   694→### Jutro (9:00-12:00)
+   695→Zajtrk v **Kavarni Zvezda** (tradicionalne slovenske slaščice). Sprehod po **Tivoli parku** — največjem ljubljanskem parku z ribniki in razstavami v dvorcu Tivoli.
+   696→
+   697→Ob 11:00 obiščite **Botanični vrt** — najstarejši v Sloveniji (1810). Vstop brezplačen.
+   698→
+   699→### Popoldan (13:00-18:00)
+   700→Kosilo v **Gostilni As** ali **Čolnarni** — lokalna kuhinja. Popoldanski ogled **Muzeja moderne umetnosti** (Moderna galerija) na Cankarjevem nabrežju.
+   701→
+   702→Kratka vožnja z avtobusom do **Šiške** — boemske četrti z ulico Trubarjevo cesto, kjer so številne butike, kavarne in ulični festivali.
+   703→
+   704→### Večer (19:00-)
+   705→Zadnja večerja v **Restavraciji JB** — vrhunec slovenske kulinarike. Po večerji koncert v **Križankah** (poletni festival) ali pijača v eni od vinotek na Starem trgu.
+   706→
+   707→## Najboljše restavracije
+   708→
+   709→- **Restavracija As** (€€€) — avtorska slovenska kuhinja
+   710→- **Restavracija JB** (€€€) — Janez Bratovž, Michelin priporočilo
+   711→- **Sestica** (€€) — tradicionalna slovenska kuhinja
+   712→- **Čolnarna** (€€) — bar ob Ljubljanici
+   713→- **Klobasarna** (€) — Kranjska klobasa za hitro kosilo
+   714→
+   715→## Kaj narediti v 2 dneh — skriti biseri
+   716→
+   717→- **Prešernova spomenik** ob sončnem zahodu
+   718→- **Plečnikova hiša** — muzej arhitekta Karantanije
+   719→- **Krakovo** — emblematična četrt z lesenimi hišami
+   720→- **Šance** — ostanki srednjeveških obzidij na Gradu
+   721→
+   722→## Nasveti
+   723→
+   724→- **Ljubljanska kartica** (€15) — brezplačen javni prevoz in popusti
+   725→- **Brezplačni ogledi** z lokalnimi vodniki vsak dan ob 11:00
+   726→- **Vreme**: Ljubljana je med najbolj deževnimi mesti v Sloveniji — vedno imejte dežni plašč
+   727→- **Javni prevoz**: mestni avtobusi vozijo vsakih 10-15 min, kartica €1,3
+   728→
+   729→## Lokalni nasveti
+   730→
+   731→- **Vikend**: v soboto zjutraj obiščite tržnico Open Kitchen (marec-oktober)
+   732→- **Festivali**: poletni festival Ljubljana (julij-avgust), Trnfest (avgust)
+   733→- **Kava**: najboljša v Kavarni Zvezda ali Čolnarni
+   734→- **Kruh**: pekovska hiša Pekarna Pečar
+   735→
+   736→Ljubljana je mesto, ki ga odkrijete počasi. 48 ur je dovolj za okus — vendar boste hoteli več.`,
+   737→    image:
+   738→      "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1200&h=800&fit=crop&q=80",
+   739→    category: "kultura",
+   740→    author: "Maja Dolenc",
+   741→    date: "2025-09-05",
+   742→    readTime: 8,
+   743→    relatedDestination: "ljubljana",
+   744→  },
+   745→  {
+   746→    slug: "prekmurska-gibanica-zgodovina-in-recept",
+   747→    title: "Prekmurska gibanica: Zgodovina, legenda in pravi recept",
+   748→    excerpt:
+   749→      "Prekmurska gibanica je kraljica slovenskih sladic. Spoznajte njeno zgodovino, legendo o poroki in pravi tradicionalni recept za pripravo doma.",
+   750→    content: `## Kraljica slovenskih sladic
+   751→
+   752→Prekmurska gibanica je najbolj znana slovenska sladica. Plastnata pita s skuto, makom, orehi in jabolki, vsaka plast ločena z vlečenim testom. Zaščitena z oznako tradicionalnega ugleda od leta 2010. Pristna prekmurska gibanica je lahko le ena — tista iz Prekmurja.
+   753→
+   754→## Zgodovina in legenda
+   755→
+   756→Prva pisna omemba prekmurske gibanice sega v leto 1828, ko jo je omenil Jožef Košič v svojem delu o Prekmurju. Legenda pravi, da je bila gibanica poročna jed — nevesta je morala pred poroko pripraviti gibanico za ženina. Če je bila dobra, je bila poroka blagoslovljena.
+   757→
+   758→Druga legenda pravi, da je bila gibanica rezervirana za najboljše goste — vsaka plast je predstavljala eno od štirih letnih časov: skuta (pomlad), mak (poletje), orehi (jesen), jabolka (zima).
+   759→
+   760→## Sestavine
+   761→
+   762→### Za testo:
+   763→- 500 g ostre moke
+   764→- 200 ml tople vode
+   765→- 100 g masla (stopljenega)
+   766→- 1 jajce
+   767→- Ščepec soli
+   768→
+   769→### Za plasti:
+   770→- **Skutna**: 500 g skute, 2 jajci, 100 g sladkorja, 1 vanilijev sladkor
+   771→- **Makova**: 200 g maka, 100 g sladkorja, 200 ml mleka
+   772→- **Orehova**: 200 g mletih orehov, 100 g sladkorja, 100 ml mleka
+   773→- **Jabolčna**: 500 g jabolk (naribanih), 50 g sladkorja, 1 žlica cimeta
+   774→
+   775→### Za med:
+   776→- 200 g masla (stopljenega za premaz)
+   777→
+   778→## Postopek
+   779→
+   780→### 1. Priprava testa (30 min)
+   781→Vse sestavine zamesite v gladko, prožno testo. Razdelite na 8 enakih kosov. Pokrijte s krpo in pustite 30 minut počivati.
+   782→
+   783→### 2. Razvaljanje testo
+   784→Vsako testo razvlecite na vlažni prt čim bolj tanko — tako tanko, da vidite skozi. To je ključno za pravo gibanico.
+   785→
+   786→### 3. Plastenje v pekač
+   787→1. Dno pekača (30x20 cm) namažite z maslom
+   788→2. Prvo plast testa položite na dno, premaz z maslom
+   789→3. Drugo testo — premaz s skutno plastjo
+   790→4. Tretje testo — premaz z makom
+   791→5. Četrto testo — premaz z orehi
+   792→6. Peto testo — premaz z jabolki
+   793→7. Šesto testo — premaz s skuto (ponovno)
+   794→8. Sedmo testo — premaz z makom (ponovno)
+   795→9. Osmo testo — vrh, premaz z maslom
+   796→
+   797→### 4. Pečenje (60 min)
+   798→Pecite v pečici pri 180 °C približno 60 minut, dokler ni vrh zlatorumen. Če prevroči, pokrijte z alu folijo.
+   799→
+   800→### 5. Ohlajanje
+   801→Pustite 2 uri, da se ohladi. Razrežite na 12 kosov.
+   802→
+   803→## Kje poskusiti pravo gibanico
+   804→
+   805→- **Slaščičarna Murska** (Murska Sobota) — najbolj znana
+   806→- **Lendavska slaščičarna** (Lendava) — prava prekmurska gibanica
+   807→- **Kmečko gospodarstvo Novak** (Ptuj) — domača različica
+   808→- **Slaščičarna Zvezda** (Ljubljana) — ljubljanska varianta
+   809→
+   810→## Zanimivosti
+   811→
+   812→- Skupna teža ene gibanice: ~2 kg
+   813→- Število kalorij na kos: ~450 kcal
+   814→- Cena v slaščičarni: €2,5-3,5 na kos
+   815→- Cena celega pekača: €20-30
+   816→
+   817→## Nasveti za pripravo
+   818→
+   819→- **Testo**: mora biti prožno, da se da vleči tanko. Če se trga, dodajte malo vode.
+   820→- **Skuta**: uporabite polnomastno skuto za kremno teksturo.
+   821→- **Pečica**: predgrevajte 15 minut, da je pečenje enakomerno.
+   822→- **Hranjenje**: v hladilniku do 5 dni, zamrznete do 3 mesece.
+   823→
+   824→Prekmurska gibanica ni le sladica — je slovenska kulinarična dediščina v vsakem grižljaju.`,
+   825→    image:
+   826→      "https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=1200&h=800&fit=crop&q=80",
+   827→    category: "kulinarika",
+   828→    author: "Petra Kovač",
+   829→    date: "2025-06-15",
+   830→    readTime: 7,
+   831→    relatedDestination: "murska-sobota",
+   832→  },
+   833→  {
+   834→    slug: "vinogradi-stajerske-turizem",
+   835→    title: "Vinogradi Štajerske: Vodnik po vinskih turističnih kleteh",
+   836→    excerpt:
+   837→      "Štajerska je ena najpomembnejših slovenskih vinorodnih regij. Spoznajte najboljše vinske kleti, degustacije in nastanitve v vinogradih.",
+   838→    content: `## Štajerska — slovenska Toskana
+   839→
+   840→Štajerska vinorodna regija je ena najlepših vinskih pokrajin v Srednji Evropi. Valoviti vinogradi nad Dravo, tradicionalne vinske kleti in sodobni arhitekturni biseri. Vinogradniška tradicija sega v rimsko dobo, današnji vinarji pa povezujejo tradicijo s sodobnimi tehnikami.
+   841→
+   842→## Najbolj znane vinske kleti
+   843→
+   844→### 1. Vinska klet Stara trta (Maribor)
+   845→Vinska klet ob najstarejši trti na svetu (400+ let). Degustacije modre frankinje in drugih štajerskih sort. Vodeni ogled s sommelierjem.
+   846→
+   847→### 2. Vinska klet Pullus (Ptuj)
+   848→Ena najstarejših vinskih kleti v Sloveniji (1239). Znana po rumenem muškatu in laškem rizlingu. Ogled kleti z degustacijo 5 vin.
+   849→
+   850→### 3. Vinogradništvo Spodnja Polaneč (Haloze)
+   851→Družinska klet v Halozah. Specializirana za avtohtone sorte. Pogled na Dravo in Boč z vrha vinograda.
+   852→
+   853→### 4. Verus (Ormož)
+   854→Sodobna vinska klet z inovativnim pristopom. Znana po Sauvignonu in Traminec. Sodobna arhitektura med vinogradi.
+   855→
+   856→### 5. Vina Kvitsiani (Ljutomer)
+   857→Družinska klet v Prlekiji. Tradicionalne sorte z ekološko pridelavo. Degustacije s prleško gibanico.
+   858→
+   859→## Štajerske avtohtone sorte
+   860→
+   861→### Modra frankinja
+   862→Najbolj znana štajerska rdeča sorta. Sveže, z malinovo aromo. Serverirati pri 14-16 °C.
+   863→
+   864→### Rumeni muškat
+   865→Sladko belo vino z intenzivno cvetlično aromo. Aperitiv ali sladica.
+   866→
+   867→### Renski rizling
+   868→Klasično belo vino z mineralno aromo. Serverirati z ribami ali perutnino.
+   869→
+   870→### Traminec
+   871→Aromatično belo vino z rožno aromo. Tradicionalno slovensko svatovno vino.
+   872→
+   873→### Žlahtnina
+   874→Avtohtona štajerska bela sorta. Sveže, blago, s sadno aromo.
+   875→
+   876→## Vinske ture
+   877→
+   878→### 1-dnevna tura Maribor
+   879→- Jutranji ogled Stare trte (Maribor)
+   880→- Degustacija v Vinski kleti Stara trta
+   881→- Kosilo v restavraciji ob Dravi
+   882→- Popoldanski ogled Maribora
+   883→- Cena: €60-80 na osebo
+   884→
+   885→### 2-dnevna tura Haloze
+   886→- Dan 1: Maribor + Stara trta, prenočitev v vinogradu
+   887→- Dan 2: Haloze (Vinogradništvo Polaneč), Ptujska klet Pullus, Ptuj
+   888→- Cena: €180-220 na osebo
+   889→
+   890→### 3-dnevna tura Štajerska
+   891→- Dan 1: Maribor + Vinska vigred festival (marec)
+   892→- Dan 2: Haloze + Jeruzalem
+   893→- Dan 3: Ptuj + Ormož + Ljutomer
+   894→- Cena: €350-450 na osebo
+   895→
+   896→## Najboljše nastanitve v vinogradih
+   897→
+   898→- **Hotel Brot** (Maribor) — center, sodoben 4*
+   899→- **Vinogradniška hiša Špičak** (Haloze) — družinska nastanitev
+   900→- **Bed & Breakfast Verus** (Ormož) — sodoben B&B v vinogradih
+   901→- **Vinska klet Pullus Apartma** (Ptuj) — apartma nad kletjo
+   902→
+   903→## Najboljši čas za obisk
+   904→
+   905→- **Marec**: Vinska vigred (Maribor) — največji festival vina
+   906→- **Maj**: flowering v vinogradih, najlepše vinograde vidite
+   907→- **September-oktober**: trgatev, festivale, degustacije
+   908→- **November**: martinovanje (sv. Martin, 11. november) — krst mladih vin
+   909→
+   910→## Nasveti
+   911→
+   912→- **Degustacije**: rezervirajte vsaj 2 dni vnaprej, še posebej poleti
+   913→- **Vozite se**: v Štajerski je javni prevoz slab — najem avtomobila priporočljiv
+   914→- **Lokalni festivali**: vsak vikend v septembru in oktobru je nekje trgatev
+   915→- **Vinogradi**: najboljši pogled izvrh od Mariborskega Pohorja
+   916→
+   917→## Kaj kupiti domov
+   918→
+   919→- **Modra frankinja** (Maribor) — najbolj znano štajersko vino
+   920→- **Rumeni muškat** (Haloze) — sladko, za posebne priložnosti
+   921→- **Žlahtnina** (Jeruzalem) — avtohtona sorta, redka drugod
+   922→- **Bučno olje** (Prekmurje) — odlična spremljava štajerskih vin
+   923→
+   924→Štajerska vinogradniška regija ni le vinska destinacija — je kulinarična in naravna izkušnja, ki jo boste dolgo zapomnili.`,
+   925→    image:
+   926→      "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=1200&h=800&fit=crop&q=80",
+   927→    category: "kulinarika",
+   928→    author: "Petra Kovač",
+   929→    date: "2025-10-18",
+   930→    readTime: 8,
+   931→    relatedDestination: "ptuj",
+   932→  },
+   933→  {
+   934→    slug: "triglavski-narodni-park-vodic",
+   935→    title: "Triglavski narodni park: Vodič po edinem slovenskem narodnem parku",
+   936→    excerpt:
+   937→      "Triglavski narodni park je edini narodni park v Sloveniji. 840 km² alpske narave z vrhovi, dolinami, jezera in slapovi. Spoznajte najlepše kotičke.",
+   938→    content: `## Edini slovenski narodni park
+   939→
+   940→Triglavski narodni park (TNP) je edini narodni park v Sloveniji, ustanovljen leta 1981. Obsega 840 km² v severozahodnem delu države — skoraj ves obseg Julijcev. Imenovan po Triglavu (2864 m), najvišjem slovenskem vrhu, ki krasa državni grb.
+   941→
+   942→## Tri zaščititvene cone
+   943→
+   944→TNP je razdeljen na tri cone z različnimi režimi varstva:
+   945→
+   946→- **1. cona (strogi rezervat)**: 4% površine, brez človeškega vpliva
+   947→- **2. cona (prvo varstvo)**: 33% površine, omejene aktivnosti
+   948→- **3. cona (kultivirana pokrajina)**: 63% površine, kmetijska zemljišča in naselja
+   949→
+   950→## Najlepše doline
+   951→
+   952→### Dolina Trenta
+   953→Najbolj znana dolina v TNP, izvir Soče. Pohodi na planine, vijugasta cesta do Vršiča.
+   954→
+   955→### Dolina Vrata
+   956→Dolina pod severno steno Triglava. Izhodišče za vzpon na Triglav preko Triglavske koče.
+   957→
+   958→### Dolina Krma
+   959→Mirna dolina z alpskimi planinami. Dostopna z avtom, izhodišče za pohode na Triglav preko Kredarice.
+   960→
+   961→### Dolina Tamar
+   962→Zaprta dolina ob meji z Avstrijo. Smučanje pozimi, pohodi poleti.
+   963→
+   964→## Najbolj znana jezera
+   965→
+   966→### Bohinjsko jezero
+   967→Največje naravno jezero v Sloveniji, znotraj TNP. 4 km dolgo, do 45 m globoko. Žičnica Vogel, slap Savica, ribolov.
+   968→
+   969→### Blejsko jezero
+   970→Blejsko jezero ni v TNP, a leži ob robu parka. Znameniti otok z cerkvijo.
+   971→
+   972→### Krnska jezera
+   973→Visokogorska jezera v Julijskih Alpah. Krnsko jezero (1383 m) je največje visokogorsko jezero v Sloveniji.
+   974→
+   975→## Pohodi v TNP
+   976→
+   977→### Vzpon na Triglav (2864 m)
+   978→Najbolj znani slovenski pohod. Preko Triglavske koče (2 dni) ali enodnevni za izkušene. Aljažev stolp na vrhu.
+   979→
+   980→### Slap Savica
+   981→Kratek pohod iz Bohinja. 78 m visok slap, navdih za Prešernovo Krst pri Savici.
+   982→
+   983→### Komna (1520 m)
+   984→Planina nad Bohinjem z razgledom na Julijce. 2 uri pohoda iz Koče na Voglu.
+   985→
+   986→### Krn (2244 m)
+   987→Pohod na vrh s pogledom na Soško dolino. 4 ure iz Lomca. Med 1. svetovno vojno frontna črta.
+   988→
+   989→### Mangart (2679 m)
+   990→Tretji najvišji vrh Slovenije. Dostopen preko Mangartskega sedla, zahteven pohod.
+   991→
+   992→## Naravne znamenitosti
+   993→
+   994→### Korita Soče
+   995→Naravni bazeni vrezani v apnenec ob Soči. Več lokacij: Kobarid, Bovec, Srpenica.
+   996→
+   997→### Tolminska korita
+   998→Najgloblja soteska v Sloveniji (60 m globoko). Sotoče Soče in Tolminke.
+   999→
+  1000→### Vintgarska soteska
+  1001→1,6 km dolga soteska ob reki Radovni. Lesene poti ob kristalno čisti vodi.
+  1002→
+  1003→### Slap Boka
+  1004→Najvišji slovenski slap (106 m). Dostopen iz vasi Žaga pri Bovcu.
+  1005→
+  1006→## Divje živali v TNP
+  1007→
+  1008→- **Gams** — najpogostejša velika žival v Julijskih Alpah
+  1009→- **Kozorog** — najredkejši, načrtovano ojačana populacija
+  1010→- **Snežni volk** — najredkeji zver, zaščitena vrsta
+  1011→- **Rjavi medved** — prisoten, a redek v TNP
+  1012→- **Planinski orel** — največja ptica v Alpah
+  1013→
+  1014→## Kje spati
+  1015→
+  1016→### Planinske koče
+  1017→- **Triglavska koča na Doliču** (2151 m) — izhodišče za Triglav
+  1018→- **Koča na Voglu** (1535 m) — nad Bohinjem
+  1019→- **Dom v Tamarju** (1100 m) — v Tamarju
+  1020→- **Koča pri Izviru Soče** (760 m) — Trenta
+  1021→
+  1022→### Hoteli in apartmaji
+  1023→- **Hotel Jezero** (Bohinjsko jezero) — 4* ob jezeru
+  1024→- **Hotel Dolec** (Kobarid) — boutique hotel
+  1025→- **Apartmaji Bovec** — družinski apartmaji v Bovcu
+  1026→
+  1027→## Nasveti za obisk
+  1028→
+  1029→- **Najboljši čas**: junij do september, ko so planine odprte in vreme stabilno
+  1030→- **Oprema**: pohodni čevlji, dežni plašč, topla oblačila (tudi poleti je v gorah hladno)
+  1031→- **Vreme**: vedno preverite vremensko napoved pred pohodom
+  1032→- **Vstopnine**: v TNP ni splošne vstopnine, a nekatere atrakcije (Vintgar, Savica) imajo vstopnine
+  1033→- **Parkirišča**: večina parkirišč je plačljivih (€3-5/dan)
+  1034→- **Javni prevoz**: poleti vozijo avtobusi do izhodišč pohodov
+  1035→
+  1036→## Varovanje narave
+  1037→
+  1038→- Ne trgajte rož (zaščitene so)
+  1039→- Ne zastrupljajte vode (tudi ne z milom)
+  1040→- Ne sprehajajte se izven markiranih poti
+  1041→- Ne prihajajte preblizu divjih živali
+  1042→- Vzemi smeti s seboj
+  1043→
+  1044→Triglavski narodni park je slovenski naravni biser. Spoštujte ga, da bo ostal lep tudi za naslednje generacije.`,
+  1045→    image:
+  1046→      "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop&q=80",
+  1047→    category: "narava",
+  1048→    author: "Blaž Zupan",
+  1049→    date: "2025-08-08",
+  1050→    readTime: 9,
+  1051→    relatedDestination: "triglav",
+  1052→  },
+  1053→];
+  1054→
+  1055→// Pomožne funkcije
+  1056→export function getPostBySlug(slug: string): BlogPost | undefined {
+  1057→  return BLOG_POSTS.find((p) => p.slug === slug);
+  1058→}
+  1059→
+  1060→export function getPostsByCategory(category: BlogCategory | "all"): BlogPost[] {
+  1061→  if (category === "all") return BLOG_POSTS;
+  1062→  return BLOG_POSTS.filter((p) => p.category === category);
+  1063→}
+  1064→

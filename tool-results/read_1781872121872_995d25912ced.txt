@@ -1,0 +1,893 @@
+     1→"use client";
+     2→
+     3→import { useCallback, useEffect, useState } from "react";
+     4→import {
+     5→  Star,
+     6→  MapPin,
+     7→  Clock,
+     8→  ShoppingCart,
+     9→  Calendar,
+    10→  ShoppingBag,
+    11→  Filter,
+    12→  X,
+    13→  Leaf,
+    14→  HandHeart,
+    15→  Truck,
+    16→  Globe,
+    17→  Baby,
+    18→  Accessibility,
+    19→  Compass,
+    20→  Sparkles,
+    21→  Store,
+    22→} from "lucide-react";
+    23→import { Card, CardContent } from "@/components/ui/card";
+    24→import { Badge } from "@/components/ui/badge";
+    25→import { Button } from "@/components/ui/button";
+    26→import { Skeleton } from "@/components/ui/skeleton";
+    27→import {
+    28→  Select,
+    29→  SelectContent,
+    30→  SelectItem,
+    31→  SelectTrigger,
+    32→  SelectValue,
+    33→} from "@/components/ui/select";
+    34→import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+    35→import { cn } from "@/lib/utils";
+    36→import {
+    37→  PRODUCT_CATEGORY_LABELS,
+    38→  PRODUCT_CATEGORY_ICONS,
+    39→  EXPERIENCE_CATEGORY_LABELS,
+    40→  EXPERIENCE_CATEGORY_ICONS,
+    41→  formatPrice,
+    42→  formatDuration,
+    43→  type Product,
+    44→  type ProductCategory,
+    45→  type Experience,
+    46→  type ExperienceCategory,
+    47→} from "@/lib/marketplace-types";
+    48→import { ProductModal } from "@/components/sections/product-modal";
+    49→import { ExperienceModal } from "@/components/sections/experience-modal";
+    50→
+    51→const ALL_VALUE = "all";
+    52→
+    53→// Možnosti za filter kategorije izdelkov
+    54→const PRODUCT_CATEGORY_OPTIONS: { value: ProductCategory; label: string }[] = (
+    55→  Object.keys(PRODUCT_CATEGORY_LABELS) as ProductCategory[]
+    56→).map((c) => ({
+    57→  value: c,
+    58→  label: `${PRODUCT_CATEGORY_ICONS[c]} ${PRODUCT_CATEGORY_LABELS[c]}`,
+    59→}));
+    60→
+    61→// Možnosti za filter kategorije izkušenj
+    62→const EXPERIENCE_CATEGORY_OPTIONS: {
+    63→  value: ExperienceCategory;
+    64→  label: string;
+    65→}[] = (
+    66→  Object.keys(EXPERIENCE_CATEGORY_LABELS) as ExperienceCategory[]
+    67→).map((c) => ({
+    68→  value: c,
+    69→  label: `${EXPERIENCE_CATEGORY_ICONS[c]} ${EXPERIENCE_CATEGORY_LABELS[c]}`,
+    70→}));
+    71→
+    72→// Možnosti za sortiranje izdelkov
+    73→const PRODUCT_SORT_OPTIONS: { value: string; label: string }[] = [
+    74→  { value: "featured", label: "Izpostavljeni" },
+    75→  { value: "price-asc", label: "Cena naraščajoče" },
+    76→  { value: "price-desc", label: "Cena padajoče" },
+    77→  { value: "rating", label: "Najvišja ocena" },
+    78→];
+    79→
+    80→// Možnosti za sortiranje izkušenj
+    81→const EXPERIENCE_SORT_OPTIONS: { value: string; label: string }[] = [
+    82→  { value: "featured", label: "Izpostavljeni" },
+    83→  { value: "price-asc", label: "Cena naraščajoče" },
+    84→  { value: "price-desc", label: "Cena padajoče" },
+    85→  { value: "rating", label: "Najvišja ocena" },
+    86→];
+    87→
+    88→type ProductsResponse = {
+    89→  products: Product[];
+    90→  total: number;
+    91→};
+    92→
+    93→type ExperiencesResponse = {
+    94→  experiences: Experience[];
+    95→  total: number;
+    96→};
+    97→
+    98→type Tab = "products" | "experiences";
+    99→
+   100→/**
+   101→ * MarketplaceSection — tržnica slovenskih izdelkov in izkušenj.
+   102→ * Tabs med izdelki in izkušnjami, filtri kategorije in sortiranja.
+   103→ * Kartice odprejo detail modal (ProductModal / ExperienceModal).
+   104→ */
+   105→export function MarketplaceSection() {
+   106→  const [tab, setTab] = useState<Tab>("products");
+   107→
+   108→  // Filtri izdelki
+   109→  const [productCategory, setProductCategory] = useState<string>(ALL_VALUE);
+   110→  const [productSort, setProductSort] = useState<string>("featured");
+   111→
+   112→  // Filtri izkušnje
+   113→  const [expCategory, setExpCategory] = useState<string>(ALL_VALUE);
+   114→  const [expSort, setExpSort] = useState<string>("featured");
+   115→
+   116→  const [products, setProducts] = useState<Product[]>([]);
+   117→  const [productsTotal, setProductsTotal] = useState<number>(0);
+   118→  const [productsLoading, setProductsLoading] = useState<boolean>(true);
+   119→  const [productsError, setProductsError] = useState<string | null>(null);
+   120→
+   121→  const [experiences, setExperiences] = useState<Experience[]>([]);
+   122→  const [experiencesTotal, setExperiencesTotal] = useState<number>(0);
+   123→  const [experiencesLoading, setExperiencesLoading] = useState<boolean>(true);
+   124→  const [experiencesError, setExperiencesError] = useState<string | null>(null);
+   125→
+   126→  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+   127→  const [selectedExperience, setSelectedExperience] =
+   128→    useState<Experience | null>(null);
+   129→
+   130→  // Fetch izdelkov
+   131→  const fetchProducts = useCallback(async () => {
+   132→    setProductsLoading(true);
+   133→    setProductsError(null);
+   134→    try {
+   135→      const params = new URLSearchParams();
+   136→      if (productCategory !== ALL_VALUE)
+   137→        params.set("category", productCategory);
+   138→      params.set("sort", productSort);
+   139→      params.set("limit", "50");
+   140→
+   141→      const res = await fetch(`/api/products?${params.toString()}`, {
+   142→        cache: "no-store",
+   143→      });
+   144→      if (!res.ok) throw new Error("Napaka pri pridobivanju izdelkov");
+   145→      const data: ProductsResponse = await res.json();
+   146→      setProducts(data.products ?? []);
+   147→      setProductsTotal(data.total ?? 0);
+   148→    } catch (err) {
+   149→      console.error("[products] fetch napaka:", err);
+   150→      setProductsError("Ne morem naložiti izdelkov. Poskusite kasneje.");
+   151→      setProducts([]);
+   152→      setProductsTotal(0);
+   153→    } finally {
+   154→      setProductsLoading(false);
+   155→    }
+   156→  }, [productCategory, productSort]);
+   157→
+   158→  // Fetch izkušenj
+   159→  const fetchExperiences = useCallback(async () => {
+   160→    setExperiencesLoading(true);
+   161→    setExperiencesError(null);
+   162→    try {
+   163→      const params = new URLSearchParams();
+   164→      if (expCategory !== ALL_VALUE) params.set("category", expCategory);
+   165→      params.set("sort", expSort);
+   166→      params.set("limit", "50");
+   167→
+   168→      const res = await fetch(`/api/experiences?${params.toString()}`, {
+   169→        cache: "no-store",
+   170→      });
+   171→      if (!res.ok) throw new Error("Napaka pri pridobivanju izkušenj");
+   172→      const data: ExperiencesResponse = await res.json();
+   173→      setExperiences(data.experiences ?? []);
+   174→      setExperiencesTotal(data.total ?? 0);
+   175→    } catch (err) {
+   176→      console.error("[experiences] fetch napaka:", err);
+   177→      setExperiencesError("Ne morem naložiti izkušenj. Poskusite kasneje.");
+   178→      setExperiences([]);
+   179→      setExperiencesTotal(0);
+   180→    } finally {
+   181→      setExperiencesLoading(false);
+   182→    }
+   183→  }, [expCategory, expSort]);
+   184→
+   185→  useEffect(() => {
+   186→    void fetchProducts();
+   187→  }, [fetchProducts]);
+   188→
+   189→  useEffect(() => {
+   190→    void fetchExperiences();
+   191→  }, [fetchExperiences]);
+   192→
+   193→  // Počisti filtre glede na aktivni tab
+   194→  const clearFilters = () => {
+   195→    if (tab === "products") {
+   196→      setProductCategory(ALL_VALUE);
+   197→      setProductSort("featured");
+   198→    } else {
+   199→      setExpCategory(ALL_VALUE);
+   200→      setExpSort("featured");
+   201→    }
+   202→  };
+   203→
+   204→  const hasActiveFilters =
+   205→    tab === "products"
+   206→      ? productCategory !== ALL_VALUE || productSort !== "featured"
+   207→      : expCategory !== ALL_VALUE || expSort !== "featured";
+   208→
+   209→  return (
+   210→    <section
+   211→      id="trznica"
+   212→      className="scroll-mt-20 bg-muted/20 py-16 sm:py-20"
+   213→      aria-labelledby="trznica-title"
+   214→    >
+   215→      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+   216→        {/* Header */}
+   217→        <div className="mx-auto max-w-2xl text-center">
+   218→          <Badge
+   219→            variant="secondary"
+   220→            className="mb-3 gap-1.5 bg-primary/10 text-primary"
+   221→          >
+   222→            <Store className="size-3.5" aria-hidden="true" />
+   223→            Tržnica
+   224→          </Badge>
+   225→          <h2
+   226→            id="trznica-title"
+   227→            className="text-3xl font-bold tracking-tight sm:text-4xl"
+   228→          >
+   229→            Tržnica Slovenije
+   230→          </h2>
+   231→          <p className="mt-3 text-base text-muted-foreground">
+   232→            Lokalni izdelki in izkušnje — direktno od kmetov, vinogradnikov in
+   233→            vodnikov
+   234→          </p>
+   235→        </div>
+   236→
+   237→        {/* Tabs */}
+   238→        <div className="mt-8 flex justify-center">
+   239→          <Tabs
+   240→            value={tab}
+   241→            onValueChange={(v) => setTab(v as Tab)}
+   242→            className="w-full max-w-md"
+   243→          >
+   244→            <TabsList className="grid w-full grid-cols-2">
+   245→              <TabsTrigger value="products" className="gap-1.5">
+   246→                <ShoppingBag className="size-4" aria-hidden="true" />
+   247→                Izdelki
+   248→              </TabsTrigger>
+   249→              <TabsTrigger value="experiences" className="gap-1.5">
+   250→                <Compass className="size-4" aria-hidden="true" />
+   251→                Izkušnje
+   252→              </TabsTrigger>
+   253→            </TabsList>
+   254→          </Tabs>
+   255→        </div>
+   256→
+   257→        {/* Filter vrstica */}
+   258→        <div className="mx-auto mt-6 max-w-3xl rounded-xl border border-border/60 bg-background p-4 sm:p-5">
+   259→          <div className="mb-3 flex items-center justify-between gap-2">
+   260→            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+   261→              <Filter className="size-4 text-primary" aria-hidden="true" />
+   262→              Filtri
+   263→            </div>
+   264→            {hasActiveFilters ? (
+   265→              <Button
+   266→                type="button"
+   267→                variant="ghost"
+   268→                size="sm"
+   269→                onClick={clearFilters}
+   270→                className="h-8 gap-1.5 text-muted-foreground hover:text-foreground"
+   271→              >
+   272→                <X className="size-3.5" aria-hidden="true" />
+   273→                Počisti filtre
+   274→              </Button>
+   275→            ) : null}
+   276→          </div>
+   277→
+   278→          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+   279→            {tab === "products" ? (
+   280→              <>
+   281→                <FilterSelect
+   282→                  value={productCategory}
+   283→                  onChange={setProductCategory}
+   284→                  placeholder="Vse kategorije"
+   285→                  ariaLabel="Filtriraj izdelke po kategoriji"
+   286→                  options={PRODUCT_CATEGORY_OPTIONS}
+   287→                />
+   288→                <FilterSelect
+   289→                  value={productSort}
+   290→                  onChange={setProductSort}
+   291→                  placeholder="Razvrsti po"
+   292→                  ariaLabel="Razvrsti izdelke"
+   293→                  options={PRODUCT_SORT_OPTIONS}
+   294→                  showAllOption={false}
+   295→                />
+   296→              </>
+   297→            ) : (
+   298→              <>
+   299→                <FilterSelect
+   300→                  value={expCategory}
+   301→                  onChange={setExpCategory}
+   302→                  placeholder="Vse kategorije"
+   303→                  ariaLabel="Filtriraj izkušnje po kategoriji"
+   304→                  options={EXPERIENCE_CATEGORY_OPTIONS}
+   305→                />
+   306→                <FilterSelect
+   307→                  value={expSort}
+   308→                  onChange={setExpSort}
+   309→                  placeholder="Razvrsti po"
+   310→                  ariaLabel="Razvrsti izkušnje"
+   311→                  options={EXPERIENCE_SORT_OPTIONS}
+   312→                  showAllOption={false}
+   313→                />
+   314→              </>
+   315→            )}
+   316→          </div>
+   317→        </div>
+   318→
+   319→        {/* Števec */}
+   320→        <p className="mt-5 text-center text-sm text-muted-foreground">
+   321→          {tab === "products"
+   322→            ? productsLoading
+   323→              ? "Nalagam izdelke..."
+   324→              : (() => {
+   325→                  const t = productsTotal;
+   326→                  return (
+   327→                    <>
+   328→                      Prikazujem{" "}
+   329→                      <span className="font-semibold text-foreground">{t}</span>{" "}
+   330→                      {t === 1 ? "izdelek" : t < 5 ? "izdelke" : "izdelkov"}
+   331→                    </>
+   332→                  );
+   333→                })()
+   334→            : experiencesLoading
+   335→              ? "Nalagam izkušnje..."
+   336→              : (() => {
+   337→                  const t = experiencesTotal;
+   338→                  return (
+   339→                    <>
+   340→                      Prikazujem{" "}
+   341→                      <span className="font-semibold text-foreground">{t}</span>{" "}
+   342→                      {t === 1
+   343→                        ? "izkušnjo"
+   344→                        : t < 5
+   345→                          ? "izkušnje"
+   346→                          : "izkušenj"}
+   347→                    </>
+   348→                  );
+   349→                })()}
+   350→        </p>
+   351→
+   352→        {/* Grid */}
+   353→        {tab === "products" ? (
+   354→          productsLoading ? (
+   355→            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+   356→              {Array.from({ length: 6 }).map((_, i) => (
+   357→                <ProductSkeleton key={i} />
+   358→              ))}
+   359→            </div>
+   360→          ) : productsError ? (
+   361→            <ErrorState
+   362→              message={productsError}
+   363→              onRetry={() => void fetchProducts()}
+   364→            />
+   365→          ) : products.length === 0 ? (
+   366→            <EmptyState
+   367→              canClear={hasActiveFilters}
+   368→              onClear={clearFilters}
+   369→              label="izdelkov"
+   370→            />
+   371→          ) : (
+   372→            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+   373→              {products.map((p) => (
+   374→                <ProductCard
+   375→                  key={p.id}
+   376→                  product={p}
+   377→                  onOpen={() => setSelectedProduct(p)}
+   378→                />
+   379→              ))}
+   380→            </div>
+   381→          )
+   382→        ) : experiencesLoading ? (
+   383→          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+   384→            {Array.from({ length: 6 }).map((_, i) => (
+   385→              <ExperienceSkeleton key={i} />
+   386→            ))}
+   387→          </div>
+   388→        ) : experiencesError ? (
+   389→          <ErrorState
+   390→            message={experiencesError}
+   391→            onRetry={() => void fetchExperiences()}
+   392→          />
+   393→        ) : experiences.length === 0 ? (
+   394→          <EmptyState
+   395→            canClear={hasActiveFilters}
+   396→            onClear={clearFilters}
+   397→            label="izkušenj"
+   398→          />
+   399→        ) : (
+   400→          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+   401→            {experiences.map((e) => (
+   402→              <ExperienceCard
+   403→                key={e.id}
+   404→                experience={e}
+   405→                onOpen={() => setSelectedExperience(e)}
+   406→              />
+   407→            ))}
+   408→          </div>
+   409→        )}
+   410→
+   411→        {/* Footer note — monetizacijski CTA */}
+   412→        <div className="mt-10 flex flex-col items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 p-6 text-center sm:flex-row sm:gap-4">
+   413→          <Store className="size-5 text-primary" aria-hidden="true" />
+   414→          <p className="text-sm text-foreground/90">
+   415→            Želite prodajati svoje izdelke ali izkušnje? Pridruži se tržnici.
+   416→          </p>
+   417→          <a
+   418→            href="#pridruzi-se"
+   419→            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary transition-colors hover:text-primary/80"
+   420→          >
+   421→            Pridruži se
+   422→            <Compass className="size-3.5" aria-hidden="true" />
+   423→          </a>
+   424→        </div>
+   425→      </div>
+   426→
+   427→      {/* Modala */}
+   428→      <ProductModal
+   429→        product={selectedProduct}
+   430→        onClose={() => setSelectedProduct(null)}
+   431→      />
+   432→      <ExperienceModal
+   433→        experience={selectedExperience}
+   434→        onClose={() => setSelectedExperience(null)}
+   435→      />
+   436→    </section>
+   437→  );
+   438→}
+   439→
+   440→interface FilterOption {
+   441→  value: string;
+   442→  label: string;
+   443→}
+   444→
+   445→function FilterSelect({
+   446→  value,
+   447→  onChange,
+   448→  placeholder,
+   449→  ariaLabel,
+   450→  options,
+   451→  showAllOption = true,
+   452→}: {
+   453→  value: string;
+   454→  onChange: (v: string) => void;
+   455→  placeholder: string;
+   456→  ariaLabel: string;
+   457→  options: FilterOption[];
+   458→  showAllOption?: boolean;
+   459→}) {
+   460→  return (
+   461→    <Select value={value} onValueChange={onChange}>
+   462→      <SelectTrigger aria-label={ariaLabel} className="w-full">
+   463→        <SelectValue placeholder={placeholder} />
+   464→      </SelectTrigger>
+   465→      <SelectContent>
+   466→        {showAllOption ? (
+   467→          <SelectItem value={ALL_VALUE}>{placeholder}</SelectItem>
+   468→        ) : null}
+   469→        {options.map((o) => (
+   470→          <SelectItem key={o.value} value={o.value}>
+   471→            {o.label}
+   472→          </SelectItem>
+   473→        ))}
+   474→      </SelectContent>
+   475→    </Select>
+   476→  );
+   477→}
+   478→
+   479→/**
+   480→ * ProductCard — kartica izdelka za tržnico.
+   481→ */
+   482→function ProductCard({
+   483→  product,
+   484→  onOpen,
+   485→}: {
+   486→  product: Product;
+   487→  onOpen: () => void;
+   488→}) {
+   489→  const image = product.images[0];
+   490→  const discount = product.compareAtPrice
+   491→    ? Math.round(
+   492→        ((product.compareAtPrice - product.price) / product.compareAtPrice) *
+   493→          100
+   494→      )
+   495→    : 0;
+   496→
+   497→  return (
+   498→    <Card
+   499→      className={cn(
+   500→        "group relative gap-0 overflow-hidden py-0 transition-all hover:shadow-lg focus-within:shadow-lg",
+   501→        product.plan === "premium" && "border-primary"
+   502→      )}
+   503→    >
+   504→      {/* Slika */}
+   505→      <div className="relative aspect-square w-full overflow-hidden bg-muted">
+   506→        {image ? (
+   507→          <img
+   508→            src={image}
+   509→            alt={`${product.name} — ${product.description}`}
+   510→            loading="lazy"
+   511→            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+   512→          />
+   513→        ) : (
+   514→          <div className="flex size-full items-center justify-center bg-muted text-4xl">
+   515→            <span aria-hidden="true">
+   516→              {PRODUCT_CATEGORY_ICONS[product.category]}
+   517→            </span>
+   518→          </div>
+   519→        )}
+   520→
+   521→        {/* Atributi (top-left) */}
+   522→        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+   523→          {product.organic ? (
+   524→            <Badge className="bg-primary text-primary-foreground shadow-sm">
+   525→              <Leaf className="size-3" aria-hidden="true" />
+   526→              Ekološko
+   527→            </Badge>
+   528→          ) : null}
+   529→          {product.handmade ? (
+   530→            <Badge className="bg-blue-600 text-white shadow-sm">
+   531→              <HandHeart className="size-3" aria-hidden="true" />
+   532→              Ročno
+   533→            </Badge>
+   534→          ) : null}
+   535→          {product.vegan ? (
+   536→            <Badge variant="secondary" className="shadow-sm">
+   537→              <Leaf className="size-3" aria-hidden="true" />
+   538→              Vegansko
+   539→            </Badge>
+   540→          ) : null}
+   541→        </div>
+   542→
+   543→        {/* Featured badge (top-right) */}
+   544→        {product.featured ? (
+   545→          <Badge className="absolute right-3 top-3 bg-amber-400 text-amber-950 shadow-sm">
+   546→            <Sparkles className="size-3" aria-hidden="true" />
+   547→            Izpostavljeno
+   548→          </Badge>
+   549→        ) : null}
+   550→
+   551→        {/* Discount badge (bottom-right) */}
+   552→        {discount > 0 ? (
+   553→          <Badge className="absolute bottom-3 right-3 bg-destructive text-destructive-foreground shadow-sm">
+   554→            -{discount}%
+   555→          </Badge>
+   556→        ) : null}
+   557→      </div>
+   558→
+   559→      {/* Body */}
+   560→      <CardContent className="flex flex-col gap-3 p-4">
+   561→        <div>
+   562→          <h3 className="line-clamp-1 text-lg font-semibold leading-tight">
+   563→            {product.name}
+   564→          </h3>
+   565→          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+   566→            {product.description}
+   567→          </p>
+   568→        </div>
+   569→
+   570→        {/* Rating */}
+   571→        <div className="flex items-center gap-1.5">
+   572→          <Star
+   573→            className="size-4 fill-amber-400 text-amber-400"
+   574→            aria-hidden="true"
+   575→          />
+   576→          <span className="text-sm font-medium tabular-nums">
+   577→            {product.rating.toFixed(1)}
+   578→          </span>
+   579→          <span className="text-xs text-muted-foreground">
+   580→            ({product.reviewCount})
+   581→          </span>
+   582→        </div>
+   583→
+   584→        {/* Cena */}
+   585→        <div className="flex items-baseline gap-2">
+   586→          <span className="text-lg font-bold text-foreground">
+   587→            {formatPrice(product.price, product.currency)}
+   588→          </span>
+   589→          {product.compareAtPrice ? (
+   590→            <span className="text-sm text-muted-foreground line-through">
+   591→              {formatPrice(product.compareAtPrice, product.currency)}
+   592→            </span>
+   593→          ) : null}
+   594→        </div>
+   595→
+   596→        {/* Seller name + location */}
+   597→        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+   598→          <MapPin
+   599→            className="mt-0.5 size-3.5 shrink-0"
+   600→            aria-hidden="true"
+   601→          />
+   602→          <span className="line-clamp-1">
+   603→            {product.sellerName}
+   604→            {product.destinationName ? ` · ${product.destinationName}` : ""}
+   605→          </span>
+   606→        </div>
+   607→
+   608→        {/* Shipping badge */}
+   609→        <div className="flex flex-wrap gap-1.5">
+   610→          {product.shippingFree ? (
+   611→            <Badge className="bg-amber-400 text-amber-950">
+   612→              <Truck className="size-3" aria-hidden="true" />
+   613→              Brezplačna dostava
+   614→            </Badge>
+   615→          ) : product.shipsEurope ? (
+   616→            <Badge variant="secondary">
+   617→              <Globe className="size-3" aria-hidden="true" />
+   618→              Dostava EU
+   619→            </Badge>
+   620→          ) : null}
+   621→        </div>
+   622→
+   623→        {/* CTA */}
+   624→        <div className="mt-1 flex items-center gap-2">
+   625→          <Button
+   626→            type="button"
+   627→            size="sm"
+   628→            className="flex-1 justify-center bg-primary text-primary-foreground hover:bg-primary/90"
+   629→            disabled={product.stock <= 0}
+   630→            onClick={(e) => e.stopPropagation()}
+   631→          >
+   632→            <ShoppingCart className="size-4" aria-hidden="true" />
+   633→            {product.stock > 0 ? "V košaro" : "Ni zaloge"}
+   634→          </Button>
+   635→          <Button
+   636→            type="button"
+   637→            variant="outline"
+   638→            size="sm"
+   639→            className="justify-center"
+   640→            onClick={onOpen}
+   641→          >
+   642→            Podrobnosti
+   643→          </Button>
+   644→        </div>
+   645→      </CardContent>
+   646→    </Card>
+   647→  );
+   648→}
+   649→
+   650→/**
+   651→ * ExperienceCard — kartica izkušnje za tržnico.
+   652→ */
+   653→function ExperienceCard({
+   654→  experience,
+   655→  onOpen,
+   656→}: {
+   657→  experience: Experience;
+   658→  onOpen: () => void;
+   659→}) {
+   660→  const image = experience.images[0];
+   661→
+   662→  return (
+   663→    <Card
+   664→      className={cn(
+   665→        "group relative gap-0 overflow-hidden py-0 transition-all hover:shadow-lg focus-within:shadow-lg",
+   666→        experience.plan === "premium" && "border-primary"
+   667→      )}
+   668→    >
+   669→      {/* Slika */}
+   670→      <div className="relative aspect-video w-full overflow-hidden bg-muted">
+   671→        {image ? (
+   672→          <img
+   673→            src={image}
+   674→            alt={`${experience.name} — ${experience.description}`}
+   675→            loading="lazy"
+   676→            className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+   677→          />
+   678→        ) : (
+   679→          <div className="flex size-full items-center justify-center bg-muted text-4xl">
+   680→            <span aria-hidden="true">
+   681→              {EXPERIENCE_CATEGORY_ICONS[experience.category]}
+   682→            </span>
+   683→          </div>
+   684→        )}
+   685→
+   686→        {/* Category badge (top-left) */}
+   687→        <Badge className="absolute left-3 top-3 bg-background/90 text-foreground backdrop-blur-sm">
+   688→          <span aria-hidden="true">
+   689→            {EXPERIENCE_CATEGORY_ICONS[experience.category]}
+   690→          </span>
+   691→          {EXPERIENCE_CATEGORY_LABELS[experience.category]}
+   692→        </Badge>
+   693→
+   694→        {/* Featured badge (top-right) */}
+   695→        {experience.featured ? (
+   696→          <Badge className="absolute right-3 top-3 bg-amber-400 text-amber-950 shadow-sm">
+   697→            <Sparkles className="size-3" aria-hidden="true" />
+   698→            Izpostavljeno
+   699→          </Badge>
+   700→        ) : null}
+   701→
+   702→        {/* Duration badge (bottom-right) */}
+   703→        <Badge className="absolute bottom-3 right-3 bg-background/90 text-foreground backdrop-blur-sm">
+   704→          <Clock className="size-3" aria-hidden="true" />
+   705→          {formatDuration(experience.durationHours)}
+   706→        </Badge>
+   707→      </div>
+   708→
+   709→      {/* Body */}
+   710→      <CardContent className="flex flex-col gap-3 p-4">
+   711→        <div>
+   712→          <h3 className="line-clamp-1 text-lg font-semibold leading-tight">
+   713→            {experience.name}
+   714→          </h3>
+   715→          <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
+   716→            {experience.description}
+   717→          </p>
+   718→        </div>
+   719→
+   720→        {/* Rating */}
+   721→        <div className="flex items-center gap-1.5">
+   722→          <Star
+   723→            className="size-4 fill-amber-400 text-amber-400"
+   724→            aria-hidden="true"
+   725→          />
+   726→          <span className="text-sm font-medium tabular-nums">
+   727→            {experience.rating.toFixed(1)}
+   728→          </span>
+   729→          <span className="text-xs text-muted-foreground">
+   730→            ({experience.reviewCount})
+   731→          </span>
+   732→        </div>
+   733→
+   734→        {/* Cena */}
+   735→        <div className="flex items-baseline gap-1">
+   736→          <span className="text-xs text-muted-foreground">od</span>
+   737→          <span className="text-lg font-bold text-foreground">
+   738→            {formatPrice(experience.pricePerPerson, experience.currency)}
+   739→          </span>
+   740→          <span className="text-xs text-muted-foreground">/ osebo</span>
+   741→        </div>
+   742→
+   743→        {/* Provider name + location */}
+   744→        <div className="flex items-start gap-1.5 text-xs text-muted-foreground">
+   745→          <MapPin
+   746→            className="mt-0.5 size-3.5 shrink-0"
+   747→            aria-hidden="true"
+   748→          />
+   749→          <span className="line-clamp-1">
+   750→            {experience.providerName}
+   751→            {experience.destinationName ? ` · ${experience.destinationName}` : ""}
+   752→          </span>
+   753→        </div>
+   754→
+   755→        {/* Atributi */}
+   756→        {(experience.familyFriendly || experience.accessibility) && (
+   757→          <div className="flex flex-wrap gap-1.5">
+   758→            {experience.familyFriendly ? (
+   759→              <Badge variant="secondary">
+   760→                <Baby className="size-3" aria-hidden="true" />
+   761→                Družinsko
+   762→              </Badge>
+   763→            ) : null}
+   764→            {experience.accessibility ? (
+   765→              <Badge variant="secondary">
+   766→                <Accessibility className="size-3" aria-hidden="true" />
+   767→                Dostopno
+   768→              </Badge>
+   769→            ) : null}
+   770→          </div>
+   771→        )}
+   772→
+   773→        {/* CTA */}
+   774→        <div className="mt-1 flex items-center gap-2">
+   775→          <Button
+   776→            type="button"
+   777→            size="sm"
+   778→            className="flex-1 justify-center bg-primary text-primary-foreground hover:bg-primary/90"
+   779→            onClick={(e) => e.stopPropagation()}
+   780→          >
+   781→            <Calendar className="size-4" aria-hidden="true" />
+   782→            Rezerviraj
+   783→          </Button>
+   784→          <Button
+   785→            type="button"
+   786→            variant="outline"
+   787→            size="sm"
+   788→            className="justify-center"
+   789→            onClick={onOpen}
+   790→          >
+   791→            Podrobnosti
+   792→          </Button>
+   793→        </div>
+   794→      </CardContent>
+   795→    </Card>
+   796→  );
+   797→}
+   798→
+   799→function ProductSkeleton() {
+   800→  return (
+   801→    <Card className="gap-0 overflow-hidden py-0">
+   802→      <Skeleton className="aspect-square w-full rounded-none" />
+   803→      <CardContent className="space-y-3 p-4">
+   804→        <Skeleton className="h-5 w-3/4" />
+   805→        <Skeleton className="h-4 w-full" />
+   806→        <Skeleton className="h-4 w-2/3" />
+   807→        <Skeleton className="h-5 w-1/3" />
+   808→        <div className="flex gap-2">
+   809→          <Skeleton className="h-8 flex-1 rounded-md" />
+   810→          <Skeleton className="h-8 w-24 rounded-md" />
+   811→        </div>
+   812→      </CardContent>
+   813→    </Card>
+   814→  );
+   815→}
+   816→
+   817→function ExperienceSkeleton() {
+   818→  return (
+   819→    <Card className="gap-0 overflow-hidden py-0">
+   820→      <Skeleton className="aspect-video w-full rounded-none" />
+   821→      <CardContent className="space-y-3 p-4">
+   822→        <Skeleton className="h-5 w-3/4" />
+   823→        <Skeleton className="h-4 w-full" />
+   824→        <Skeleton className="h-4 w-2/3" />
+   825→        <Skeleton className="h-5 w-1/3" />
+   826→        <div className="flex gap-2">
+   827→          <Skeleton className="h-8 flex-1 rounded-md" />
+   828→          <Skeleton className="h-8 w-24 rounded-md" />
+   829→        </div>
+   830→      </CardContent>
+   831→    </Card>
+   832→  );
+   833→}
+   834→
+   835→function EmptyState({
+   836→  canClear,
+   837→  onClear,
+   838→  label,
+   839→}: {
+   840→  canClear: boolean;
+   841→  onClear: () => void;
+   842→  label: string;
+   843→}) {
+   844→  return (
+   845→    <div className="mt-6 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-background px-6 py-16 text-center">
+   846→      <span className="flex size-12 items-center justify-center rounded-full bg-muted">
+   847→        <Store className="size-6 text-muted-foreground" aria-hidden="true" />
+   848→      </span>
+   849→      <p className="text-base font-medium">Ni najdenih rezultatov.</p>
+   850→      <p className="text-sm text-muted-foreground">
+   851→        Poskusite spremeniti filtre ali jih počistiti.
+   852→      </p>
+   853→      {canClear ? (
+   854→        <Button
+   855→          type="button"
+   856→          variant="outline"
+   857→          size="sm"
+   858→          onClick={onClear}
+   859→          className="mt-2 gap-1.5"
+   860→        >
+   861→          <X className="size-3.5" aria-hidden="true" />
+   862→          Počisti filtre ({label})
+   863→        </Button>
+   864→      ) : null}
+   865→    </div>
+   866→  );
+   867→}
+   868→
+   869→function ErrorState({
+   870→  message,
+   871→  onRetry,
+   872→}: {
+   873→  message: string;
+   874→  onRetry: () => void;
+   875→}) {
+   876→  return (
+   877→    <div className="mt-6 flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-destructive/40 bg-destructive/5 px-6 py-16 text-center">
+   878→      <p className="text-base font-medium text-destructive">{message}</p>
+   879→      <Button
+   880→        type="button"
+   881→        variant="outline"
+   882→        size="sm"
+   883→        onClick={onRetry}
+   884→        className="gap-1.5"
+   885→      >
+   886→        Poskusi znova
+   887→      </Button>
+   888→    </div>
+   889→  );
+   890→}
+   891→
+   892→export default MarketplaceSection;
+   893→

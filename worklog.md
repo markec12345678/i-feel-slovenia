@@ -3030,3 +3030,62 @@ Stage Summary:
 - ✅ 0 runtime errorjev, lint čist
 - ✅ 81 slik skupno posodobljenih (25 + 28 + 28)
 - Platforma je vizualno konsistentna — slike se ujemajo z imeni in opisi
+
+---
+Task ID: 48
+Agent: main (Z.ai Code)
+Task: Odstrani vse duplikate slik (blog + cross-file)
+
+Work Log:
+- Uporabnik poslal screenshot z dvema enakima slikama (smučar) za "Bohinj pozimi" in "Kam na Pohorju"
+- VLM analiza screenshot-a potrdila: duplikat smučarja med dvema blog člankoma
+- Sistematsen pregled blog-data.ts — odkritih 6 Unsplash slik podvojjenih:
+  - photo-1551524559-8af4e6624178 (smučar) — 3x: Zima v Sloveniji, Bohinj pozimi, Kam na Pohorju
+  - photo-1469474968028-56623f02e42e (gore) — 3x: Vintgar, Cviček (nepravilno!), Slapovi, Triglavski park
+- Preveril bazo listings/products/experiences: 0 duplikatov (81 unikatnih slik)
+- Pridobil nove slike za 6 blog člankov z duplikati (image-search):
+  - zima-v-sloveniji: 24e0319040cc.jpg (ženska v bazenu z zasneženimi gorami — smučanje + terme)
+  - bohinj-pozimi: cd8b734ba670.jpg (zasnežene gore, jezero, gozdovi)
+  - kam-na-pohorju: 34d0335d5c60.jpg (snežna gozdna pot v gorah)
+  - vintgarska-soteska: 4cf4cf182837.jpg (oseba na lesenem mostu v soteski — Vintgar!)
+  - cvicek-in-dolenjska-kuhinja: b307c276773c.jpg → zamenjano s 4b0974438031.jpg (steklenica vina z nalepko Cvíček!)
+  - slapovi-slovenije: a21f41691a36.jpg (vodometi, jezero — slapovi!)
+  - triglavski-narodni-park: 29777d33ec2d.jpeg (jezero z zeleno vodo, gore, gozdovi)
+- VLM preverba vseh 6 novih slik — vse ustrezne
+- Še 6 ostalih Unsplash slik zamenjanih s slovenskimi kontekstnimi:
+  - slovenska-kulinarika: d08bfb619a1a.jpg (štuklji/žlikrofi)
+  - cvicek: 4b0974438031.jpg (Cvíček vino z nalepko!)
+  - kolesarjenje-ob-dravi: 528b9cc50ea4.jpg (Drava s kolesarji in labodi — Maribor!)
+  - ljubljana-v-48-urah: 650260f2f384.jpg (Tromostovje!)
+  - prekmurska-gibanica: 1cfd5ad8d032.jpg (slojasta torta — gibanica!)
+  - vinogradi-stajerske: 2b43ef1e28ac.jpg (vinska klet)
+- 0 Unsplash slik v blog-data.ts (prej 12)
+- Odkril še 3 cross-file duplikate (blog + destinacije):
+  - 5f720abe0af2.jpg: Soča (destinacija) + Soča blog
+  - f1fdf5ca02fe.jpg: Triglav (destinacija) + Triglav blog
+  - 1ca2f342127f.jpg: Piran (destinacija) + Piran blog
+- Pridobil nove slike za te 3 blog članke:
+  - soca-adrenalinski-vodnik: ed8d38609552.jpg (rafting na turkizni reki — Soča!)
+  - triglav-vzpon-vodic: 0cbde96d84ea.jpg (plezalci na gorskem vrhu — Triglav!)
+  - piran-slovenska-obala: 5b98e63b6641.jpg (pot ob obali do starega mesta — Piran!)
+- VLM preverba: vse 3 ustrezne
+
+Verifikacija:
+- 0 Unsplash slik v blog-data.ts
+- 0 duplikatov znotraj blog-data.ts
+- 0 cross-file duplikatov (blog ↔ destinacije)
+- 0 duplikatov v bazi (listings/products/experiences)
+- 0 duplikatov na homepage-u (122 unikatnih slik)
+- Lint: 0 errorjev
+- Agent Browser potrdil: blog sekcija prikazuje vse unikatne slike
+
+Stage Summary:
+- ✅ Vsi blog članki (16) imajo unikatne, relevantne slike
+- ✅ 0 Unsplash slik (prej 12)
+- ✅ 0 duplikatov znotraj blog-data.ts
+- ✅ 0 cross-file duplikatov (blog ↔ destinacije)
+- ✅ 0 duplikatov v bazi (81 unikatnih slik)
+- ✅ 0 duplikatov na homepage-u (122 unikatnih slik)
+- ✅ VLM preverba: vse sline ustrezne (Cvíček vino, Tromostovje, Vintgar, slapovi, Triglav, Piran, Soča rafting, gibanica)
+- ✅ 0 runtime errorjev, lint čist
+- Platforma je vizualno popolnoma konsistentna — ni ene same podvojene slike

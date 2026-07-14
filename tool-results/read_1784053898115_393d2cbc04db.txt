@@ -1,0 +1,302 @@
+     1→     1→# Worklog — I Feel Slovenia (Next.js 16 rebuild)
+     2→     2→
+     3→     3→---
+     4→     4→Task ID: 1
+     5→     5→Agent: main (Z.ai Code)
+     6→     6→Task: Postavi temelj — Prisma schema povrnjena (brez baze), shared types, slovenia-data.ts (12 destinacij), affiliate.ts, API routes (destinations/itinerary/weather), globals.css slovenska tema, layout.tsx, theme-provider
+     7→     7→
+     8→     8→Work Log:
+     9→     9→- Uporabnik odločil: BREZ BAZE (affiliate model, ni shranjevanja podatkov)
+    10→    10→- Povrnil Prisma schema v original (User/Post), da ne lomim infrastrukture
+    11→    11→- Ustvaril `src/lib/types.ts` — centralni tipi (Destination, PlannerInput, Itinerary, WeatherData, AffiliateLinks)
+    12→    12→- Ustvaril `src/lib/slovenia-data.ts` — 12 slovenskih destinacij (Bled, Bohinj, Ljubljana, Postojna, Piran, Soča, Triglav, Kobarid, Maribor, Portorož, Vintgar, Rogaška) z regijami, koordinatami, aktivnostmi. Single source of truth (odpravljena duplikacija iz originala).
+    13→    13→- Ustvaril `src/lib/affiliate.ts` — generatorji povezav za Booking (5%), DiscoverCars (70%), Viator (8%), GetYourGuide (8%), Skyscanner (40%), WorldNomads. Affiliate ID-ji iz env spremenljivk z demo fallback.
+    14→    14→- API routes:
+    15→    15→  - `GET /api/destinations` — statični podatki, filtri region/featured
+    16→    16→  - `GET /api/destinations/[slug]` — posamezna destinacija
+    17→    17→  - `POST /api/itinerary` — z-ai-web-dev-sdk LLM z JSON output + pametni fallback (deterministični itinerer iz statičnih podatkov ob napaki AI)
+    18→    18→  - `GET /api/weather?lat&lng` — Open-Meteo proxy (brez API ključa, 10-min cache)
+    19→    19→- `src/app/globals.css` — slovenska naravna paleta (alpsko zelena primary, terakota accent), light/dark, custom scrollbar, hero-overlay
+    20→    20→- `src/app/layout.tsx` — slovenski lang, SEO metapodatki, ThemeProvider
+    21→    21→- `src/components/theme-provider.tsx` — next-themes wrapper
+    22→    22→- Dev strežnik pognan na portu 3000, `/` vrača 200
+    23→    23→
+    24→    24→Stage Summary:
+    25→    25→- Backend popolnoma končan (brez baze, vse statično + AI + proxy)
+    26→    26→- Design system postavljen (slovenska tema)
+    27→    27→- Naslednji koraki: frontend komponente (Navigation, Hero, Destinations, ItineraryPlanner, WeatherWidget, Footer) delegirane subagentom
+    28→    28→- Ključne odločitve: statični podatki namesto baze, affiliate brez shranjevanja, AI z fallbackom, Open-Meteo brez ključa
+    29→    29→
+    30→    30→---
+    31→    31→Task ID: 2-c
+    32→    32→Agent: full-stack-developer
+    33→    33→Task: AI Itinerary Planner komponenta
+    34→    34→
+    35→    35→Work Log:
+    36→    36→- Prebral worklog.md, types.ts, slovenia-data.ts (INTERESTS), affiliate.ts (getAffiliateLinks) ter preveril razpoložljive shadcn/ui komponente (button, card, input, label, select, badge, skeleton, alert) in toast infrastrukturo (radix `useToast` iz `@/hooks/use-toast`, Toaster že montiran v layout.tsx).
+    37→    37→- Ustvaril `src/components/sections/itinerary-planner.tsx` — "use client" komponenta z `id="načrtuj"`.
+    38→    38→- LEVO: Card z obrazcem (Število dni 1-14, Proračun € 50-5000, Velikost skupine 1-20, Select sezona Pomlad/Poletje/Jesen/Zima, multi-select interesov iz INTERESTS arraya kot toggle badge-i z aria-pressed). Submit gumb full-width bg-primary z loading state-om (Loader2 spinner + "AI razmišlja...").
+    39→    39→- DESNO: empty state (Sparkles ikona v primary/10 krogu), skeleton kartice za 3 dni med generiranjem, Alert z AlertCircle + retry gumb ob napaki, uspeh prikaže header (days + source badge AI zelena/Fallback rumena + Skupaj ~€ badge), eno Card kartico na dan z weather badge (Cloud + condition + temp), listo LocationVisit (time_slot bold, destination_name text-lg, Clock duration badge, accent cost badge, notes muted), CTA "Rezerviraj" gumb ki odpre getAffiliateLinks(name).hotels v novem tabu (target=_blank rel=sponsored), ter Priporočila/Nasveti sekciji z bullet listo.
+    40→    40→- Logika: validate() preveri days 1-14, budget>0, groupSize 1-20, vsaj 1 interest; generateItinerary() kliče POST /api/itinerary z JSON formData; toast ob uspehu "Itinerer generiran!" preko radix useToast.
+    41→    41→- Tipi striktni (PlannerInput, Itinerary, Season), lucide-react ikone (Sparkles, Clock, Calendar, Euro, Users, MapPin, AlertCircle, ExternalLink, Star, Cloud, Loader2), mobile-first (grid lg:grid-cols-2, sm:grid-cols-2 znotraj obrazca), NO indigo/blue (primary/accent/muted + emerald/amber za source badge).
+    42→    42→- ESLint: komponenta brez napak (preostale napake v weather-widget.tsx/destination-modal.tsx/destinations.tsx so iz drugih taskov). Dev strežnik uspešno kompajlira, `/` vrača 200.
+    43→    43→
+    44→    44→Stage Summary:
+    45→    45→- Ustvarjena datoteka: `/home/z/my-project/src/components/sections/itinerary-planner.tsx` (~470 vrstic)
+    46→    46→- Funkcionalnost: popoln AI Itinerary Planner — obrazec z validacijo, AI/fallback rezultat z dnevnimi načrti, vremenom, lokacijami, cenami, affiliate CTA, priporočili in nasveti
+    47→    47→- Pripravljen za integracijo v `src/app/page.tsx` kot `<ItineraryPlanner />` (exportan kot named + default)
+    48→    48→- Toast infrastruktura: radix `useToast` (Toaster že v layout.tsx)
+    49→    49→
+    50→    50→---
+    51→    51→Task ID: 2-a
+    52→    52→Agent: full-stack-developer
+    53→    53→Task: Navigation + Hero + Footer komponente
+    54→    54→
+    55→    55→Work Log:
+    56→    56→- Prebral worklog.md za kontekst projekta (slovenska tema, 12 destinacij, affiliate model, API routes končane)
+    57→    57→- Preveril src/components/ui/ — na voljo sheet, button, badge, card, dialog, input, select, itd.
+    58→    58→- Prebral globals.css: hero-overlay class, slovenska zelena/terakota paleta, custom scrollbar
+    59→    59→- Preveril package.json: next-themes, framer-motion, lucide-react že prisotni
+    60→    60→- Ustvaril navigation.tsx ("use client"):
+    61→    61→  - Sticky top z backdrop-blur, border-border/60, bg-background/80 (z supports-[backdrop-filter])
+    62→    62→  - Levo: logotip "I Feel Slovenia" z Mountain ikono v zelenem badge-u
+    63→    63→  - Center (lg+): 5 anchor linkov (#destinacije, #načrtuj, #zemljevid, #izkušnje, #rezerviraj) z hover bg-accent
+    64→    64→  - Desno: theme toggle (Sun/Moon) z mounted guard proti hidracijskemu mismatchu + CTA "Načrtuj potovanje" (skrit na mobile)
+    65→    65→  - Mobile: hamburger → Sheet (right side) z istimi linki in CTA na dnu, SheetClose na vsakem linku za avto-zapiranje
+    66→    66→- Ustvaril hero.tsx (server component):
+    67→    67→  - min-h-[90vh], next/image fill z Blejskim jezerom (priority, sizes=100vw, object-cover)
+    68→    68→  - hero-overlay class iz globals.css (3-stopnični dark gradient)
+    69→    69→  - Badge: "🇸🇮 12 destinacij · AI načrtovalec" (Sparkles icon, translucent border-white/25)
+    70→    70→  - H1: "Odkrijte Slovenijo" (text-5xl → 7xl, bold, white, drop-shadow)
+    71→    71→  - P: podnaslov o AI itinererju
+    72→    72→  - 2 CTA: primarni bg-background text-foreground z ArrowRight, sekundarni outline z border-white/40 text-white
+    73→    73→  - 3 StatCard komponente (translucent bg-white/10 backdrop-blur): 2,4 mio obiskovalcev, 60% gozdov, 47 km obale (Users/Trees/Waves ikone)
+    74→    74→  - Animiran fade-in preko tw-animate-css (slide-in-from-bottom-*, delay stopnjevan) — dela v RSC ker ni "use client"
+    75→    75→- Ustvaril footer.tsx (server component):
+    76→    76→  - border-t, bg-muted/30, mt-auto (sticky-footer pravilo — parent page skrbi za min-h-screen flex flex-col)
+    77→    77→  - 4-kolončni grid (1/2/4 responsive)
+    78→    78→  - Kolona 1: Brand z Mountain ikono + opis + 3 social ikone (Facebook/Instagram/Twitter) kot okrogle gumbi z hover→primary
+    79→    79→  - Kolona 2: Destinacije (Vse + Bled, Ljubljana, Piran, Triglav)
+    80→    80→  - Kolona 3: Podpora (AI načrtovalec, Vreme, Rezervacije, FAQ)
+    81→    81→  - Kolona 4: Pravno (Piškotki, Pogoji, Kontakt, Zasebnost)
+    82→    82→  - Spodaj: © 2025 I Feel Slovenia + Heart ikona + "Narejeno z ❤️ v Sloveniji." + affiliate disclaimer
+    83→    83→  - Pomožni komponenti FooterColumn in SocialLink za čistost
+    84→    84→- Pognal bun run lint — MOJE 3 datoteke (navigation, hero, footer) čiste brez napak (napake v drugih datotekah so od paralelnih agentov: destination-modal, weather-widget)
+    85→    85→
+    86→    86→Stage Summary:
+    87→    87→- Ustvarjene datoteke:
+    88→    88→  - /home/z/my-project/src/components/sections/navigation.tsx (client, sticky, theme toggle, Sheet mobile meni)
+    89→    89→  - /home/z/my-project/src/components/sections/hero.tsx (server, full-height, Bled background, 3 stat karte)
+    90→    90→  - /home/z/my-project/src/components/sections/footer.tsx (server, 4 kolone, sticky-ready z mt-auto)
+    91→    91→- Vse komponente uporabljajo slovensko temo (zelena primary, terakota accent), nobenih indigo/blue barv
+    92→    92→- Mobile-first responsive (sm/lg breakpointi), shadcn/ui Button/Sheet/Badge, lucide-react ikone
+    93→    93→- Vsa UI besedila v slovenščini
+    94→    94→- Lint čist za moje datoteke (0 errors, 0 warnings)
+    95→    95→- Naslednji koraki za druge agente: integrirati Navigation/Hero/Footer v src/app/page.tsx z glavnimi sekcijami (Destinations, ItineraryPlanner, WeatherWidget, Map, Experiences, Booking)
+    96→    96→
+    97→    97→---
+    98→    98→Task ID: 2-b
+    99→    99→Agent: full-stack-developer
+   100→   100→Task: DestinationsSection + DestinationModal + WeatherWidget komponente
+   101→   101→
+   102→   102→Work Log:
+   103→   103→- Prebral worklog.md, types.ts (Destination, WeatherData), slovenia-data.ts (DESTINATIONS/REGIONS/INTERESTS), affiliate.ts (getAffiliateLinks, COMMISSION_INFO) ter API route /api/weather (vrne {condition, temp, humidity, windSpeed, icon} iz Open-Meteo).
+   104→   104→- Preveril shadcn/ui komponente: dialog (controlled preko open + onOpenChange, DialogContent z built-in X gumbom), select (SelectTrigger/Content/Item z Value), card (gap-6 default — sem povožil z gap-0 za boljši image-card layout), badge, button, skeleton, scroll-area.
+   105→   105→- Ustvaril `src/components/sections/weather-widget.tsx` ("use client"):
+   106→   106→  - Props: lat, lng, name?. Fetcha iz `/api/weather?lat=${lat}&lng=${lng}` z AbortController (cleanup ob unmountu/ponovnem renderu).
+   107→   107→  - Cache vzorec: `loadedFor` state hrani lat/lng za katerega velja trenutni weather/error. `loading` je IZVEDEN iz primerjave loadedFor z aktualnima lat/lng — NI posebn state. Tako v effect body-ju ni sinhronega setState (pravilo react-hooks/set-state-in-effect), vsi setState klici so znotraj async IIFE callbacka (po prvem await).
+   108→   108→  - Card z bg-muted/40 headerjem (CloudSun ikona + "Vreme" + ime), vsebina: emoji ikona (text-4xl), temp (text-2xl font-bold tabular-nums), condition (capitalize), vlaga + veter (text-xs text-muted-foreground z Droplets/Wind ikonami).
+   109→   109→  - Loading → Skeleton (krog + 2 vrstici), Error → "Vreme trenutno ni na voljo".
+   110→   110→- Ustvaril `src/components/sections/destination-modal.tsx` ("use client"):
+   111→   111→  - Props: destination: Destination | null, onClose. Controlled Dialog: open={destination !== null}, onOpenChange → onClose ko !open. DialogContent pogojno renderan samo ko destination obstaja (brez null-checkov v notranjosti).
+   112→   112→  - max-w-3xl, p-0 overflow-hidden. Notranji scroll: `scroll-area-custom max-h-[80vh] overflow-y-auto` (uporablja custom scrollbar iz globals.css).
+   113→   113→  - Velika slika (aspect-video) z gradient overlay in Badge regije + H2 imenom + tagline v belem čez sliko.
+   114→   114→  - Opis (text-sm leading-relaxed).
+   115→   115→  - Grid 2x2 InfoItem kartice (MapPin/Tag/Clock/Euro ikone): Regija (iz REGIONS), Tip (TYPE_LABELS slovar), Trajanje, Cena na osebo.
+   116→   116→  - Poudarki (Sparkles ikona) kot bullet list z CheckCircle2 ikonami v primary barvi.
+   117→   117→  - Aktivnosti kot Badge variant="secondary", Najboljše za kot Badge variant="outline" (capitalize).
+   118→   118→  - WeatherWidget na dnu (lat/lng iz destination.coords, name=destination.name).
+   119→   119→  - REZERVACIJSKI CTA sekcija z border + bg-muted/30: H3 "Rezerviraj direktno", grid 2 kolone (sm:grid-cols-2) partnerjev — vsak je `<a target="_blank" rel="noopener noreferrer">` z ikono (BedDouble/Car/Ticket/Plane), imenom partnerja, kategorijo, ExternalLink ikono. DiscoverCars ima badge "70% provizija" (bg-amber-400). Opomba na dnu: "Affiliate povezave — podpora projektu brez dodatnih stroškov za vas."
+   120→   120→  - DialogTitle/Description sr-only za a11y (radix zahteva naslov).
+   121→   121→- Ustvaril `src/components/sections/destinations.tsx` ("use client"):
+   122→   122→  - Section id="destinacije" z scroll-mt-20 (za sticky nav offset), bg-background, py-16/20.
+   123→   123→  - Header: H2 "Raziščite destinacije" (text-3xl/4xl) + "12 najlepših kotičkov Slovenije" (text-muted-foreground).
+   124→   124→  - Filter vrstica: 2 Select (sm:w-56, w-full na mobile) — regija (Vse regije + 5 iz REGIONS) in interes (Vsi interesi + 8 iz INTERESTS z emoji prefiksi). Filter logika: regionOk (all || d.region===region) AND interestOk (all || d.bestFor.includes(interest)).
+   125→   125→  - Grid `grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6`. EmptyState če ni rezultatov ("Ni destinacij za izbrane filtre." z Compass ikono).
+   126→   126→  - DestinationCard: Card z role="button", tabIndex=0, onClick + onKeyDown(Enter/Space). Slika z aspect-video, overflow-hidden, hover:scale-105 transition (duration-500). Badge regije top-left (bg-primary text-primary-foreground). Featured Badge top-right "★ Priporočeno" (bg-amber-400 text-amber-950) če featured. Body: H3 ime, tagline (line-clamp-2), rating z Star (fill-amber-400 text-amber-400), budget Badge secondary + duration z Clock ikono, 3 highlight chipi (rounded-md bg-muted text-muted-foreground text-[11px]), Button "Več informacij" (variant ghost, text-primary, ArrowRight z group-hover translate-x).
+   127→   127→  - Lokalni state selected: Destination | null. onClick kartice ali gumba odpre DestinationModal. Button ima stopPropagation da ne sproži dvakrat.
+   128→   128→- Pognal `bun run lint` — 0 errorjev, 0 opozoril za moje datoteke. Rešil `react-hooks/set-state-in-effect` rule z izvedenim `loading` state vzorcem (loadedFor primerjava). Odstranil unused eslint-disable direktive za `@next/next/no-img-element` (rule je off v configu).
+   129→   129→- TypeScript: `npx tsc --noEmit` — MOJE 3 datoteke čiste (napake so samo v pre-existing examples/skills/api/itinerary).
+   130→   130→- Dev server: HTTP 200 na `/`, kompajlira brez napak.
+   131→   131→
+   132→   132→Stage Summary:
+   133→   133→- Ustvarjene datoteke:
+   134→   134→  - /home/z/my-project/src/components/sections/weather-widget.tsx (~95 vrstic) — async fetch z AbortController, izveden loading state, Skeleton/error/success variant, slovenški pogoji iz Open-Meteo
+   135→   135→  - /home/z/my-project/src/components/sections/destination-modal.tsx (~280 vrstic) — controlled Dialog z veliko sliko, 2x2 info grid, poudarki/aktivnosti/bestFor sekcije, WeatherWidget, 4 affiliate CTA gumbi (Booking/DiscoverCars/Viator/Skyscanner z 70% provizija badge)
+   136→   136→  - /home/z/my-project/src/components/sections/destinations.tsx (~250 vrstic) — grid 1/2/3 kolone, 2 Select filtra (regija/interes), DestinationCard z vsemi badge-i in rating, EmptyState, lokalni state za modal
+   137→   137→- Vse 3 komponente "use client", slovenski UI, NO indigo/blue (samo primary zelena, accent terakota, amber za zvezde/featured/70% provizijo), mobile-first responsive (sm/lg breakpointi)
+   138→   138→- Affiliate model integriran: getAffiliateLinks(name) generira 4 partnerske povezave, vsa odpiranja v novem tabu z rel="noopener noreferrer", transparentna opomba o podpori projekta
+   139→   139→- Lint čist (0 errors, 0 warnings), TypeScript strikten, dev strežnik HTTP 200
+   140→   140→- Pripravljen za integracijo v `src/app/page.tsx` kot `<DestinationsSection />` (exportan kot named + default)
+   141→   141→
+   142→   142→---
+   143→   143→Task ID: 3
+   144→   144→Agent: main (Z.ai Code)
+   145→   145→Task: Sestavitev glavne strani + preostale sekcije (Affiliate, Experiences, Stats) + self-verify z Agent Browser + VLM
+   146→   146→
+   147→   147→Work Log:
+   148→   148→- Ustvarjene 3 dodatne sekcije: affiliate-section.tsx (5 partnerjev: DiscoverCars 70%, Booking 5%, Viator 8%, Skyscanner 40%, WorldNomads), experiences.tsx (6 izkušenj: pohodništvo, vodne avanture, zgodovina, narava, kulinariika, skriti dragulji), stats.tsx (4 statistike na zeleni podlagi)
+   149→   149→- Sestavljena glavna stran src/app/page.tsx: Navigation → Hero → Stats → Destinations → ItineraryPlanner → Experiences → Affiliate → Footer, z min-h-screen flex flex-col in mt-auto logiko za sticky footer
+   150→   150→- Popravljen next.config.ts: dodana images.remotePatterns za images.unsplash.com (rešilo next/image napako)
+   151→   151→- Dev strežnik pognan čisto na portu 3000, HTTP 200
+   152→   152→- Agent Browser self-verification:
+   153→   153→  1. Stran se naloži pravilno — navigation, hero, 12 destinacij, itinerary obrazec
+   154→   154→  2. Modal test: click "Več informacij" na Bled → modal odprt z vsemi podatki, poudarki, aktivnostmi, 4 affiliate CTA (Booking, DiscoverCars z 70% badge, Viator, Skyscanner)
+   155→   155→  3. AI itinerer test: click "Generiraj itinerer ✨" → po ~10s prikazan "Vaš 3-dnevni itinerer" z badge "AI" (pravo AI generiranje, ne fallback), 3 dnevi z lokacijami, priporočili, nasveti, toast "Itinerer generiran!"
+   156→   156→  4. Mobile test: viewport 390x844 → hamburger "Odpri meni" prisoten, layout pravilen
+   157→   157→  5. Footer test: scrollHeight 15006px na desktopu — footer naravno na dnu (sticky deluje)
+   158→   158→  6. Console/errors: 0 runtime errorjev, samo nekritičen accessibility warning za Dialog Description
+   159→   159→- VLM analiza screenshot-a: "profesionalna, čista, simetrična postavitev, skladne barve (zelena, siva, bela), pravilna poravnava, footer drži na dnu"
+   160→   160→
+   161→   161→Stage Summary:
+   162→   162→- ✅ Celoten projekt funkcionalen in browser-verified
+   163→   163→- ✅ AI itinerer dejansko deluje (z-ai-web-dev-sdk, source:"ai")
+   164→   164→- ✅ Affiliate CTA gumbi prisotni v modalih in rezultatih
+   165→   165→- ✅ Responsive (mobile hamburger + desktop)
+   166→   166→- ✅ Sticky footer deluje
+   167→   167→- ✅ Brez runtime errorjev
+   168→   168→- ✅ Lint čist (0 errors, 0 warnings)
+   169→   169→- Arhitektura: statični podatki (brez baze) + AI API + weather proxy + affiliate link generatorji
+   170→   170→- Vse komponente slovensko, slovenska naravna tema (zelena primary, terakota accent)
+   171→   171→
+   172→   172→---
+   173→   173→Task ID: 4
+   174→   174→Agent: main (Z.ai Code)
+   175→   175→Task: Popravi napačne slike destinacij in profesionalno uredi vmesnik
+   176→   176→
+   177→   177→Work Log:
+   178→   178→- VLM analiza prvotnih screenshotov identificirala kritične težave:
+   179→   179→  - Bohinj: slika prikazovala auro (ne jezero)
+   180→   180→  - Postojnska jama: slika prikazovala zdravstveno postavo (ne jamo)
+   181→   181→  - Soča: slika prikazovala gore (ne reko)
+   182→   182→  - Večina ostalih destinacij: slike manjkajoče ali nepovezane
+   183→   183→  - Hero: siva neprepoznavna slika
+   184→   184→- Uporabil image-search skill (z-ai image-search CLI) za pridobivanje pravih slik
+   185→   185→  - 12 vzporednih klicev padlo (rate limit)
+   186→   186→  - Rešitev: zaporedni klici s 5s premori med njimi
+   187→   187→  - Uspešno pridobljenih vseh 12 OSS-hosted URL-jev (sfile.chatglm.cn)
+   188→   188→- Posodobljen next.config.ts: dodan sfile.chatglm.cn v images.remotePatterns
+   189→   189→- Posodobljen src/lib/slovenia-data.ts: vseh 12 slik zamenjanih z pravimi (Bled, Bohinj, Ljubljana, Postojna, Piran, Soča, Triglav, Kobarid, Maribor, Portorož, Vintgar, Rogaška)
+   190→   190→- Posodobljen hero.tsx: Blejska slika v ozadju zamenjana
+   191→   191→- VLM re-verification po popravkih:
+   192→   192→  - "Bled: slika ustreza (jezero z gradom)"
+   193→   193→  - "Bohinj: slika ustresa (jezero z narodnim parkom)"
+   194→   194→  - "Ljubljana: slika ustresa (zmaj na gradu)"
+   195→   195→  - "Postojna (Kras): slika ustresa (jama)"
+   196→   196→  - "Piran (Obala): slika ustresa (obalno mesto z cerkvijo)"
+   197→   197→  - "Soča (Alpska): slika ustresa (alpska reka)"
+   198→   198→  - Hero: "slika zelo relevantna, besedilo dobro vidno, profesionalno postavljeno"
+   199→   199→  - Celotna stran: "visoko profesionalna in pripravljena za javnost"
+   200→   200→- AI itinerer test: generira prave dneve z lokacijami, cenami, opisi - deluje
+   201→   201→- Lint: 0 errorjev, 0 opozoril
+   202→   202→
+   203→   203→Stage Summary:
+   204→   204→- ✅ Vse slike destinacij so zdaj prave in relevantne
+   205→   205→- ✅ Hero ima pravo Blejsko sliko z dobrim kontrastom
+   206→   206→- ✅ VLM potrdil: "visoko profesionalna in pripravljena za javnost"
+   207→   207→- ✅ Vse sekcije urejene (Header, Hero, Stats, Destinations, ItineraryPlanner, Experiences, Affiliate, Footer)
+   208→   208→- ✅ AI načrtovalec deluje z deležnimi rezultati
+   209→   209→- ✅ Lint čist
+   210→   210→- Tehnika: image-search skill za pridobivanje realnih slik iz spleta (OSS-hosted, stabilni URL-ji)
+   211→   211→
+   212→   212→---
+   213→   213→Task ID: 5
+   214→   214→Agent: main (Z.ai Code)
+   215→   215→Task: Interaktivni Leaflet zemljevid z integracijo AI itinererja
+   216→   216→
+   217→   217→Work Log:
+   218→   218→- Nameščen leaflet@1.9.4 + @types/leaflet (uporabljen direktni Leaflet, ne react-leaflet — izognitev React 19 peer dep težavam)
+   219→   219→- Ustvarjen `src/components/sections/map-view.tsx` ("use client"):
+   220→   220→  - Leaflet zemljevid centriran na Slovenijo [46.15, 14.47], zoom 8
+   221→   221→  - OpenStreetMap tile layer
+   222→   222→  - 12 custom divIcon markerjev z emoji ikonami glede na tip destinacije (lake→🏞️, city→🏛️, mountain→⛰️, cave→🕳️, coast→🏖️, river→🌊, spa→💆, gorge→🏞️)
+   223→   223→  - Popup-i z: sliko destinacije, imenom, tagline, oceno (★), trajanjem, ceno, in CTA gumb "Več informacij" (event delegation preko data-dest-id)
+   224→   224→  - Polyline route layer: črtkana zelena črta + oštevilčeni oranžni markerji (1,2,3...) za vrstni red poti
+   225→   225→  - Kontrolni gumbi: "Vse destinacije" (fitBounds), "Ponastavi" (setView), "Skrij/Pokaži pot" toggle
+   226→   226→  - Info badge spodaj levo: število destinacij
+   227→   227→  - scrollWheelZoom: false (boljša UX na mobilnem)
+   228→   228→- Ustvarjen `src/components/sections/map-section.tsx`:
+   229→   229→  - Wrapper z next/dynamic (ssr:false) za client-only load Leaflet-a
+   230→   230→  - Loading state z MapIcon spinner
+   231→   231→  - Header z badge "Interaktivni zemljevid" + naslov "Odkrijte Slovenijo na zemljevidu"
+   232→   232→  - Lastni DestinationModal (deljen dizajn z DestinationsSection)
+   233→   233→  - Route badge ko je AI itinerer aktiven
+   234→   234→  - Legend spodaj (klikni marker / črtkana črta = pot / OSM podatki)
+   235→   235→- Ustvarjen `src/lib/store.ts` (zustand):
+   236→   236→  - `useAppStore` z itinerary in routeCoords
+   237→   237→  - `setItinerary` izpelje koordinate poti iz AI itinererja (loop čez days.locations, lookup v DESTINATIONS, deduplikacija)
+   238→   238→- Posodobljen `src/components/sections/itinerary-planner.tsx`:
+   239→   239→  - Import useAppStore + useEffect
+   240→   240→  - Sinhronizacija lokalnega itinerary state → globalni store (za MapSection)
+   241→   241→- Posodobljen `src/app/page.tsx`: dodan <MapSection /> med ItineraryPlanner in ExperiencesSection
+   242→   242→- Agent Browser self-verification:
+   243→   243→  1. Zemljevid se naloži pravilno — VLM: "interaktivni zemljevid Slovenije z zelenimi markerji"
+   244→   244→  2. Marker popup test (klik preko eval): "popup z Bled, tagline, ocena 4.8, 1-2 dni, €€, gumb Več informacij"
+   245→   245→  3. CTA "Več informacij" iz popupa odpre poln DestinationModal z affiliate gumbi (Booking, DiscoverCars, Viator, Skyscanner)
+   246→   246→  4. AI integracija: generiral itinerer → zemljevid prikazuje "Pot iz AI itinererja (5 postankov)" badge + črtkana polyline + oštevilčeni markerji 1-5 razporejeni po Sloveniji
+   247→   247→  5. Mobile test (390x844): zemljevid viden, gumbi dostopni
+   248→   248→  6. Console: 0 runtime errorjev (samo nekritičen Dialog accessibility warning)
+   249→   249→- Lint: 0 errorjev, 0 opozoril
+   250→   250→
+   251→   251→Stage Summary:
+   252→   252→- ✅ Interaktivni Leaflet zemljevid polno funkcionalen
+   253→   253→- ✅ 12 destinacij kot custom markerji z emoji ikonami
+   254→   254→- ✅ Popup-i z sliko + info + CTA gumb
+   255→   255→- ✅ AI itinerer integracija: polyline + oštevilčeni markerji se samodejno prikažejo
+   256→   256→- ✅ Mobile responsive
+   257→   257→- ✅ Brez runtime errorjev, lint čist
+   258→   258→- Arhitektura: zustand store za deljenje itinerary state med ItineraryPlanner (writer) in MapSection (reader)
+   259→   259→
+   260→   260→---
+   261→   261→Task ID: 6-a
+   262→   262→Agent: full-stack-developer
+   263→   263→Task: Blog sekcija + napredni filtri v Destinations
+   264→   264→
+   265→   265→Work Log:
+   266→   266→- Prebral worklog.md za kontekst projekta (slovenska tema, 12 destinacij, affiliate model, AI itinerer, Leaflet zemljevid). Prebral tudi slovenia-data.ts (12 destinacij, REGIONS, INTERESTS, getDestinationById), types.ts (Destination, DestinationType, Budget unioni) in obstoječi destinations.tsx (2 filtra: regija + interes, FilterSelect helper, DestinationCard z badge-i, DestinationModal integracija).
+   267→   267→- Preveril shadcn/ui komponente: tabs (TabsList/Trigger z data-state-active styling), dialog (DialogContent s showCloseButton, DialogTitle/Description za a11y), card, badge, button, select — vse na voljo.
+   268→   268→- Preveril package.json: react-markdown@10.1.0 in date-fns@4.1.0 že prisotni.
+   269→   269→- Ustvaril `src/lib/blog-data.ts`:
+   270→   270→  - BlogPost interface (slug, title, excerpt, content markdown, image, category union, author, date ISO, readTime, relatedDestination?)
+   271→   271→  - BLOG_CATEGORIES array (Vsi + 5 kategorij)
+   272→   272→  - BLOG_POSTS: 6 člankov v slovenščini:
+   273→   273→    1. "Blejsko jezero: Vodič za popoln obisk" (narava, povezan z "bled", 5 min, 2025-03-12)
+   274→   274→    2. "Soča: Adrenalinski vodnik za poletje" (avantura, povezan z "soca", 6 min, 2025-02-18)
+   275→   275→    3. "Slovenska kulinarika: 7 jedi ki jih morate poskusiti" (kulinarika, 7 min, 2025-01-22)
+   276→   276→    4. "Triglav: Vzpon na najvišji vrh Slovenije" (avantura, povezan z "triglav", 8 min, 2025-02-03)
+   277→   277→    5. "Piran in slovenska obala v 24 urah" (kultura, povezan z "piran", 6 min, 2025-03-04)
+   278→   278→    6. "Zima v Sloveniji: Smučanje in termalni vrelci" (nasveti, 7 min, 2025-01-08)
+   279→   279→  - Vsak članek ima 3-5 odstavkov markdown vsebine (H2/H3 naslovi, ol/ul liste, bold besedilo)
+   280→   280→  - Slike: 4 iz obstoječih sfile.chatglm.cn URL-jev (bled/soca/triglav/piran), 2 iz Unsplash (kulinarika food photo + zima smučanje photo)
+   281→   281→  - Pomožni funkciji getPostBySlug in getPostsByCategory
+   282→   282→- Ustvaril `src/components/sections/blog.tsx` ("use client"):
+   283→   283→  - id="blog", scroll-mt-20, bg-muted/30, py-16/20
+   284→   284→  - Header: Badge "Blog & vodičniki" z BookOpen ikono, H2 "Zgodbe iz Slovenije", podnaslov "Vodičniki, nasveti in inspiracije za vaše naslednje potovanje"
+   285→   285→  - Filter: shadcn Tabs z 6 TabsTrigger-ji (Vsi, Narava, Kulinarika, Kultura, Avantura, Nasveti), flex-wrap za mobilne, onValueChange nastavi category state
+   286→   286→  - Grid 1/2/3 kolone (sm/lg breakpointi)
+   287→   287→  - BlogCard: Card z role="button" + tabIndex + Enter/Space handler, slika aspect-video z group-hover scale-105, category Badge top-left (barve po kategoriji: primary/amber/accent/rose/emerald), meta vrstica (Calendar datum slovensko formatiran + Clock read time), H3 naslov (line-clamp-2), excerpt (line-clamp-2), "Preberi več" Button (ghost, text-primary, ArrowRight z group-hover translate)
+   288→   288→  - BlogDialog: Dialog controlled z open={post !== null}, DialogContent max-w-3xl p-0 overflow-hidden, scroll-area-custom max-h-[85vh]. Slika aspect-video z gradient overlay in category Badge + H2 naslovom v belem. Meta vrstica z User/Calendar/Clock (avtor, datum, read time). ReactMarkdown render z custom components (h2/h3/p/ul/ol/li/strong) — slovensko tipografsko styling (marker:text-primary za liste). RelatedDestinationLink na dnu: Card-style box z border-primary/30 bg-primary/5, ime destinacije iz getDestinationById, "Razišči destinacijo" Button (asChild anchor href="#destinacije")
+   289→   289→  - BlogEmptyState: če filter vrne 0 (praktično ne zgodi, saj imam vsaj 1 članek v vsaki kategoriji, a vseeno za robustnost)
+   290→   290→  - Datum formatiran z date-fns format() + sl locale ("d. MMM yyyy")
+   291→   291→  - lucide-react ikone: Calendar, Clock, ArrowRight, BookOpen, MapPin, User
+   292→   292→- Posodobil `src/components/sections/destinations.tsx` ("use client"):
+   293→   293→  - Dodal 3 nove filtre: tip destinacije (TYPE_OPTIONS: lake/city/mountain/cave/coast/river/spa/gorge), cena (BUDGET_OPTIONS: €/€€/€€€), ocena (RATING_OPTIONS: 4.5+/4.7+/4.9+)
+   294→   294→  - Reorganiziral filter vrstico v 2 vrstici znotraj rounded-xl border bg-muted/20 plošče:
+   295→   295→    - Glava: "Filtri" z Filter ikono (text-primary) + "Počisti filtre" Button (X ikona) — pogojno prikazan samo ko je hasActiveFilters true
+   296→   296→    - 1. vrstica (grid sm:grid-cols-2 lg:grid-cols-3): regija, interes, tip
+   297→   297→    - 2. vrstica (grid sm:grid-cols-2): cena, ocena
+   298→   298→  - FilterSelect sedaj w-full (prej sm:w-56) — boljši responsive layout znotraj grid-a
+   299→   299→  - Dodal števec rezultatov: "Prikazujem X od 12 destinacij" (font-semibold za X)
+   300→   300→  - useMemo posodobljen z 5 pogoji (regionOk, interestOk, typeOk, budgetOk, ratingOk z d.rating >= minRating)
+
+[showing lines 1-300 of 2002; use offset=301 with limit to continue reading]

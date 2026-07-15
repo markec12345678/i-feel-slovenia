@@ -3618,3 +3618,37 @@ Stage Summary:
 - ✅ GitHub push uspešen (commit 3c593e8)
 - ✅ 0 runtime errorjev, lint čist
 - Pripravljen za E2E test
+
+---
+Task ID: 58
+Agent: main (Z.ai Code)
+Task: E2E Test — Celoten poslovni tok (56/56 passed, 100%)
+
+Work Log:
+- Ustvaril scripts/e2e-test.ts (656 vrstic) — celovit E2E test
+- 10 glavnih testov + 3 negativni testi = 56 assertions
+- Test 1: Provider registracija → owner ustvarjen, role=provider, plan=free ✅
+- Test 2: Dodaj lokal → status=draft, NI v javnih rezultatih, profile completion 58% ✅
+- Test 3: Oddaja v pregled → draft→pending, v admin queue, še vedno ni javen ✅
+- Test 4: Admin approval → pending→published, verified=true, partnerStatus=verified ✅
+- Test 5: AI priporočilo → ranking engine najde lokal, score=0.240, Q=47 ✅
+- Test 6: Transparency badge → "✓ Preverjen partner" v transparency razlogih ✅
+- Test 7: Sponsorship purchase → created (premium, €149) → aktiviran (demo) ✅
+- Test 8: Sponsorship activation → sponsored=true, plan=premium, subscription=active ✅
+- Test 9: AI ranking boost → premium boost > 0, <= 5%, recommendationType=sponsored ✅
+- Test 10: Audit log → sponsorship_activated zabeležen, actorRole=system ✅
+- Negativni N1: Nepotrjen lokal → NI v AI rezultatih, NI v javnih listings ✅
+- Negativni N2: Slab rating (2.0) → ne dobi premium boost-a (min 3.5) ✅
+- Negativni N3: Nizak Q (18/100) + ne verificiran → NE izpolnjuje Featured pogojev ✅
+- Popravila po prvem run-u (2 failed → 0 failed):
+  - Test 2: Dodane 3 slike (namesto 1) — canSubmitForReview zahteva min 3 slike
+  - Test 2: Dodan rating 4.5 — premium boost zahteva rating >= 3.5
+- GitHub push: commit 84ad87e uspešen ✅
+
+Stage Summary:
+- ✅ 56/56 testov passed (100% success rate)
+- ✅ Celoten poslovni tok deluje: Registracija → Draft → Pending → Published → AI → Badge → Sponsorship → Boost → Audit
+- ✅ Negativni testi potrjujejo varnost: nepotrjeni niso vidni, slabi ne dobijo boost-a, Featured zahteva Q>90+verified
+- ✅ Platforma je pripravljena za beta fazo z resničnimi ponudniki
+- ✅ GitHub push uspešen (commit 84ad87e)
+- ✅ 0 runtime errorjev, lint čist

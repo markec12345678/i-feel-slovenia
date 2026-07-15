@@ -3791,3 +3791,43 @@ Stage Summary:
 - ✅ 0 errorjev, 0 opozoril (lint čist)
 - ✅ GitHub push uspešen (commit 765758c)
 - WOW flow: Turist napiše → AI sestavi dan → vizualni timeline → rezerviraj → lokal dobi obisk → ponudnik vidi ROI
+
+---
+Task ID: 62
+Agent: main (Z.ai Code)
+Task: Sprint WOW 2 — AI Recommendation Card + AI Stories + Social Sharing
+
+Work Log:
+- 1. AI RECOMMENDATION CARD (src/components/recommendation-card.tsx):
+  - Premium kartica z "94% AI MATCH" score (barvno kodirano: zeleni >90%, primary >75%, amber >60%)
+  - "Zakaj priporočamo?" sekcija z checkmark razlogi (max 4)
+  - Partner badge + rating (zvezdice) + cena + čas
+  - Akcijski gumbi: Rezerviraj, Navigacija, Shrani, Obišči
+  - Category emoji (🍽️ hotel, 🏔️ aktivnost, 🛒 trgovina)
+  - Compact in default variant
+- 2. AI STORIES (src/components/ai-story.tsx):
+  - GLM generira čustveno zgodbo o vsakem lokalcu (2-3 stavki)
+  - Zgodbeni naslov (npr. "Med iz gozdov Bele krajine")
+  - 3 zanimivosti (expandable)
+  - Auto-generira ob mount, fallback na description če AI odpove
+  - Italic storytelling stil z BookOpen ikono
+  - "AI Story" badge
+- 3. SOCIAL SHARING (src/components/social-share.tsx):
+  - "Deli svoj AI plan" gumb
+  - Native Share API (mobile) s fallback dialog na desktop
+  - 4 platforme: WhatsApp, Facebook, Instagram, Copy link
+  - Preview kartica z destinacijami in opisom
+  - Inline variant za kompaktne postavitve
+  - Instagram: kopira besedilo (ni direct API) → odpre Instagram
+  - WhatsApp: wa.me link z besedilom
+  - Facebook: sharer.php z URL in quote
+- GitHub push: commit d6ae217 uspešen ✅
+
+Stage Summary:
+- ✅ AI Recommendation Card — "94% AI MATCH" z razlogi priporočila
+- ✅ AI Stories — čustvene zgodbe o lokalcih (GLM generirane)
+- ✅ Social Sharing — WhatsApp/Facebook/Instagram/Copy link
+- ✅ 3 nove komponente (676 vrstic)
+- ✅ 0 errorjev, 0 opozoril (lint čist)
+- ✅ GitHub push uspešen (commit d6ae217)
+- Celoten WOW flow: Turist napiše → AI sestavi dan → vizualni timeline → AI match kartice → zgodbe o lokalcih → deli na WhatsApp → organski promet

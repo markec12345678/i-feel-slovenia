@@ -3831,3 +3831,54 @@ Stage Summary:
 - ✅ 0 errorjev, 0 opozoril (lint čist)
 - ✅ GitHub push uspešen (commit d6ae217)
 - Celoten WOW flow: Turist napiše → AI sestavi dan → vizualni timeline → AI match kartice → zgodbe o lokalcih → deli na WhatsApp → organski promet
+
+---
+Task ID: 63
+Agent: main (Z.ai Code)
+Task: Sprint WOW 3 — AI Booking Assistant + Trip Profile + Slovenia Pass
+
+Work Log:
+- 1. AI MEMORY / TRIP PROFILE (src/components/trip-profile.tsx, 418 vrstic):
+  - useTripProfile() hook — localStorage-based (brez računa potrebno)
+  - Lazy initializer za SSR-safe localStorage branje
+  - 3-step onboarding modal:
+    - Step 0: Interests (4 ikone: narava, hrana, avantura, kultura)
+    - Step 1: Group type (solo, par, družina, prijatelji)
+    - Step 2: Budget (budžetno, udobje, luksuz)
+  - WelcomeBackBanner za vračajoče uporabnike ("Dobrodošel nazaj! 👋")
+  - Prikaz preferenc: "AI že ve: narava, lokalna hrana · par · 3 obiskane destinacije"
+  - addVisitedDestination() — sledi obiskanim destinacijam
+  - completeOnboarding() — zaključi onboarding
+  - resetProfile() — ponastavi profil
+- 2. AI BOOKING ASSISTANT (src/components/booking-assistant.tsx, 296 vrstic):
+  - "Rezerviraj z AI" gumb (inline ali default variant)
+  - Modal z 4 koraki: form → confirming → confirmed
+  - Date picker (min: jutri)
+  - Time slot grid (11:00-20:00, 12 terminov)
+  - Party size selector (1-20, +/- gumbi)
+  - Name + phone + notes input
+  - "AI potrjuje rezervacijo..." loading animation (2s)
+  - "Rezervacija potrjena!" z PartyPopper ikono + povzetek
+  - Tracking: POST /api/listings/[id]/track z type="lead" source="booking_assistant"
+  - Partner badge + match score prikaz v modalu
+- 3. SLOVENIA PASS (src/components/slovenia-pass.tsx, 230 vrstic):
+  - 9 regij za obiskat (Gorenjska 🏔️, Primorska 🌊, Kras 🪨, itd.)
+  - Points sistem (+50 točk per regija)
+  - 6 značk: Explorer 🗺️, Nature Lover 🌿, Food Lover 🍷, Adventurer 🧗, Local Hero ⭐, Slovenia Master 👑
+  - Locked/unlocked states z Lock ikono
+  - "Naslednji cilj" predlog (prva neobiskana regija)
+  - localStorage persistenca
+  - Progress: X/9 regij, X/6 značk
+  - "Začni svoje potovanje" CTA za nove uporabnike
+- Lint fix: useState lazy initializer namesto useEffect+setState (react-hooks/set-state-in-effect)
+- Lint fix: odstranjen unused useEffect import
+- GitHub push: commit d2d672a uspešen ✅
+
+Stage Summary:
+- ✅ AI Memory / Trip Profile — osebni asistent ki si zapomni preference (localStorage)
+- ✅ AI Booking Assistant — "AI ne samo svetuje, ampak uredi" (konverzacijska rezervacija)
+- ✅ Slovenia Pass — gamifikacija z 9 regijami, 6 značkami, točkami
+- ✅ 3 nove komponente (976 vrstic)
+- ✅ 0 errorjev, 0 opozoril (lint čist)
+- ✅ GitHub push uspešen (commit d2d672a)
+- Celoten WOW flow: Turist napiše → AI Memory pozdravi → AI sestavi dan → vizualni timeline → AI Match kartice → zgodbe o lokalcih → AI rezervira → Slovenia Pass točke → Deljenje na WhatsApp → organski promet

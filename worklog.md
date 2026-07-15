@@ -3295,3 +3295,47 @@ Stage Summary:
 - ✅ docs/VERSIONING.md (202 vrstic) — verzioniranje
 - Arhitektura je zdaj POPOLNOMA dokumentirana — implementacija lahko začne z minimalnim tveganjem
 - Naslednji korak: Faza 1 — DB migracije
+
+---
+Task ID: 52
+Agent: main (Z.ai Code)
+Task: Faza 1 — DB migracije (Listing status, Partner polja, Owner role, Sponsorship, User, Analytics)
+
+Work Log:
+- Backup baze pred migracijo (db/backups/db_pre_phase1_*.db)
+- Popolnoma nova Prisma schema z vsemi MVP potrebnimi modeli:
+  - Listing: + status, partnerStatus, partnerSince, verifiedByAdmin, premiumUntil, aiRecommendations, leadCount, rejectionReason, submittedAt, approvedAt, approvedBy
+  - Owner: + role (provider/moderator/admin/super_admin)
+  - ListingEvent (manjkal prej — uporabljen v kodi ampak ni bil v shemi!)
+  - Sponsorship (nova tabela za sponzoriranja)
+  - User (registrirani uporabnik z passwordHash + preferences)
+  - SavedItinerary (shranjeni itinererji)
+  - AnalyticsEvent (user behavior tracking)
+  - AIUsageLog (AI stroški in monitoring)
+- bun run db:push — uspešno aplicirano (49ms)
+- bun run db:generate — Prisma client regeneriran
+- Migracija obstoječih 25 lokalov na nove partner statuse:
+  - 12 featured (featured: true → partnerStatus="featured")
+  - 6 premium (plan: premium/enterprise → partnerStatus="premium")
+  - 2 verified (verified: true → partnerStatus="verified")
+  - 5 standard (default)
+  - Vsi dobili partnerSince = createdAt
+  - Vsi dobili verifiedByAdmin = verified
+  - Vsi imajo status = "published"
+- Verify skripta (scripts/verify-migration.ts):
+  - ✅ Vsi listings imajo pravilen status in partnerStatus
+  - ✅ Vsi owners imajo role = "provider"
+  - ✅ Sponsorship, AnalyticsEvent, AIUsageLog, User, SavedItinerary, ListingEvent tabele delujejo
+- Lint: 0 errorjev
+
+Stage Summary:
+- ✅ Listing status sistem (draft/pending/approved/published/rejected/expired/archived/deleted)
+- ✅ Partner sistem (standard/verified/premium/featured) z partnerSince, verifiedByAdmin, premiumUntil
+- ✅ Owner role (provider/moderator/admin/super_admin)
+- ✅ Sponsorship tabela (created/paid/active/expiring/expired/cancelled/archived)
+- ✅ User + SavedItinerary (registrirani uporabniki + shranjeni itinererji)
+- ✅ ListingEvent (končno v shemi — prej manjkal)
+- ✅ AnalyticsEvent + AIUsageLog (analitika in AI monitoring)
+- ✅ Vsi obstoječi podatki migrirani pravilno (25 lokalov, 28 izdelkov, 28 izkušenj)
+- ✅ 0 runtime errorjev, lint čist
+- Faza 1 končana — pripravljen za Fazo 2 (Permission sistem)

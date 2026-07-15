@@ -3882,3 +3882,53 @@ Stage Summary:
 - ✅ 0 errorjev, 0 opozoril (lint čist)
 - ✅ GitHub push uspešen (commit d2d672a)
 - Celoten WOW flow: Turist napiše → AI Memory pozdravi → AI sestavi dan → vizualni timeline → AI Match kartice → zgodbe o lokalcih → AI rezervira → Slovenia Pass točke → Deljenje na WhatsApp → organski promet
+
+---
+Task ID: 64
+Agent: main (Z.ai Code)
+Task: UI Wiring — vse WOW komponente integrirane v enoten tok
+
+Work Log:
+- 1. HERO → ITINERARY PLANNER wiring:
+  - heroQuery event listener v itinerary-planner.tsx
+  - Smart query parsing iz natural language:
+    - "narava/pohod/gora" → interest: narava
+    - "hrana/jesti/kosilo/večerja" → interest: kulinarika
+    - "avantura/raft/adrenalin" → interest: avantura
+    - "otrok/družina" → interest: družina, groupSize: 4
+    - "X ur" → days: 1
+    - "X dni/dnevi" → days: X
+    - "X oseb" → groupSize: X
+    - "sam" → groupSize: 1
+  - Auto-generira itinerer z smart defaults
+- 2. ITINERARY RESULTS wiring:
+  - TripTimeline dodan po recommendations/tips
+  - SocialShare (inline variant) pod timeline
+  - Destinations ekstrahirane iz itinerary za share text
+- 3. LISTING MODAL wiring:
+  - AIStory dodan po long description
+  - BookingAssistant (inline trigger) po CTA gumbu
+  - Prikazuje se za vse razen transport kategorije
+  - matchScore = rating × 20 (približen AI match)
+- 4. HOMEPAGE wiring:
+  - WelcomeBackWrapper nad hero (prikaže se vračajočim)
+  - SloveniaPassSection po itinerary planner (retention/gamifikacija)
+- 5. Nove datoteke:
+  - src/components/welcome-back-wrapper.tsx (client wrapper)
+  - src/components/slovenia-pass-section.tsx (section wrapper)
+- Homepage load: ✅
+- Lint: 0 errorjev
+- GitHub push: commit 10e36b8 ✅
+
+Stage Summary:
+- ✅ Celoten WOW flow integriran v en tok
+- ✅ Hero → AI analiza → Timeline → Cards → Stories → Booking → Pass → Share
+- ✅ Smart query parsing (natural language → planner input)
+- ✅ AI Story v listing modal (čustvene zgodbe)
+- ✅ Booking Assistant v listing modal (rezerviraj z AI)
+- ✅ Welcome Back banner za vračajoče
+- ✅ Slovenia Pass na homepage (gamifikacija)
+- ✅ Social Sharing po itinererju
+- ✅ 0 runtime errorjev, lint čist
+- ✅ GitHub push uspešen (commit 10e36b8)
+- 30s demo flow: napiše → AI analiza → vizualni dan → match kartice → zgodbe → rezervacija → pass → deljenje

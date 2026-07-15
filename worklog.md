@@ -3503,3 +3503,63 @@ Stage Summary:
 - ✅ AI dobi razvrščene partnerje z Q scores in oznakami
 - ✅ 0 runtime errorjev, lint čist
 - Pripravljen za Fazo 5 — Transparency UI (badges v UI)
+
+---
+Task ID: 56
+Agent: main (Z.ai Code)
+Task: Faza 5 — Transparency UI (PartnerBadge + AffiliateBadge + RecommendationReasons)
+
+Work Log:
+- Ustvaril src/components/partner-badge.tsx:
+  - PartnerBadge: ENA glavna oznaka per partner (ne več badge-ov)
+  - Prioriteta: Featured (⭐) > Premium (👑) > Verified (✓)
+  - Standard → brez badge-a (pravilo: če nima posebnega statusa, ne pokaži nič)
+  - Tooltip z razlago za vsak badge:
+    - Featured: "Preverjen partner z visoko kakovostjo profila in Premium članstvom"
+    - Premium: "Partner podpira razvoj platforme in ima razširjen profil"
+    - Verified: "Podatke je preverila ekipa Discover Slovenia AI"
+  - AffiliateBadge: LOČEN od partner statusa
+    - 🔗 Partnerska povezava (modra barva)
+    - Tooltip: "Preusmerjeni boste na zunanjo stran. Discover Slovenia AI lahko prejme provizijo."
+    - Podpora za: booking, viator, discovercars, skyscanner, generic
+  - 3 velikosti: sm, md, lg
+- Ustvaril src/components/recommendation-reasons.tsx:
+  - "Zakaj to priporočamo?" expandable komponenta
+  - Prikazuje razloge priporočila (ne samo ikone)
+  - 7 tipov razlogov: relevance, quality, verified, distance, premium, rating, sponsored
+  - Vsak z ustrezno ikono in barvo
+  - Quality Score prikaz (Q: XX/100)
+  - generateReasons() helper — generira razloge iz ranked listinga
+  - Collapsible (default zaprt, klik za razširitev)
+- Posodobil src/components/sections/listings.tsx:
+  - Zamenjal stari plan badge + verified badge z eno PartnerBadge
+  - Standard partnerji nimajo badge-a
+  - Import PartnerBadge
+- Posodobil src/components/sections/listing-modal.tsx:
+  - Zamenjal PlanBadge z PartnerBadge (size md)
+  - Odstranjen star verified checkmark (PartnerBadge to pokriva)
+  - Odstranjen "Izpostavljeno" badge (Featured se prikaže preko PartnerBadge)
+  - Odstranjena nepotrebna PlanBadge funkcija
+- Posodobil src/components/sections/booking-panel.tsx:
+  - Dodan AffiliateBadge v AffiliateCard komponento
+  - Prikazuje "🔗 Partner" ob imenu affiliate partnerja (Booking.com, Viator, itd.)
+- Posodobil README.md — popoln rewrite z Discover Slovenia AI branding
+- GitHub commit (lokalno — token potekel):
+  - "docs: rebrand README to Discover Slovenia AI + add full documentation index"
+- Verifikacija:
+  - Agent Browser: "Premium" badge-i prikazani na listings karticah ✅
+  - Tooltip: "Premium Partner — Partner podpira razvoj platforme..." ✅
+  - AffiliateBadge: prikazan v booking panel ✅
+  - Lint: 0 errorjev ✅
+
+Stage Summary:
+- ✅ PartnerBadge — ena glavna oznaka (Featured/Premium/Verified), standard brez
+- ✅ AffiliateBadge — ločen od partner statusa, modra barva, 🔗 ikona
+- ✅ Tooltip razlage za vsak badge
+- ✅ "Zakaj to priporočamo?" komponenta (expandable z razlogi)
+- ✅ generateReasons() helper za AI odgovore
+- ✅ Listings section + listing modal posodobljeni
+- ✅ Booking panel z AffiliateBadge
+- ✅ README posodobljen (Discover Slovenia AI)
+- ✅ 0 runtime errorjev, lint čist
+- Pripravljen za Fazo 6 — Sponsorship management

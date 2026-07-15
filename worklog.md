@@ -3699,3 +3699,47 @@ Stage Summary:
 - ✅ GitHub push uspešen
 - ✅ 0 runtime errorjev, lint čist
 - Platforma je pripravljena za production hardening → beta → deploy
+
+---
+Task ID: 60
+Agent: main (Z.ai Code)
+Task: Launch Checklist — 31/31 passed (100%)
+
+Work Log:
+- Ustvaril scripts/launch-checklist.ts — dejanski testi pred produkcijo
+- 1. BACKUP TEST:
+  - Backup: 434KB, 3ms ✅
+  - Restore: 14ms ✅
+  - Data verified: 25 listings, 4 owners, 28 products, 28 experiences ✅
+  - Recovery time: < 15 min (dejansko < 1s) ✅
+- 2. MONITORING:
+  - DB latency: 1ms ✅
+  - Sponsorship tabela dostopna ✅
+  - AuditLog tabela dostopna ✅
+  - AnalyticsEvent tabela dostopna ✅
+  - AIUsageLog tabela dostopna ✅
+  - 25 published listings ✅
+  - Partner status: 0 featured, 18 premium, 2 verified, 5 standard
+- 3. LEGAL:
+  - Privacy Policy: 3316 znakov ✅
+  - Terms of Service: 3337 znakov ✅
+  - Kontakt/Impressum: 2753 znakov ✅
+  - GDPR checkbox pri registraciji ✅
+  - Affiliate disclosure v footer ✅
+- 4. CONCIERGE ONBOARDING:
+  - Vseh 13 kritičnih API endpointov obstaja ✅
+    - Owner: listings, submit, auto-tag, profile-completion, quality-score, sponsorship
+    - Admin: pending, approve, reject, sponsorships, audit-log
+    - Analytics: funnel, provider-roi
+- GitHub push: commit 886dc60 uspešen ✅
+
+Stage Summary:
+- ✅ 31/31 launch checklist testov passed (100%)
+- ✅ Backup + restore deluje (3ms/14ms)
+- ✅ DB zdrava (1ms latency)
+- ✅ Vse tabele dostopne
+- ✅ Legal strani obstajajo + GDPR + affiliate disclosure
+- ✅ Vsi 13 kritični API-ji verificirani
+- 🚀 PLATFORMA JE PRIPRAVLJENA ZA PRODUKCIJO
+- ✅ GitHub push uspešen (commit 886dc60)
+- ✅ 0 runtime errorjev, lint čist

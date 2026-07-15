@@ -3932,3 +3932,49 @@ Stage Summary:
 - ✅ 0 runtime errorjev, lint čist
 - ✅ GitHub push uspešen (commit 10e36b8)
 - 30s demo flow: napiše → AI analiza → vizualni dan → match kartice → zgodbe → rezervacija → pass → deljenje
+
+---
+Task ID: 65
+Agent: main (Z.ai Code)
+Task: Final polish — demo scenarios + provider landing + mobile fix
+
+Work Log:
+- 1. DEMO SCENARIJI (src/components/demo-scenarios.tsx + demo-scenarios-wrapper.tsx):
+  - 5 "wow" vprašanj za hitri 30s test:
+    1. 🌊 "Miren vikend ob reki" (narava, kulinarika, 2 dni)
+    2. 👨‍👩‍👧 "Družinski izlet danes" (družina, 5 ur)
+    3. ❤️ "Romantičen vikend z vinom" (romantika, kulinarika)
+    4. 💸 "Cenejši izlet brez gužve" (narava, budžetno)
+    5. 🍯 "Najboljša lokalna hrana v Beli krajini" (kulinarika, lokalno)
+  - Click → scroll do plannerja → dispatch heroQuery event → AI generira
+  - 6. kartica "Napiši svoje" za custom input
+  - Mobile responsive (375x812 verified)
+  - Integrirano v page.tsx med Hero in Stats
+- 2. PROVIDER LANDING PAGE (/za-ponudnike):
+  - Hero: "Ko turist vpraša AI, najde vas."
+  - "Kako AI prinese goste" (4 koraki: vpraša → najde → klik → rezervacija)
+  - "Kaj dobite kot partner" (6 ugodnosti: Verified, AI optimizacija, Analytics, QR, Coach, Story)
+  - Paketi: Free €0, Premium €149, Enterprise €499
+  - "Postanite founding partner" CTA → /owner/prijava
+  - Mobile responsive
+- 3. MOBILE FIX (kritičen bug fix):
+  - Problem: ai-story.tsx (client component) je importal generateCompletion iz @/lib/ai-client
+  - z-ai-web-dev-sdk uporablja fs/promises (Node.js) ki ne deluje v browserju
+  - Rešitev: Ustvarjen /api/ai-story endpoint (server-side)
+  - ai-story.tsx sedaj kliče fetch('/api/ai-story') namesto direktnega import-a
+  - Build error "Module not found: Can't resolve 'fs/promises'" odpravljen
+- 4. MOBILE TEST:
+  - Homepage na 375x812 (iPhone X): ✅
+  - Hero quick input viden: ✅
+  - Demo scenariji vidni: ✅
+  - Provider page: ✅
+- 5. GitHub push: commit 7f0d9f8 uspešen ✅
+
+Stage Summary:
+- ✅ 5 demo scenarijev za 30s test
+- ✅ Provider landing page (/za-ponudnike)
+- ✅ Mobile fix (ai-story client → API endpoint)
+- ✅ Mobile test (375x812) — homepage + hero + demo + provider page
+- ✅ 0 build errorjev, lint čist
+- ✅ GitHub push uspešen (commit 7f0d9f8)
+- Platforma pripravljena za beta outreach

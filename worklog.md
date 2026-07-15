@@ -3978,3 +3978,54 @@ Stage Summary:
 - ✅ 0 build errorjev, lint čist
 - ✅ GitHub push uspešen (commit 7f0d9f8)
 - Platforma pripravljena za beta outreach
+
+---
+Task ID: 66
+Agent: main (Z.ai Code)
+Task: Honest booking copy + provider page social proof — final commit
+
+Work Log:
+- Updated booking-assistant.tsx copy:
+  - "Rezervacija je brezplačna. Ponudnik te kontaktira za potrditev."
+    → "AI te poveže z ponudnikom. Rezervacijo opraviš direktno pri njem — brez posrednikov, brez provizij."
+  - "obveščen o tvoji rezervaciji"
+    → "obveščen o tvojem povpraševanju. Kontaktiraj ga direktno za potrditev."
+- Updated /za-ponudnike:
+  - Step 4: "Rezervacija" → "Kontakt" — "Turist vas pokliče ali obišče spletno stran — rezervacija pri vas"
+  - Hero copy: "AI sestavi dan, priporoči vaš lokal in ga pripelje do vas. Rezervacijo opravi turist direktno pri vas — brez posrednikov, brez provizij."
+  - Social proof stats: 22 destinacij · 25 partnerjev · 9 AI funkcij
+- GitHub push: commit e129362 ✅
+- Lint: 0 errorjev ✅
+
+=== RAZVOJNA FAZA ZAKLJUČENA ===
+
+Discover Slovenia AI — končni povzetek:
+
+Tehnične faze (vse končane):
+- Faza 1: DB migracije (status, partner, sponsorship, analytics, audit)
+- Faza 2: Permission sistem (8 vlog, canPerform)
+- Faza 3: Admin approval (DRAFT→PENDING→APPROVED→PUBLISHED + AI enrichment)
+- Faza 4: AI Ranking engine (60/15/10/10/5 + Quality Score 0-100)
+- Faza 5: Transparency UI (PartnerBadge + AffiliateBadge + Reasons)
+- Faza 6: Sponsorship management (Stripe + webhook + audit log)
+- E2E test: 56/56 passed (100%)
+- Security hardening: 0 hardcoded gesla
+- Analytics: funnel + provider ROI
+- Sprint WOW 1: Hero Quick Input + Trip Timeline + Quality Coach + QR Card
+- Sprint WOW 2: AI Recommendation Card + AI Stories + Social Sharing
+- Sprint WOW 3: AI Booking Assistant + Trip Profile + Slovenia Pass
+- UI Wiring: vse povezano v en tok
+- Final polish: Demo scenariji + Provider landing + Mobile fix
+- Honest copy: Redirect model, brez provizij
+
+Števila:
+- 65+ Git commits
+- 20+ dokumentov (Blueprint, Tech Spec, ADR, Risk Register, itd.)
+- 15+ API endpointov
+- 10 WOW komponent
+- 25 lokalov, 28 izdelkov, 28 izkušenj
+- 81 VLM-verified slik
+- 56/56 E2E testov
+- 31/31 Launch checklist
+
+Naslednja faza: BETA OUTREACH (poslovna aktivnost, ne koda)

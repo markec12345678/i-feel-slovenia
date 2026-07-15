@@ -3375,3 +3375,74 @@ Stage Summary:
 - ✅ API vrača nova polja (status, partnerStatus, verifiedByAdmin)
 - ✅ 0 runtime errorjev, lint čist
 - Pripravljen za Fazo 3 — Admin Approval workflow
+
+---
+Task ID: 54
+Agent: main (Z.ai Code)
+Task: Faza 3 — Admin Approval workflow (DRAFT → PENDING → APPROVED → PUBLISHED)
+
+Work Log:
+- Posodobil /api/listings (public) — filter status="published" (AI in uporabnik vidijo samo published)
+- Posodobil /api/listings/[slug] — preverja status="published"
+- Posodobil /api/itinerary — sponsored filter dodan status="published"
+- Posodobil /api/smart-search — vsi query-ji (listings, products, experiences) dodan status="published"
+- Posodobil /api/chat — vsi query-ji dodan status="published"
+- Posodobil /lib/ai-recommendations.ts — products in experiences query-ji dodan status="published"
+- Ustvaril /api/admin/pending — seznam lokalov s status="pending" (z admin auth)
+- Ustvaril /api/admin/approve/[id] — odobri lokal (pending → approved → published)
+  - Avtomatsko nastavi partnerStatus="verified" (če je bil "standard")
+  - AI auto-enrichment: generira SEO meta, ključne besede, AI tagi (background, ne blokira)
+  - Email obvestilo lastniku
+- Ustvaril /api/admin/reject/[id] — zavrne lokal z razlogom
+  - 8 validnih razlogov (manjkajo fotografije, nepopoln opis, napačna kategorija, itd.)
+  - Custom reason možnost za "Drugo"
+  - Status → "rejected" z rejectionReason
+  - Email obvestilo lastniku z razlogom
+- Ustvaril /api/admin/status-counts — števci po statusu in partnerStatus
+  - Pending/Approved/Published/Rejected/Expired/Archived števci
+  - Standard/Verified/Premium/Featured števci
+- Ustvaril /api/owner/listings/submit — oddaj lokal v pregled (DRAFT → PENDING)
+  - Preveri popolnost profila (canSubmitForReview)
+  - Če manjkajo required polja → 400 z seznamom
+- Ustvaril /api/owner/profile-completion — izračun popolnosti profila
+  - Procent popolnosti (0-100)
+  - Seznam manjkajočih polj
+  - Seznam izpolnjenih polj
+- Ustvaril /lib/profile-completion.ts — helper za izračun popolnosti
+  - 13 polj z utežmi (images 15%, opis 10+10%, telefon 8%, itd.)
+  - canSubmitForReview() — preveri ali so vsa required polja izpolnjena
+- Posodobil /api/owner/listings (POST) — novi lokalci začnejo kot status="draft"
+  - partnerStatus="standard" (default)
+- Testiranje:
+  - GET /api/admin/status-counts → 25 published, 0 pending ✅
+  - GET /api/admin/pending → [] (prazno, pravilno) ✅
+  - GET /api/admin/reject/test → 8 validnih razlogov ✅
+  - Lint: 0 errorjev ✅
+
+Status workflow implementiran:
+  DRAFT (lastnik ureja, ni viden)
+    → PENDING (oddan, čaka admin)
+    → APPROVED (admin odobril, lahko časovno objavi)
+    → PUBLISHED (objavljen, AI ga lahko priporoča)
+    → REJECTED (admin zavrgel z razlogom, lastnik lahko uredi in ponovno odda)
+
+AI auto-enrichment ob odobritvi:
+  - Generira SEO title (do 60 znakov)
+  - Generira meta description (do 155 znakov)
+  - Generira 5 ključnih besed
+  - Generira 3 AI tag-e
+  - Vse shrani v specialties polje
+
+Stage Summary:
+- ✅ Popoln approval workflow (DRAFT → PENDING → APPROVED → PUBLISHED → REJECTED)
+- ✅ Admin pending queue z seznamom čakajočih
+- ✅ Approve z AI auto-enrichment (SEO meta, ključne besede, tagi)
+- ✅ Reject z 8 strukturiranimi razlogi + custom
+- ✅ Email obvestila (approved/rejected)
+- ✅ Status counts za admin dashboard
+- ✅ Profile completion za owner dashboard (0-100% z manjkajočimi polji)
+- ✅ Submit for review endpoint (preverja popolnost)
+- ✅ Vsi AI endpointi uporabljajo samo status="published"
+- ✅ Novi lokalci začnejo kot "draft"
+- ✅ 0 runtime errorjev, lint čist
+- Pripravljen za Fazo 4 — AI Ranking z utežmi 60/20/10/10 + Partner Quality Score

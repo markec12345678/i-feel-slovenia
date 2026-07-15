@@ -3652,3 +3652,50 @@ Stage Summary:
 - ✅ Platforma je pripravljena za beta fazo z resničnimi ponudniki
 - ✅ GitHub push uspešen (commit 84ad87e)
 - ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 59
+Agent: main (Z.ai Code)
+Task: Production hardening + Analytics funnel + Outreach toolkit
+
+Work Log:
+- SECURITY HARDENING:
+  - Audit vseh datotek za hardcoded secrets (grep discoverslovenia2025)
+  - .env.example: ADMIN_PASSWORD → CHANGE_ME_TO_RANDOM_32_CHAR_STRING
+  - README.md: ADMIN_PASSWORD → CHANGE_ME placeholder
+  - docs/SECURITY-REVIEW.md: posodobljen security checklist
+  - PRODUCT-BLUEPRINT.md: posodobljen launch checklist
+  - TECHNICAL-SPECIFICATION.md: posodobljen env primer
+  - .env je v .gitignore (potrjeno)
+  - 0 hardcoded gesel v dokumentaciji ✅
+- ANALYTICS:
+  - /api/analytics/funnel — search→click→contact→booking funnel:
+    - AI priporočila → impresije → kliki → kontakti → rezervacije
+    - Conversion rates: CTR, contact rate, booking rate, overall
+    - AI vs organic click share
+    - Top 10 performing listings (z imeni, kategorijami, plan)
+    - 7-day daily breakdown
+  - /api/analytics/provider-roi — ROI za posameznega ownerja:
+    - Per-listing: impresije, kliki, kontakti, AI recs
+    - Ocenjena vrednost (kontakti × €50 + kliki × €5)
+    - ROI = (value - cost) / cost × 100
+    - Mesečni strošek glede na plan (free=€0, premium=€149, enterprise=€499)
+- OUTREACH TOOLKIT:
+  - docs/OUTREACH-TOOLKIT.md:
+    - Email templatei (SL + EN) za outreach
+    - Target kategorije (hoteli, restavracije, aktivnosti, tržnica)
+    - Onboarding checklist (pred/during/post registracijo)
+    - Data quality requirements (slike, opis, kontakti)
+    - Beta provider pipeline (outreach → registracija → approval → AI)
+    - KPI targets (100+ providers, 80+ published, >80% approval, >60 Q score)
+- GitHub push: commit 7c48b72 uspešen ✅
+- Lint: 0 errorjev ✅
+
+Stage Summary:
+- ✅ 0 hardcoded gesel v dokumentaciji (security hardening končan)
+- ✅ Analytics funnel API (search→click→contact→booking)
+- ✅ Provider ROI API (ocenjena vrednost + ROI izračun)
+- ✅ Outreach toolkit (email templates + onboarding + KPI targets)
+- ✅ GitHub push uspešen
+- ✅ 0 runtime errorjev, lint čist
+- Platforma je pripravljena za production hardening → beta → deploy

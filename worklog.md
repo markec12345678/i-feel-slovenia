@@ -3446,3 +3446,60 @@ Stage Summary:
 - ✅ Novi lokalci začnejo kot "draft"
 - ✅ 0 runtime errorjev, lint čist
 - Pripravljen za Fazo 4 — AI Ranking z utežmi 60/20/10/10 + Partner Quality Score
+
+---
+Task ID: 55
+Agent: main (Z.ai Code)
+Task: Faza 4 — AI Ranking Engine + Partner Quality Score
+
+Work Log:
+- Ustvaril src/lib/ranking-config.ts — konfigurabilne uteži (env-based, ne trda koda):
+  - relevance: 60, quality: 15, rating: 10, distance: 10, premium: 5
+  - Featured requirements: plan=premium+, qualityScore>90, verifiedByAdmin=true
+  - MAX_PREMIUM_BOOST = 5% (ne more preseči)
+  - MIN_RATING_FOR_BOOST = 3.5 (slabi lokalci ne dobijo boost-a)
+  - Vse preko env variables (RANKING_WEIGHTS, FEATURED_REQUIREMENTS)
+- Ustvaril src/lib/quality-score.ts — Partner Quality Score (0-100):
+  - 7 signalov: profileCompletion (30), imageQuality (15), descriptionQuality (15),
+    aiTags (10), adminVerification (10), rating (10), dataFreshness (10)
+  - calculateQualityScore() — polna razčlenitev z details
+  - qualifiesForFeatured() — preveri pogoje za Featured
+  - recalculatePartnerStatus() — auto-promote/demote glede na Quality Score
+- Ustvaril src/lib/ranking-engine.ts — dvostopenjski ranking engine:
+  - 1. FILTER: status=published, trdi kriteriji (kategorija)
+  - 2. SCORE: relevance (destinacija+interesi+kategorija), quality (0-100), rating, distance, premium boost
+  - 3. RANK: weighted sum glede na konfigurabilne uteži, sort descending
+  - 4. TRANSPARENCY: za vsak rezultat se zabeleži razlog priporočila
+    ("✓ Zelo ustreza iskanju", "✓ Preverjen partner", "✓ Kakovosten profil", itd.)
+  - buildTransparencyContext() — generira kontekst za AI prompt z Q scores
+- Integriral ranking engine z /api/itinerary:
+  - Zamenjal stari sponsored query z rankListings() + buildTransparencyContext()
+  - AI dobe razvrščene partnerje z Quality Score in [SPONZORIRANO]/[FEATURED] oznakami
+- Ustvaril /api/admin/quality-score — Quality Score za vse lokale (admin overview)
+  - Sort by quality/rating/name
+  - Summary: avg, top, low, above90, above70, below50
+- Ustvaril /api/owner/quality-score — Quality Score za lastnikove lokale
+  - Brez listingId: vsi lastnikovi lokalci z scores
+  - Z listingId: polna razčlenitev z signals in details
+- Ustvaril /api/cron/recalculate-status — dnevni cron za auto-promote/demote
+  - Za vsak published lokal preračuna Quality Score
+  - Auto-promote: Q>90 + premium + verified → featured
+  - Auto-demote: Q<90 → premium (izgubi featured)
+  - Report: promoted, demoted, unchanged
+- Testiranje:
+  - GET /api/admin/quality-score → Hotel Vila Bled: Q=60 (1 slika, 38% completion) ✅
+  - GET /api/cron/recalculate-status → 12 degradiranih (featured→premium ker Q<90) ✅
+  - GET /api/admin/status-counts → featured=0 (prej 12), premium=18 (prej 6) ✅
+  - Lint: 0 errorjev ✅
+
+Stage Summary:
+- ✅ Konfigurabilni ranking engine (uteži preko env, ne trda koda)
+- ✅ Partner Quality Score (0-100) z 7 signali
+- ✅ Dvostopenjski proces: Filter → Rank
+- ✅ Transparency labels (zakaj je bil priporočen)
+- ✅ Featured auto-qualification (Premium + Q>90 + Verified)
+- ✅ Auto-promote/demote cron job
+- ✅ 12 lokalov degradiranih iz featured (Q<90) — sistem deluje!
+- ✅ AI dobi razvrščene partnerje z Q scores in oznakami
+- ✅ 0 runtime errorjev, lint čist
+- Pripravljen za Fazo 5 — Transparency UI (badges v UI)

@@ -3563,3 +3563,58 @@ Stage Summary:
 - ✅ README posodobljen (Discover Slovenia AI)
 - ✅ 0 runtime errorjev, lint čist
 - Pripravljen za Fazo 6 — Sponsorship management
+
+---
+Task ID: 57
+Agent: main (Z.ai Code)
+Task: Faza 6 — Sponsorship Management + Audit Log + GitHub Push
+
+Work Log:
+- Dodan AuditLog model v Prisma schema (actorId, actorEmail, actorRole, action, resourceType, resourceId, resourceName, metadata)
+- bun run db:push — uspešno aplicirano
+- Ustvaril src/lib/audit-log.ts:
+  - logAudit() — beleženje akcij (ne zaustavlja glavne operacije)
+  - AUDIT_ACTIONS — 12 preddefiniranih akcij (listing_approved, sponsorship_activated, itd.)
+- Ustvaril /api/owner/sponsorship (POST + GET):
+  - POST: ustvari sponsorship checkout (demo ali Stripe)
+    - Validira lastništvo + status=published
+    - Featured zahteva Q>90 + verified
+    - Preveri obstoječe aktivno sponzorstvo
+    - Demo mode: direktno aktivira (activateSponsorship)
+    - Production: vrne Stripe checkout URL
+  - GET: seznam lastnikovih sponzorstev
+  - activateSponsorship() — posodobi sponsorship + listing (sponsored=true) + owner (plan) + audit log
+- Ustvaril /api/admin/sponsorships (GET + POST):
+  - GET: seznam vseh sponzorstev z listing + owner podatki, summary (total, active, expired, revenue)
+  - POST: admin ročno ustvari sponzorstvo (z durationDays)
+- Ustvaril /api/admin/audit-log (GET):
+  - Zadnje admin/owner akcije z filtri (action, resourceType, limit)
+- Posodobil /api/stripe/webhook:
+  - Dodan sponsorship handling v checkout.session.completed
+  - Preveri metadata.type === "sponsorship"
+  - Aktivira sponzorstvo preko activateSponsorship()
+- Posodobil /api/admin/approve/[id]:
+  - Dodan audit log (listing_approved / listing_published)
+- Posodobil /api/admin/reject/[id]:
+  - Dodan audit log (listing_rejected z razlogom)
+- Testiranje:
+  - Admin manual sponsorship creation → success ✅
+  - Audit log: sponsorship_activated za Hotel Vila Bled ✅
+  - Sponsorship listing: active, €149, 30 dni ✅
+  - Listing posodobljen: sponsored=true, sponsoredUntil nastavljen ✅
+  - Partner status: premium ✅
+- GitHub push: uspešen na https://github.com/markec12345678/Discover-Slovenia-AI
+- Lint: 0 errorjev ✅
+
+Stage Summary:
+- ✅ Sponsorship tok: Provider → Checkout → Webhook → ACTIVE → 5% boost + ⭐ badge
+- ✅ Demo mode: direktno aktivira (brez Stripe)
+- ✅ Production mode: Stripe Checkout z metadata
+- ✅ Audit log za vse admin/owner akcije
+- ✅ Admin sponsorships tab z upravljanjem
+- ✅ Owner sponsorship API
+- ✅ Featured zahteva Q>90 + verified (ne more se kupiti)
+- ✅ Sponzorstvo = dodaten boost (max 5%), ne kupovanje prvega mesta
+- ✅ GitHub push uspešen (commit 3c593e8)
+- ✅ 0 runtime errorjev, lint čist
+- Pripravljen za E2E test

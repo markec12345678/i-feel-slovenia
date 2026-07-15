@@ -3339,3 +3339,39 @@ Stage Summary:
 - ✅ Vsi obstoječi podatki migrirani pravilno (25 lokalov, 28 izdelkov, 28 izkušenj)
 - ✅ 0 runtime errorjev, lint čist
 - Faza 1 končana — pripravljen za Fazo 2 (Permission sistem)
+
+---
+Task ID: 53
+Agent: main (Z.ai Code)
+Task: Faza 2 — Permission sistem (auth-guards.ts z canPerform)
+
+Work Log:
+- Posodobil src/lib/auth.ts:
+  - Added `role` field to JWT token (authorize callback)
+  - Added `role` to JWT sync (reads from DB on each session)
+  - Added `role` to session callback
+  - Updated TypeScript Session interface z `role?: string`
+- Ustvaril nov src/lib/auth-guards.ts (popoln prepis):
+  - 8 vlog: visitor, user, provider, premium, enterprise, moderator, admin, super_admin
+  - Permission interface: Resource (8 tipov), Action (7 tipov), Scope (own/all)
+  - ROLE_PERMISSIONS mapping — vsaka vloga ima eksplicitne dovoljenja
+  - canPerform(role, permission) — preveri ali ima vloga dovoljenje
+  - getCurrentRole(request) — določi vlogo iz seje ali admin gesla
+  - requireOwner() — preveri prijavo lastnika, vrne ownerId
+  - requireOwnership(resource, id) — preveri lastništvo specifičnega resursa
+  - checkAdmin(password) — preveri admin geslo
+  - unauthorizedResponse(permission) — vrne 403 z informacijo o potrebnem dovoljenju
+- Verifikacija:
+  - API /api/listings vrača nova polja: status, partnerStatus, verifiedByAdmin ✅
+  - Lint: 0 errorjev ✅
+  - Dev server deluje z novimi polji ✅
+
+Stage Summary:
+- ✅ Permission sistem implementiran z 8 vlogami in eksplicitnimi dovoljenji
+- ✅ canPerform() funkcija za preverjanje dovoljenj
+- ✅ getCurrentRole() za določanje vloge (session + admin password)
+- ✅ requireOwnership() za preverjanje lastništva resursov
+- ✅ Auth.ts posodobljen z role v JWT in session
+- ✅ API vrača nova polja (status, partnerStatus, verifiedByAdmin)
+- ✅ 0 runtime errorjev, lint čist
+- Pripravljen za Fazo 3 — Admin Approval workflow

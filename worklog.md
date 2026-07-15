@@ -3133,3 +3133,70 @@ Stage Summary:
 - ✅ AI ranking algoritem implementiran v specifikaciji (60/20/10/10 uteži)
 - ✅ Implementacijski načrt: 8 faz, ~11 dni do deploy
 - Dokumenta sta zdaj "načrt hiše" — implementacija lahko začne
+
+---
+Task ID: 50
+Agent: main (Z.ai Code)
+Task: Arhitekturna dokumentacija (ADR + Risk Register + Data Flow + Observability + Revenue scenarios)
+
+Work Log:
+- Uporabnik zahteval D (ADR) + dodatne dokumente pred DB migracijami
+- Ustvaril docs/ADR.md (727 vrstic, 15 ADR-jev):
+  - ADR-001: Next.js 16 App Router
+  - ADR-002: Prisma ORM
+  - ADR-003: SQLite (dev) / Turso (prod)
+  - ADR-004: Vercel za deployment
+  - ADR-005: GLM preko Puter API kot primarni AI
+  - ADR-006: AI fallback chain (3-tier)
+  - ADR-007: AI ranking z utežmi 60/20/10/10
+  - ADR-008: Sponsored boost max 10%
+  - ADR-009: Affiliate model (redirect, ne payment)
+  - ADR-010: Admin approval required
+  - ADR-011: Cache-first AI strategija
+  - ADR-012: Free B2C + paid B2B monetizacija
+  - ADR-013: Pavšalni oglas, ne provizija
+  - ADR-014: Beta do 30 lokalov brezplačno
+  - ADR-015: Transparency-first (jasno označevanje oglasov)
+  - Vsak ADR ima: Kontekst, Alternatives, Odločitev, Posledice
+- Ustvaril docs/RISK-REGISTER.md (346 vrstic, 15 tveganj):
+  - Critical (6): GLM izpad, premalo providerjev, AI stroški, Stripe izpad
+  - Moderate (4): spam, konkurenca, SEO, GDPR, performance, DB poškodba
+  - Low (5): affiliate spremembe, email, browser, security, cold start
+  - Vsako tveganje: ID, kategorija, opis, impact, probability, score, lastnik, mitigacija, contingency
+  - Risk trend analysis + review proces
+- Ustvaril docs/DATA-FLOW.md (762 vrstic):
+  - Visitor Data Flow (homepage, AI itinerary, chat, search, click tracking)
+  - Provider Data Flow (registration, create listing, admin approval, upgrade)
+  - Admin Data Flow (dashboard, sponsorship management)
+  - AI Data Flow (detailed 11-step pipeline, ranking algorithm)
+  - Payment Data Flow (Stripe checkout, subscription lifecycle)
+  - External API Data Flow (OSM, weather, affiliate links)
+  - Data Storage Map (DB, filesystem, static code, external, CDN)
+  - PII Data Map (osebni podatki, GDPR rights)
+- Ustvaril docs/OBSERVABILITY-PLAN.md (662 vrstic):
+  - Monitoring stack (Vercel Analytics, Sentry, UptimeRobot, custom DB logging)
+  - Metrics katalog (Business, AI, Provider, Monetization, Technical, SEO)
+  - Alerting (Critical/Warning/Info z threshold-i)
+  - Logging (strukturirani log format, retention)
+  - Dashboards (5 tab-ov: Overview, AI, Providers, Monetization, Technical)
+  - Incident Response (P0-P3, proces, post-mortem template)
+- Posodobil PRODUCT-BLUEPRINT.md AI Cost Model (16.2):
+  - Zamenjal "10,000 users = €44,900/mes" z 3 scenariji:
+    - 🟢 Konzervativen: 1,000 users → €507/mes prihodkov, €448/mes dobitek
+    - 🟡 Realističen: 5,000 users → €2,491/mes prihodkov, €2,106/mes dobitek
+    - 🔴 Optimističen: 10,000 users → €6,230/mes prihodkov, €5,180/mes dobitek
+  - Vsak scenarij ima explicitne predpostavke (% uporabnikov ki generira itinerer, % premium konverzija, % affiliate konverzija, itd.)
+  - Skupne predpostavke tabelirane z viri
+  - Ključne predpostavke ki jih moramo validirati (kako in kdaj)
+
+Stage Summary:
+- ✅ 6 arhitekturnih dokumentov kreiranih (6,443 vrstic skupaj)
+- ✅ PRODUCT-BLUEPRINT.md (2,161 vrstic) — FROZEN v1.0 + posodobljen AI Cost Model
+- ✅ TECHNICAL-SPECIFICATION.md (1,785 vrstic) — DRAFT v1.0
+- ✅ docs/ADR.md (727 vrstic) — 15 Architecture Decision Records
+- ✅ docs/RISK-REGISTER.md (346 vrstic) — 15 tveganj z mitigacijo
+- ✅ docs/DATA-FLOW.md (762 vrstic) — tok podatkov skozi sistem
+- ✅ docs/OBSERVABILITY-PLAN.md (662 vrstic) — monitoring in alerting
+- ✅ AI Cost Model posodobljen z 3 scenariji in dokumentiranimi predpostavkami
+- Arhitektura je zdaj temeljito dokumentirana — implementacija lahko začne z minimalnim tveganjem za kasnejše spremembe
+- Naslednji korak: Faza 1 — DB migracije

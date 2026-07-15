@@ -3089,3 +3089,47 @@ Stage Summary:
 - ✅ VLM preverba: vse sline ustrezne (Cvíček vino, Tromostovje, Vintgar, slapovi, Triglav, Piran, Soča rafting, gibanica)
 - ✅ 0 runtime errorjev, lint čist
 - Platforma je vizualno popolnoma konsistentna — ni ene same podvojene slike
+
+---
+Task ID: 49
+Agent: main (Z.ai Code)
+Task: Arhitekturni pregled Blueprint-a + Technical Specification
+
+Work Log:
+- Uporabnik zahteval B+D: temeljit pregled Blueprint + Technical Spec
+- Dopolnil PRODUCT-BLUEPRINT.md z 7 novimi sekcijami:
+  1. User Roles & Permissions (8 vlog, permission matrix 8×20)
+  2. State Diagrams (Listing, Sponsorship, Subscription, AI Request)
+  3. Error Flows & Fallbacks (AI, Stripe, OSM, DB, rate limiting, graceful degradation)
+  4. KPI Dashboard (6 kategorij: Growth, Monetization, AI, Providers, Trust, Tech)
+  5. AI Cost Model (stroški/klic, 2 scenarija, optimization, break-even)
+  6. Launch Checklist (13 kategorij, 80+ checkboxov)
+  7. Posodobljeno kazalo
+- Zamrznil Blueprint kot v1.0 FROZEN referenčni dokument
+- Ustvaril TECHNICAL-SPECIFICATION.md (1785 vrstic, 14 sekcij):
+  1. Arhitektura (high-level diagram + tech stack)
+  2. Database Schema (posodobljena Prisma schema z status sistemom, Sponsorship, AnalyticsEvent, AIUsageLog, User, SavedItinerary)
+  3. API Endpoints (katalog: Public, AI, Lead, Owner, Admin, Stripe, Cron)
+  4. TypeScript Tipi (Role, Plan, Status, AI, Itinerary, RankedItem, AnalyticsKPI, Permission)
+  5. AI Servis (ai-client.ts z fallback chain, logging, caching; ai-ranking.ts z 60/20/10/10 utežmi)
+  6. Caching Strategija (4 sloji: Memory, Filesystem, Database, CDN)
+  7. Background Jobs & Cron (4 cron jobs, Vercel config, queue)
+  8. Webhooks (Stripe webhook handler z vsemi event-i)
+  9. Auth & Permissions (NextAuth config, auth-guards.ts, requirePermission, requireOwner)
+  10. Deployment Arhitektura (Vercel, build proces, environments)
+  11. Environment Variables (celoten .env.example)
+  12. File Structure (celotna struktura projekta)
+  13. Implementacijski načrt (8 faz, ~11 dni)
+
+Stage Summary:
+- ✅ PRODUCT-BLUEPRINT.md: 2012 vrstic, 20 sekcij, FROZEN v1.0
+- ✅ TECHNICAL-SPECIFICATION.md: 1785 vrstic, 14 sekcij, DRAFT v1.0
+- ✅ 7 novih področij pokritih v Blueprint (Roles, Permissions, State Diagrams, Error Flows, KPIs, AI Cost, Launch Checklist)
+- ✅ Permission Matrix 8 vlog × 20 funkcij
+- ✅ 4 State Diagrams (Listing, Sponsorship, Subscription, AI Request)
+- ✅ AI Cost Model z break-even analizo (97% marža pri 10K users)
+- ✅ Launch Checklist z 80+ checkpointi
+- ✅ Database schema posodobljena z vsemi novimi tabelami
+- ✅ AI ranking algoritem implementiran v specifikaciji (60/20/10/10 uteži)
+- ✅ Implementacijski načrt: 8 faz, ~11 dni do deploy
+- Dokumenta sta zdaj "načrt hiše" — implementacija lahko začne

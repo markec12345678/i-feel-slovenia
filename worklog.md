@@ -3200,3 +3200,98 @@ Stage Summary:
 - ✅ AI Cost Model posodobljen z 3 scenariji in dokumentiranimi predpostavkami
 - Arhitektura je zdaj temeljito dokumentirana — implementacija lahko začne z minimalnim tveganjem za kasnejše spremembe
 - Naslednji korak: Faza 1 — DB migracije
+
+---
+Task ID: 51
+Agent: main (Z.ai Code)
+Task: Go/No-Go pregled — 8 dodatnih dokumentov pred DB migracijami
+
+Work Log:
+- Uporabnik zahteval 8 dodatnih preverb pred implementacijo
+- Ustvaril docs/MIGRATION-STRATEGY.md (357 vrstic):
+  - Idempotentne, reverzibilne, atomarne, testirane migracije
+  - 5 specifičnih migracij za Fazo 1 (listing status, sponsorship, analytics, user, owner role)
+  - Zero-downtime strategija (additive only, backward compatible)
+  - Backup pred vsako migracijo (VACUUM INTO)
+  - Restore procedure + test skripte
+  - Migracijski checklist
+- Ustvaril docs/SEED-STRATEGY.md (323 vrstic):
+  - Development seed (25 listings, 28 products, 28 experiences, test users)
+  - Demo seed (10 izbranih za prezentacije)
+  - Production bootstrap (minimalen — samo sistemski podatki)
+  - Migration med okolji (dev → staging, ne v prod!)
+  - Paketni JSON scripti (db:seed:dev, db:seed:demo, db:seed:prod)
+- Ustvaril docs/FEATURE-FLAGS.md (205 vrstic):
+  - 14 feature flagov (AI_CHAT, AI_SEARCH, SPONSORED, BETA, PAYMENTS, itd.)
+  - Env-based implementacija (simple, no Redis needed)
+  - Client-side hook (useFeatureFlag)
+  - API endpoint /api/feature-flags
+  - Flag lifecycle (dodaj → testiraj → vklopi → poenostavi → odstrani)
+- Ustvaril docs/BACKUP-RECOVERY.md (367 vrstic):
+  - Kaj backup-iramo (DB, cache, leads, newsletter, code, env)
+  - Avtomatski dnevni backup (cron + VACUUM INTO)
+  - 5 test scenarijev (T1-T5: DB restore, data restore, full restore, point-in-time, external)
+  - Test skripte (test-db-restore.sh, test-full-restore.sh)
+  - Recovery procedure za produkcijo
+  - Backup monitoring (alert-i)
+  - Test schedule (mesečno/četrtletno)
+- Ustvaril docs/SECURITY-REVIEW.md (293 vrstic):
+  - HTTP security headers (CSP, HSTS, X-Frame-Options, itd.)
+  - Authentication & Authorization (bcrypt, NextAuth, admin password)
+  - Input validation (Zod schemas)
+  - SQL injection (Prisma parameterized)
+  - XSS (React auto-escape)
+  - CSRF (NextAuth built-in)
+  - Rate limiting (memory-based, 8 endpointov)
+  - Secrets management (Vercel env)
+  - Admin endpoints (password + audit log)
+  - Dependency security (bun audit)
+  - Security audit checklist (15 točk)
+- Ustvaril docs/ACCESSIBILITY-REVIEW.md (225 vrstic):
+  - WCAG 2.1 AA standard (POUR načela)
+  - Keyboard navigation (skip-to-content, focus management)
+  - Color contrast (4.5:1 za text)
+  - ARIA labels (slike, ikone, gumbi, modal)
+  - Semantic HTML (main, header, nav, footer)
+  - Forms (labels, errors, autocomplete)
+  - Mobile accessibility (44px touch targeti)
+  - Test orodja (Lighthouse, axe DevTools, pa11y)
+  - Known issues (6 točk za rešiti)
+- Ustvaril docs/INCIDENT-PLAYBOOK.md (376 vrstic):
+  - Quick reference tabela (7 scenarijev)
+  - AI izpad (fallback chain, feature flags)
+  - Stripe izpad (disable payments, replay webhooks)
+  - Turso/DB izpad (restore iz backup-a)
+  - Vercel izpad (maintenance page, backup hosting)
+  - OSM izpad (cache fallback)
+  - SMTP izpad (backup SMTP, queue)
+  - Wikipedia izpad (AI opisi fallback)
+  - Komunikacijski plan (P0-P3)
+  - Post-mortem template
+- Ustvaril docs/VERSIONING.md (202 vrstic):
+  - Verzijska hierarhija (Blueprint → Spec → ADR → Release)
+  - Semantic versioning (MAJOR.MINOR.PATCH)
+  - Dokumentacija verzije
+  - Release proces (checklist, notes, Git tag)
+  - CHANGELOG.md format
+  - Version compatibility matrix
+  - Pravila (Blueprint FROZEN, ADR immutabilni, itd.)
+
+Stage Summary:
+- ✅ 14 arhitekturnih dokumentov kreiranih (8,791 vrstic skupaj)
+- ✅ PRODUCT-BLUEPRINT.md (2,161 vrstic) — FROZEN v1.0
+- ✅ TECHNICAL-SPECIFICATION.md (1,785 vrstic) — DRAFT v1.0
+- ✅ docs/ADR.md (727 vrstic) — 15 ADR-jev
+- ✅ docs/RISK-REGISTER.md (346 vrstic) — 15 tveganj
+- ✅ docs/DATA-FLOW.md (762 vrstic) — tok podatkov
+- ✅ docs/OBSERVABILITY-PLAN.md (662 vrstic) — monitoring
+- ✅ docs/MIGRATION-STRATEGY.md (357 vrstic) — varne migracije
+- ✅ docs/SEED-STRATEGY.md (323 vrstic) — dev/demo/prod seed
+- ✅ docs/FEATURE-FLAGS.md (205 vrstic) — postopno vklop
+- ✅ docs/BACKUP-RECOVERY.md (367 vrstic) — backup + test
+- ✅ docs/SECURITY-REVIEW.md (293 vrstic) — varnostni pregled
+- ✅ docs/ACCESSIBILITY-REVIEW.md (225 vrstic) — WCAG
+- ✅ docs/INCIDENT-PLAYBOOK.md (376 vrstic) — kaj ko X odpove
+- ✅ docs/VERSIONING.md (202 vrstic) — verzioniranje
+- Arhitektura je zdaj POPOLNOMA dokumentirana — implementacija lahko začne z minimalnim tveganjem
+- Naslednji korak: Faza 1 — DB migracije

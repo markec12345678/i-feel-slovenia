@@ -3743,3 +3743,51 @@ Stage Summary:
 - 🚀 PLATFORMA JE PRIPRAVLJENA ZA PRODUKCIJO
 - ✅ GitHub push uspešen (commit 886dc60)
 - ✅ 0 runtime errorjev, lint čist
+
+---
+Task ID: 61
+Agent: main (Z.ai Code)
+Task: Sprint WOW 1 — Hero Quick Input + Trip Timeline + Quality Coach + QR Card
+
+Work Log:
+- 1. HERO QUICK INPUT (src/components/hero-quick-input.tsx):
+  - "Kaj želiš doživeti v Sloveniji?" natural language input
+  - 4 quick action chips: "Danes imam 5 ur", "Potujem z družino", "Lokalna hrana", "Narava brez gneče"
+  - "Analiziram: vreme, lokacijo, odprtost, interese, lokalne ponudnike" animacija (staggered fade-in)
+  - Trust indicators (brezplačno, 22 destinacij, AI v slovenščini, preverjeni partnerji)
+  - Event dispatch: heroQuery → itinerary planner posluša
+  - Hero.tsx posodobljen z novim naslovom in quick input komponento
+- 2. AI TRIP TIMELINE (src/components/trip-timeline.tsx):
+  - Vizualni timeline z vertikalno črto, ikonami in časovnimi oznakami
+  - Kategorija-based ikone: 🍽️ restavracija, 🏔️ aktivnost, 🛒 trgovina, ☕ bar
+  - Timeline dots z barvami glede na kategorijo
+  - Quick actions: Navigacija (Google Maps), Shrani, Rezerviraj
+  - Partner badge integracija (verified/sponsored)
+  - AI nasveti na dnu timeline-a
+  - Weather + budget povzetek na vrhu
+- 3. AI QUALITY COACH (src/components/quality-coach.tsx):
+  - Actionable suggestions glede na manjkajoča polja
+  - 7 tipov predlogov: slike, opis, dolgi opis, tagi, verifikacija, osvežitev
+  - Quality Score z dvojnim progress bar (trenutno vs potencial)
+  - Impact prikaz: "+35% več AI prikazov"
+  - "💡 Višji Quality Score = več AI priporočil = več obiskovalcev"
+  - Auto-fetch iz /api/owner/quality-score
+- 4. QR PARTNER CARD (src/components/qr-partner-card.tsx):
+  - Generira QR kodo preko api.qrserver.com (brezplačno, brez dependency)
+  - Zeleno obarvana QR koda (brand color #2d6a3e)
+  - Copy URL + Download QR
+  - Usage ideas: mize, recepcija, sobe, degustacije, vhod
+  - "Gost scan-a QR → vidi meni, rezervira, odkrije zgodbe"
+- Lint fix: react-hooks/static-components error v wow/trip-timeline.tsx (IIFE → render funkcija)
+- Lint fix: unused eslint-disable v qr-partner-card.tsx
+- GitHub push: commit 765758c uspešen ✅
+
+Stage Summary:
+- ✅ Hero Quick Input — "WOW ob prvem obisku" (natural language + quick actions + animacija)
+- ✅ AI Trip Timeline — vizualni dan z ikonami, časi, navigacijo
+- ✅ AI Quality Coach — actionable suggestions z impact prikazom
+- ✅ QR Partner Card — generira QR za lokale (brezplačno, brez dependency)
+- ✅ 4 nove komponente (836 vrstic)
+- ✅ 0 errorjev, 0 opozoril (lint čist)
+- ✅ GitHub push uspešen (commit 765758c)
+- WOW flow: Turist napiše → AI sestavi dan → vizualni timeline → rezerviraj → lokal dobi obisk → ponudnik vidi ROI
